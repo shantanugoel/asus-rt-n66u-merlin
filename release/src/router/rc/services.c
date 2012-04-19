@@ -2239,7 +2239,12 @@ start_services(void)
 
 	//init_spinlock();
 	start_telnetd();
-	start_sshd();
+#ifdef RTCONFIG_SSH
+	if (nvram_match("sshd_enable", "1"))
+  {
+    start_sshd();
+  }
+#endif
 
 #ifdef CONFIG_BCMWL5
 	start_eapd();
@@ -2346,7 +2351,9 @@ _dprintf("restart_nas_services(%d): test 9.\n", getpid());
 	stop_8021x();
 #endif
 	stop_telnetd();
+#ifdef RTCONFIG_SSH
 	stop_sshd();
+#endif
 
 }
 
@@ -3232,14 +3239,21 @@ _dprintf("restart_nas_services(%d): test 12.\n", getpid());
 	{
 		if(action&RC_SERVICE_STOP) {
 			stop_telnetd();
+#ifdef RTCONFIG_SSH
 			stop_sshd();
+#endif
 			stop_logger();
 		}	
 		if(action&RC_SERVICE_START) {
 			refresh_ntpc();
 			start_logger();
 			start_telnetd();
-			start_sshd();
+#ifdef RTCONFIG_SSH
+      if (nvram_match("sshd_enable", "1"))
+      {
+        start_sshd();
+      }
+#endif
 		}
 	}
 	else if (strcmp(script, "wps_method")==0)

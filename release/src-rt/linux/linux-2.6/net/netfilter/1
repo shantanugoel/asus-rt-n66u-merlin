@@ -1,0 +1,60 @@
+# On branch asuswrt-router
+# Changes not staged for commit:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#	modified:   ../../../../version.conf
+#
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#
+#	../../../../../src-ra/pwd.log
+#	../../../../../src-rt-5.70/fpkg.log
+#	../../../../../src-rt-5.70/image/
+#	../../../../../src-rt-5.70/pwd.log
+#	../../../../../src-rt-5.70/shared/.aiutils.o.cmd
+#	../../../../../src-rt-5.70/shared/.bcmotp.o.cmd
+#	../../../../../src-rt-5.70/shared/.bcmrobo.o.cmd
+#	../../../../../src-rt-5.70/shared/.bcmsrom.o.cmd
+#	../../../../../src-rt-5.70/shared/.bcmutils.o.cmd
+#	../../../../../src-rt-5.70/shared/.hnddma.o.cmd
+#	../../../../../src-rt-5.70/shared/.hndpmu.o.cmd
+#	../../../../../src-rt-5.70/shared/.linux_osl.o.cmd
+#	../../../../../src-rt-5.70/shared/.nicpci.o.cmd
+#	../../../../../src-rt-5.70/shared/.sbutils.o.cmd
+#	../../../../../src-rt-5.70/shared/.siutils.o.cmd
+#	../../../../../src-rt-5.70/shared/aiutils.o
+#	../../../../../src-rt-5.70/shared/bcmotp.o
+#	../../../../../src-rt-5.70/shared/bcmrobo.o
+#	../../../../../src-rt-5.70/shared/bcmsrom.o
+#	../../../../../src-rt-5.70/shared/bcmutils.o
+#	../../../../../src-rt-5.70/shared/hnddma.o
+#	../../../../../src-rt-5.70/shared/hndpmu.o
+#	../../../../../src-rt-5.70/shared/linux_osl.o
+#	../../../../../src-rt-5.70/shared/nicpci.o
+#	../../../../../src-rt-5.70/shared/sbutils.o
+#	../../../../../src-rt-5.70/shared/siutils.o
+#	../../../../../src-rt-5.70/wl/sys/.d11ucode_ge24.o.cmd
+#	../../../../../src-rt-5.70/wl/sys/.d11ucode_gt15.o.cmd
+#	../../../../../src-rt-5.70/wl/sys/.d11ucode_le15.o.cmd
+#	../../../../../src-rt-5.70/wl/sys/.wl_linux.o.d
+#	../../../../../src-rt-5.70/wl/sys/d11ucode_ge24.o
+#	../../../../../src-rt-5.70/wl/sys/d11ucode_gt15.o
+#	../../../../../src-rt-5.70/wl/sys/d11ucode_le15.o
+#	../../../../.gpl_excludes
+#	../../arch/mips/brcm-boards.orig/
+#	../../arch/mips/brcm-boards/bcm947xx/wps_led.c
+#	../../drivers/net/wl/wlconf.h
+#	../../drivers/usb.orig/
+#	../../drivers/usb/misc/berry_charge.c
+#	1
+#	../../save-config
+#	../../../../shared/.dbus.o.d
+#	../../../../../src/router/busybox/sedeZPFsT
+#	../../../../../src/router/libid3tag/[config.h].in
+#	../../../../../src/router/openvpn/config.log
+#	../../../../../src/router/openvpn/config.status.lineno
+#	../../../../../src/router/wget-1.12/autom4te.cache/
+#	../../../../../src/router/wget-1.12/config.h.in
+#	../../../../../src/router/wlconf/wlconf
+no changes added to commit (use "git add" and/or "git commit -a")

@@ -31,7 +31,11 @@ Set Up Environment(Tested in Fedora 8/9 and Ubuntu)
 
 	Note: Broadcom/Ralink platform use the same toolchain for user space program, so please set PATH to the same directory as above
    
-   4. build firmware, ex, rt-n16
+   4. mkdir -p $HOME/asuswrt/release/src-rt/wl/sysdeps/default/linux
+      mkdir -p /media/ASUSWRT/
+      ln -s ~/asuswrt /media/ASUSWRT/asuswrt
+
+   5. build firmware, ex, rt-n16
 	cd release/src-rt/
 	make rt-n16
 

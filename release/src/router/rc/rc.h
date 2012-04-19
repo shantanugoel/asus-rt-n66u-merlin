@@ -256,6 +256,10 @@ extern char *trim_r(char *str);
 
 
 // ssh.c
+#ifdef RTCONFIG_SSH
+extern void start_sshd(void);
+extern void stop_sshd(void);
+#endif
 
 // usb.c
 #ifdef RTCONFIG_USB

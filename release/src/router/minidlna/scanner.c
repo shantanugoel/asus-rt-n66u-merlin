@@ -40,6 +40,7 @@
 #include "utils.h"
 #include "sql.h"
 #include "scanner.h"
+#include "albumart.h"
 #include "log.h"
 
 int valid_cache = 0;
@@ -80,11 +81,13 @@ insert_container(const char * item, const char * rootParent, const char * refID,
 	int ret = 0;
 	sqlite_int64 detailID = 0;
 
-	result = sql_get_text_field(db, "SELECT OBJECT_ID from OBJECTS"
-	                                " where PARENT_ID = '%s'"
-			                " and NAME = '%q'"
-	                                " and CLASS = 'container.%s' limit 1",
-	                                rootParent, item, class);
+	result = sql_get_text_field(db, "SELECT OBJECT_ID from OBJECTS o "
+	                                "left join DETAILS d on (o.DETAIL_ID = d.ID)"
+	                                " where o.PARENT_ID = '%s'"
+			                " and o.NAME like '%q'"
+			                " and d.ARTIST %s %Q"
+	                                " and o.CLASS = 'container.%s' limit 1",
+	                                rootParent, item, artist?"like":"is", artist, class);
 	if( result )
 	{
 		base = strrchr(result, '$');
@@ -106,7 +109,7 @@ insert_container(const char * item, const char * rootParent, const char * refID,
 		}
 		if( !detailID )
 		{
-			detailID = GetFolderMetadata(item, NULL, artist, genre, album_art);
+			detailID = GetFolderMetadata(item, NULL, artist, genre, (album_art ? strtoll(album_art, NULL, 10) : 0));
 		}
 		ret = sql_exec(db, "INSERT into OBJECTS"
 		                   " (OBJECT_ID, PARENT_ID, REF_ID, DETAIL_ID, CLASS, NAME) "
@@ -122,7 +125,7 @@ insert_container(const char * item, const char * rootParent, const char * refID,
 static void
 insert_containers(const char * name, const char *path, const char * refID, const char * class, sqlite3_int64 detailID)
 {
-	char *sql;
+	char sql[128];
 	char **result;
 	int ret;
 	int cols, row;
@@ -137,9 +140,8 @@ insert_containers(const char * name, const char *path, const char * refID, const
 		static struct virtual_item last_camdate;
 		static sqlite_int64 last_all_objectID = 0;
 
-		asprintf(&sql, "SELECT DATE, CREATOR from DETAILS where ID = %"PRId64, detailID);
+		snprintf(sql, sizeof(sql), "SELECT DATE, CREATOR from DETAILS where ID = %lld", detailID);
 		ret = sql_get_table(db, sql, &result, &row, &cols);
-		free(sql);
 		if( ret == SQLITE_OK )
 		{
 			date = result[2];
@@ -221,9 +223,8 @@ insert_containers(const char * name, const char *path, const char * refID, const
 	}
 	else if( strstr(class, "audioItem") )
 	{
-		asprintf(&sql, "SELECT ALBUM, ARTIST, GENRE, ALBUM_ART from DETAILS where ID = %"PRId64, detailID);
+		snprintf(sql, sizeof(sql), "SELECT ALBUM, ARTIST, GENRE, ALBUM_ART from DETAILS where ID = %lld", detailID);
 		ret = sql_get_table(db, sql, &result, &row, &cols);
-		free(sql);
 		if( ret != SQLITE_OK )
 			return;
 		if( !row )
@@ -388,24 +389,26 @@ insert_directory(const char * name, const char * path, const char * base, const 
 	sqlite_int64 detailID = 0;
 	char * refID = NULL;
 	char class[] = "container.storageFolder";
-	char * id_buf = NULL;
-	char * parent_buf = NULL;
-	char *dir_buf, *dir;
 	char *result, *p;
 	static char last_found[256] = "-1";
 
 	if( strcmp(base, BROWSEDIR_ID) != 0 )
-		asprintf(&refID, "%s%s$%X", BROWSEDIR_ID, parentID, objectID);
+	{
+		if( asprintf(&refID, "%s%s$%X", BROWSEDIR_ID, parentID, objectID) == -1 )
+			return 1;
+	}
 
 	if( refID )
 	{
+		char id_buf[64], parent_buf[64];
+		char *dir_buf, *dir;
  		dir_buf = strdup(path);
 		dir = dirname(dir_buf);
-		asprintf(&id_buf, "%s%s$%X", base, parentID, objectID);
-		asprintf(&parent_buf, "%s%s", base, parentID);
+		snprintf(id_buf, sizeof(id_buf), "%s%s$%X", base, parentID, objectID);
+		snprintf(parent_buf, sizeof(parent_buf), "%s%s", base, parentID);
 		while( !found )
 		{
-			if( strcmp(id_buf, last_found) == 0 )
+			if( valid_cache && strcmp(id_buf, last_found) == 0 )
 				break;
 			if( sql_get_int_field(db, "SELECT count(*) from OBJECTS where OBJECT_ID = '%s'", id_buf) > 0 )
 			{
@@ -433,13 +436,11 @@ insert_directory(const char * name, const char * path, const char * base, const 
 			dir = dirname(dir);
 		}
 		free(refID);
-		free(parent_buf);
-		free(id_buf);
 		free(dir_buf);
-		return 1;
+		return 0;
 	}
 
-	detailID = GetFolderMetadata(name, path, NULL, NULL, NULL);
+	detailID = GetFolderMetadata(name, path, NULL, NULL, find_album_art(path, NULL, 0));
 	sql_exec(db, "INSERT into OBJECTS"
 	             " (OBJECT_ID, PARENT_ID, REF_ID, DETAIL_ID, CLASS, NAME) "
 	             "VALUES"
@@ -448,7 +449,7 @@ insert_directory(const char * name, const char * path, const char * base, const 
 	if( refID )
 		free(refID);
 
-	return -1;
+	return 0;
 }
 
 int
@@ -571,25 +572,26 @@ CreateDatabase(void)
 					"ID INTEGER PRIMARY KEY AUTOINCREMENT, "
 					"PATH TEXT DEFAULT NULL, "
 					"SIZE INTEGER, "
+					"TIMESTAMP INTEGER, "
 					"TITLE TEXT COLLATE NOCASE, "
 					"DURATION TEXT, "
 					"BITRATE INTEGER, "
 					"SAMPLERATE INTEGER, "
+					"CREATOR TEXT COLLATE NOCASE, "
 					"ARTIST TEXT COLLATE NOCASE, "
 					"ALBUM TEXT COLLATE NOCASE, "
 					"GENRE TEXT COLLATE NOCASE, "
 					"COMMENT TEXT, "
 					"CHANNELS INTEGER, "
+					"DISC INTEGER, "
 					"TRACK INTEGER, "
 					"DATE DATE, "
 					"RESOLUTION TEXT, "
 					"THUMBNAIL BOOL DEFAULT 0, "
-					"CREATOR TEXT COLLATE NOCASE, "
-					"DLNA_PN TEXT, "
-					"MIME TEXT, "
 					"ALBUM_ART INTEGER DEFAULT 0, "
-					"DISC INTEGER, "
-					"TIMESTAMP INTEGER"
+					"ROTATION INTEGER, "
+					"DLNA_PN TEXT, "
+					"MIME TEXT"
 					")");
 	if( ret != SQLITE_OK )
 		goto sql_failed;
@@ -602,6 +604,12 @@ CreateDatabase(void)
 	ret = sql_exec(db, "CREATE TABLE CAPTIONS ("
 					"ID INTEGER PRIMARY KEY, "
 					"PATH TEXT NOT NULL"
+					")");
+	if( ret != SQLITE_OK )
+		goto sql_failed;
+	ret = sql_exec(db, "CREATE TABLE BOOKMARKS ("
+					"ID INTEGER PRIMARY KEY, "
+					"SEC INTEGER"
 					")");
 	if( ret != SQLITE_OK )
 		goto sql_failed;
@@ -628,7 +636,7 @@ CreateDatabase(void)
 		ret = sql_exec(db, "INSERT into OBJECTS (OBJECT_ID, PARENT_ID, DETAIL_ID, CLASS, NAME)"
 		                   " values "
 		                   "('%s', '%s', %lld, 'container.storageFolder', '%q')",
-		                   containers[i], containers[i+1], GetFolderMetadata(containers[i+2], NULL, NULL, NULL, NULL), containers[i+2]);
+		                   containers[i], containers[i+1], GetFolderMetadata(containers[i+2], NULL, NULL, NULL, 0), containers[i+2]);
 		if( ret != SQLITE_OK )
 			goto sql_failed;
 	}
@@ -772,7 +780,7 @@ ScanDirectory(const char * dir, const char * parent, enum media_types dir_type)
 			sprintf(parent_id, "%s$%X", (parent ? parent:""), i+startID);
 			ScanDirectory(full_path, parent_id, dir_type);
 		}
-		else if( type == TYPE_FILE )
+		else if( type == TYPE_FILE && (access(full_path, R_OK) == 0) )
 		{
 			if( insert_file(name, full_path, (parent ? parent:""), i+startID) == 0 )
 				fileno++;
@@ -795,6 +803,7 @@ void
 start_scanner()
 {
 	struct media_dir_s * media_path = media_dirs;
+	char name[PATH_MAX];
 
 	if (setpriority(PRIO_PROCESS, 0, 15) == -1)
 		DPRINTF(E_WARN, L_INOTIFY,  "Failed to reduce scanner thread priority\n");
@@ -803,13 +812,14 @@ start_scanner()
 	FILE * flag = fopen("/ramfs/.upnp-av_scan", "w");
 	if( flag )
 		fclose(flag);
-
 #else
-	create_scantag();
+        create_scantag();
 #endif
 	freopen("/dev/null", "a", stderr);
 	while( media_path )
 	{
+		strncpy(name, media_path->path, sizeof(name));
+		GetFolderMetadata(basename(name), media_path->path, NULL, NULL, 0);
 		ScanDirectory(media_path->path, NULL, media_path->type);
 		media_path = media_path->next;
 	}
@@ -819,15 +829,23 @@ start_scanner()
 		system("/bin/sh /ramfs/.rescan_done");
 	unlink("/ramfs/.upnp-av_scan");
 #else
-	remove_scantag();
+        remove_scantag();
 #endif
 	/* Create this index after scanning, so it doesn't slow down the scanning process.
 	 * This index is very useful for large libraries used with an XBox360 (or any
 	 * client that uses UPnPSearch on large containers). */
 	sql_exec(db, "create INDEX IDX_SEARCH_OPT ON OBJECTS(OBJECT_ID, CLASS, DETAIL_ID);");
 
-	fill_playlists();
+	if( GETFLAG(NO_PLAYLIST_MASK) )
+	{
+		DPRINTF(E_WARN, L_SCANNER, "Playlist creation disabled\n");	  
+	}
+	else
+	{
+		fill_playlists();
+	}
 
+	DPRINTF(E_DEBUG, L_SCANNER, "Initial file scan completed\n", DB_VERSION);
 	//JM: Set up a db version number, so we know if we need to rebuild due to a new structure.
 	sql_exec(db, "pragma user_version = %d;", DB_VERSION);
 }

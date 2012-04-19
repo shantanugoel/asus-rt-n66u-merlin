@@ -564,6 +564,18 @@ form{
 textarea{
 	width:99%;	
 }
+.textarea_ssh_table{
+        margin-left:2px;
+        padding-left:0.4em;
+        width: 500px;
+        line-height:23px \9;    /*IE*/
+        font-size:12px;
+        font-family: Lucida Console;
+        background: #576D73;       
+        border: 2px ridge #777;
+        border-style:bevel;
+        color:#FFFFFF;
+}
 
 .hint_word{
 	color: #FF0000;

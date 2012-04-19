@@ -3693,6 +3693,7 @@ int start_firewall(int wanunit, int lanunit)
 	modprobe_r("nf_conntrack_ipv6");
 #endif
 
+	run_custom_script("firewall-start");
 	return 0;
 }
 

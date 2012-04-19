@@ -178,7 +178,7 @@ obj-$(RTCONFIG_PPTP) += accel-pptp
 obj-$(RTCONFIG_EAPOL) += wpa_supplicant
 obj-$(RTCONFIG_PPTPD) += pptpd
 obj-$(RTCONFIG_HTTPS) += openssl
-#obj-$(RTCONFIG_SSH) += dropbear
+obj-$(RTCONFIG_SSH) += dropbear
 #obj-$(RTCONFIG_ZEBRA) += zebra
 #	obj-$(RTCONFIG_IPP2P) += ipp2p
 obj-$(RTCONFIG_LZO) += lzo
@@ -213,6 +213,10 @@ endif
 obj-y += networkmap
 obj-y += infosvr
 obj-y += ez-ipupdate
+
+# Merlin addons
+#obj-y += wol
+
 
 #obj-y += lighttpd-1.4.28
 #obj-$(RTCONFIG_USB_WEBDAV) += lighttpd-1.4.29
@@ -978,6 +982,23 @@ dhcpv6/stamp-h1:
 	$(CONFIGURE) --prefix= --with-localdbdir=/var
 	@$(MAKE) -C dhcpv6 clean
 	@touch dhcpv6/stamp-h1
+
+#wol/stamp-h1:
+#	ac_cv_func_malloc_0_nonnull=yes cd $(TOP)/wol && $(CONFIGURE) --host=mips --prefix=$(INSTALLDIR)/wol CC=mipsel-uclibc-gcc STRIP=mipsel-uclibc-strip AR=mipsel-uclibc-ar LD=mipsel-uclibc-ld NM=mipsel-uclibc-nm RANLIB=mipsel-uclibc-ranlib
+#	touch wol/stamp-h1
+
+#wol: wol/stamp-h1
+
+#wol-clean:
+#	-@$(MAKE) -C wol distclean
+#	@rm -f wol/stamp-h1
+
+#wol-install: wol
+#	install -D wol/src/wol $(INSTALLDIR)/wol/usr/sbin/wol
+#	$(STRIP) $(INSTALLDIR)/wol/usr/sbin/wol
+
+#wol: wol/Makefile
+#	$(MAKE) -C $@
 
 dhcpv6: dhcpv6/stamp-h1
 	@$(SEP)

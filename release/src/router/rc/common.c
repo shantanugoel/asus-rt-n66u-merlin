@@ -1412,3 +1412,21 @@ void setup_dnsmq(int mode)
 }
 #endif
 
+// Merlin's additions - Start
+void run_custom_script(char *name)
+{
+	char script[120];
+
+	sprintf(script, "/jffs/scripts/%s", name);
+
+        if(f_exists(script)) {
+                _dprintf("Script: running %s\n", script);
+//                eval(script);
+// This one doesn't seem to work for some reason.
+//		execute_with_maxwait(script,120);
+		xstart(script);
+        }
+
+}
+// Merlin's additions - End
+

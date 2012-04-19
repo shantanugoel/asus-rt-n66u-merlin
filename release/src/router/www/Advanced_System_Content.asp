@@ -155,6 +155,12 @@ function validForm(){
 		return false;	
 	}
 	
+	if(document.form.sshd_authkeys.value.length > 512){
+                showtext($("ssh_alert_msg"),"*SSH keys limited to 512 characters.");
+                document.form.sshd_authkeys.focus();
+                document.form.sshd_authkeys.select();
+                return false;
+	}
 	if(document.form.http_passwd2.value.length > 16){
 		showtext($("alert_msg"),"*<#LANHostConfig_x_Password_itemdesc#>");
 		document.form.http_passwd2.focus();
@@ -689,6 +695,108 @@ function pullLANIPList(obj){
           </td>
         </tr>
       </table>
+
+
+      <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable">
+                <thead>
+                <tr>
+          <td colspan="2">Persistent JFFS2 partition</td>
+        </tr>
+        </thead>
+           <tr>
+              <th>Enable JFFS partition</th>
+              <td>
+                  <input type="radio" name="jffs2_on" class="input" value="1" <% nvram_match_x("LANHostConfig", "jffs2_on", "1", "checked"); %>><#checkbox_Yes#>
+                  <input type="radio" name="jffs2_on" class="input" value="0" <% nvram_match_x("LANHostConfig", "jffs2_on", "0", "checked"); %>><#checkbox_No#>
+              </td>
+          </tr>
+          <tr>
+              <th>Format JFFS partition at next boot</th> 
+              <td>
+                  <input type="radio" name="jffs2_format" class="input" value="1" <% nvram_match_x("LANHostConfig", "jffs2_format", "1", "checked"); %>><#checkbox_Yes#>
+                  <input type="radio" name="jffs2_format" class="input" value="0" <% nvram_match_x("LANHostConfig", "jffs2_format", "0", "checked"); %>><#checkbox_No#>
+              </td>
+          </tr>
+      </table>
+
+	<table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable" style="margin-top:8px;">
+        <thead>
+                <tr>
+          <td colspan="2">Management</td>
+        </tr>
+        </thead>
+
+        <tr>
+	   <th><#Enable_Telnet#></th>
+           <td>
+              <input type="radio" name="telnetd_enable" class="input" value="1" <% nvram_match_x("LANHostConfig", "telnetd_enable", "1", "checked"); %>><#checkbox_Yes#>
+              <input type="radio" name="telnetd_enable" class="input" value="0" <% nvram_match_x("LANHostConfig", "telnetd_enable", "0", "checked"); %>><#checkbox_No#>
+           </td>
+        </tr>
+
+        <tr>
+           <th>Enable SSH</th>
+           <td>
+              <input type="radio" name="sshd_enable" class="input" value="1" <% nvram_match_x("LANHostConfig", "sshd_enable", "1", "checked"); %>><#checkbox_Yes#>
+              <input type="radio" name="sshd_enable" class="input" value="0" <% nvram_match_x("LANHostConfig", "sshd_enable", "0", "checked"); %>><#checkbox_No#>
+           </td>
+        </tr>
+        <tr>
+           <th>Allow SSH Port Forwarding</th>
+           <td>
+              <input type="radio" name="sshd_forwarding" class="input" value="1" <% nvram_match_x("LANHostConfig", "sshd_forwarding", "1", "checked"); %>><#checkbox_Yes#>
+              <input type="radio" name="sshd_forwarding" class="input" value="0" <% nvram_match_x("LANHostConfig", "sshd_forwarding", "0", "checked"); %>><#checkbox_No#>
+           </td>
+        </tr>
+        <tr id="ssh_lanport">
+           <th>SSH service port</th>
+           <td>
+              <input type="text" maxlength="5" class="input_6_table" name="sshd_port" value="<% nvram_get("sshd_port"); %>">
+           </td>
+        </tr>
+        <tr>
+           <th>Allow SSH password login</th>
+           <td>
+              <input type="radio" name="sshd_pass" class="input" value="1" <% nvram_match_x("LANHostConfig", "sshd_pass", "1", "checked"); %>><#checkbox_Yes#>
+              <input type="radio" name="sshd_pass" class="input" value="0" <% nvram_match_x("LANHostConfig", "sshd_pass", "0", "checked"); %>><#checkbox_No#>
+           </td>
+           </tr>
+           <tr>
+              <th>SSH Authentication key</th>
+              <td>
+                 <textarea rows="8" class="textarea_ssh_table" name="sshd_authkeys" cols="55" maxlength="512" ><% nvram_get("sshd_authkeys"); %></textarea>
+                 <span id="ssh_alert_msg"></span>
+              </td>
+           </tr>
+
+
+          <tr id="https_tr">
+             <th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(0, 5);"><#WLANConfig11b_AuthenticationMethod_itemname#></a></th>
+             <td>
+                <select name="http_enable" class="input_option" onchange="hide_https_lanport(this.value);">
+                               <option value="0" <% nvram_match("http_enable", "0", "selected"); %>>HTTP</option>
+                               <option value="1" <% nvram_match("http_enable", "1", "selected"); %>>HTTPS</option>
+                               <option value="2" <% nvram_match("http_enable", "2", "selected"); %>>BOTH</option>
+                </select>
+             </td>
+          </tr>
+
+          <tr id="https_lanport">
+              <th>HTTPS Lan port</th>
+              <td>
+                 <input type="text" maxlength="5" class="input_6_table" name="https_lanport" value="<% nvram_get("https_lanport"); %>">
+              </td>
+           </tr>
+
+           <tr id="http_client_tr">
+              <th>Only allow specific IP</th>
+              <td>
+                 <input type="radio" name="http_client" class="input" value="1" <% nvram_match_x("", "http_client", "1", "checked"); %>><#checkbox_Yes#>
+                 <input type="radio" name="http_client" class="input" value="0" <% nvram_match_x("", "http_client", "0", "checked"); %>><#checkbox_No#>
+              </td>
+           </tr>
+      </table>
+
       <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable" style="margin-top:8px;">
       	<thead>
 	  	<tr>
@@ -738,40 +846,6 @@ function pullLANIPList(obj){
     	      <a href="javascript:openLink('x_NTPServer1')"  name="x_NTPServer1_link" style=" margin-left:5px; text-decoration: underline;"><#LANHostConfig_x_NTPServer1_linkname#>
 					</td>
         </tr>
-
-				<tr>
-				  <th><#Enable_Telnet#></th>
-				  <td>
-				    <input type="radio" name="telnetd_enable" class="input" value="1" <% nvram_match_x("LANHostConfig", "telnetd_enable", "1", "checked"); %>><#checkbox_Yes#>
-				    <input type="radio" name="telnetd_enable" class="input" value="0" <% nvram_match_x("LANHostConfig", "telnetd_enable", "0", "checked"); %>><#checkbox_No#>
-				  </td>
-				</tr>
-
-		  	<tr id="https_tr">
-					<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(0, 5);"><#WLANConfig11b_AuthenticationMethod_itemname#></a></th>
-					<td>
-				  	<select name="http_enable" class="input_option" onchange="hide_https_lanport(this.value);">
-							<option value="0" <% nvram_match("http_enable", "0", "selected"); %>>HTTP</option>
-							<option value="1" <% nvram_match("http_enable", "1", "selected"); %>>HTTPS</option>
-							<option value="2" <% nvram_match("http_enable", "2", "selected"); %>>BOTH</option>
-				  	</select>
-					</td>
-		  	</tr>
-
-		  	<tr id="https_lanport">
-					<th>HTTPS Lan port</th>
-          <td>
-						<input type="text" maxlength="5" class="input_6_table" name="https_lanport" value="<% nvram_get("https_lanport"); %>">
-					</td>
-		  	</tr>
-
-				<tr id="http_client_tr">
-				  <th>Only allow specific IP</th>
-				  <td>
-				    <input type="radio" name="http_client" class="input" value="1" <% nvram_match_x("", "http_client", "1", "checked"); %>><#checkbox_Yes#>
-				    <input type="radio" name="http_client" class="input" value="0" <% nvram_match_x("", "http_client", "0", "checked"); %>><#checkbox_No#>
-				  </td>
-				</tr>
       </table>
 
 			<table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" class="FormTable_table" id="http_client_table">

@@ -69,7 +69,6 @@ static pid_t pid_dnsmasq = -1;
 
 #define logs(s) syslog(LOG_NOTICE, s)
 
-
 static char
 *make_var(char *prefix, int index, char *name)
 {
@@ -2240,6 +2239,7 @@ start_services(void)
 
 	//init_spinlock();
 	start_telnetd();
+	start_sshd();
 
 #ifdef CONFIG_BCMWL5
 	start_eapd();
@@ -2291,6 +2291,8 @@ start_services(void)
 #ifdef RTCONFIG_WEBDAV
 	start_webdav();
 #endif
+
+        run_custom_script("services-start");
 	return 0;
 }
 
@@ -2307,6 +2309,7 @@ void
 stop_services(void)
 {
 
+        run_custom_script("services-stop");
 #ifdef RTCONFIG_WEBDAV
 	stop_webdav();
 #endif
@@ -2343,6 +2346,8 @@ _dprintf("restart_nas_services(%d): test 9.\n", getpid());
 	stop_8021x();
 #endif
 	stop_telnetd();
+	stop_sshd();
+
 }
 
 // 2008.10 magic 
@@ -3227,12 +3232,14 @@ _dprintf("restart_nas_services(%d): test 12.\n", getpid());
 	{
 		if(action&RC_SERVICE_STOP) {
 			stop_telnetd();
+			stop_sshd();
 			stop_logger();
 		}	
 		if(action&RC_SERVICE_START) {
 			refresh_ntpc();
 			start_logger();
 			start_telnetd();
+			start_sshd();
 		}
 	}
 	else if (strcmp(script, "wps_method")==0)

@@ -1,4 +1,4 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.108.3 (18-April-2012)
+Asus RT-N66U Modded Firmware - build 3.0.0.3.108.4 (20-April-2012)
 =================================================================
 
 About
@@ -94,6 +94,10 @@ For example, 3.0.0.3.108 becomes 3.0.0.3.108.1.
 
 History
 -------
+
+3.0.0.3.108.4:
+   - FIXED: sshd would start even if disabled
+
 
 3.0.0.3.108.3:
    - NEW: JFFS support (mounted under /jffs)

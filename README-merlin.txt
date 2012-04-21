@@ -18,7 +18,8 @@ The list of changes (so far):
 - Added JFFS partition support (configurable under Administration->Advanced->System)
 - Added user scripts that run on specific events
 - Added SSHD (dropbear, configurable under Administration->Advanced->System)
-
+- Clicking on the MAC address of an unidentified client will do a lookup in
+  the OUI database (ported from DD-WRT).
 
 Installation
 ------------
@@ -96,6 +97,8 @@ History
 -------
 
 3.0.0.3.108.4:
+   - NEW: Clicking on the MAC address of an unidentified client will do a lookup in
+          the OUI database (ported from DD-WRT).
    - FIXED: sshd would start even if disabled
 
 

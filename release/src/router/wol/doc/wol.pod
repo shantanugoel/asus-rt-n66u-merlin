@@ -1,0 +1,161 @@
+=head1 NAME
+
+wol - Wake On LAN client
+
+=head1 SYNOPSIS
+
+wol [I<OPTION>] ... I<MAC-ADDRESS> ...
+
+=head1 DESCRIPTION
+
+This manual gives you an introduction into C<wol>, the Wake On LAN client.
+It remotely turns on computers that supports Magic Packet technology
+(also known as Wake On LAN).
+
+Some workstations support SecureON password feature. These machines only
+wake up if you provide the correct password. C<wol> also provides this
+feature.
+
+=head1 OPTIONS
+
+
+=over 4
+
+
+=item B<--help>
+
+
+Print a summary of the command line options.
+
+
+
+=item B<-V>
+
+
+=item B<--version>
+
+
+Print the version number of C<wol>.
+
+
+
+=item B<-h HOST>
+
+
+=item B<--host=HOST>
+
+
+=item B<-i HOST>
+
+
+=item B<--ipaddr=HOST>
+
+
+Broadcast packet to this IP address or hostname. This is important if your wol
+client is a multihomed host and you want to send only to one subnet
+(default IP address is C<255.255.255.255>).
+
+
+
+=item B<-p NUM>
+
+
+=item B<--port=NUM>
+
+
+Send packet with this destination port I<NUM>. This option is important if
+your packet filter would block the default destination port C<40000>.
+
+
+
+=item B<-f FILE>
+
+
+=item B<--file=FILE>
+
+
+Read hardware addresses, IP addresses/hostnames, optional ports and SecureON
+password from file F<FILE>. If F<FILE> is I<-> C<wol> reads from
+stdin.
+
+
+
+=item B<->
+
+
+Read hardware addresses, IP addresses, optional ports and optional SecureON
+password from stdin. So you can extract I<MAC-ADDRESSES> from any source
+and pipe the data into C<wol> so.
+
+
+
+=item B<-v>
+
+
+=item B<--verbose>
+
+
+Turns on verbose output.
+
+
+
+=item B<-w NUM>
+
+
+=item B<--wait=NUM>
+
+
+Waits I<NUM> milliseconds between Magic Packets. Also known as fuse health
+pack.
+
+
+
+=item B<--passwd[=PASS]>
+
+
+Send a magic packet with SecureON password feature. I<PASS> is written as
+x-x-x-x-x-x, where x is a hexadecimal number between 0 and ff which represents
+one byte of the password.
+
+If you don't provide I<PASS> C<wol> prompts you for a password.
+
+To set the password of your SecureON capable NIC, you can use
+C<ethtool> (E<lt>B<http://www.sourceforge.net/projects/gkernel/>E<gt>).
+
+
+=back
+
+
+=head1 BUGS
+
+Please report bugs to E<lt>B<krennwallner@aon.at>E<gt>. Feel free to send bug
+reports, translations, improvement suggestions and patches to this email
+address.
+
+=head1 SEE ALSO
+
+GNU info entry for F<wol>.
+
+=head1 AUTHOR
+
+Written by Thomas Krennwallner E<lt>krennwallner@aon.atE<gt>.
+
+=head1 COPYRIGHT
+
+Copyright (C) 2001,2002,2003,2004 Thomas Krennwallner E<lt>B<krennwallner@aon.at>E<gt>
+
+This document may be distributed and modified under the terms of the GNU
+General Public License.
+
+This manual is free software; you may redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
+
+This manual is distributed in the hope that it will be useful, but without any
+warranty; without even the implied warranty of merchantability or fitness for a
+particular purpose. See the GNU General Public License for more details.
+
+A copy of the GNU General Public License is available on the World Wide Web at
+the GNU website. You can also obtain it by writing to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+

@@ -20,6 +20,8 @@ The list of changes (so far):
 - Added SSHD (dropbear, configurable under Administration->Advanced->System)
 - Clicking on the MAC address of an unidentified client will do a lookup in
   the OUI database (ported from DD-WRT).
+- Enabled HTTPS access to web interface
+
 
 Installation
 ------------
@@ -99,7 +101,10 @@ History
 3.0.0.3.108.4:
    - NEW: Clicking on the MAC address of an unidentified client will do a lookup in
           the OUI database (ported from DD-WRT).
+   - NEW: Added HTTPS access to web interface (configurable under Administration)
    - FIXED: sshd would start even if disabled
+   - CHANGE: Switched back to wol, as people report better compatibility with it.
+             ether-wake remains available over Telnet.
 
 
 3.0.0.3.108.3:

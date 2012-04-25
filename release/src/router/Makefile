@@ -215,7 +215,7 @@ obj-y += infosvr
 obj-y += ez-ipupdate
 
 # Merlin addons
-#obj-y += wol
+obj-y += wol
 
 
 #obj-y += lighttpd-1.4.28
@@ -983,22 +983,22 @@ dhcpv6/stamp-h1:
 	@$(MAKE) -C dhcpv6 clean
 	@touch dhcpv6/stamp-h1
 
-#wol/stamp-h1:
-#	ac_cv_func_malloc_0_nonnull=yes cd $(TOP)/wol && $(CONFIGURE) --host=mips --prefix=$(INSTALLDIR)/wol CC=mipsel-uclibc-gcc STRIP=mipsel-uclibc-strip AR=mipsel-uclibc-ar LD=mipsel-uclibc-ld NM=mipsel-uclibc-nm RANLIB=mipsel-uclibc-ranlib
-#	touch wol/stamp-h1
+wol/stamp-h1:
+	ac_cv_func_malloc_0_nonnull=yes cd $(TOP)/wol && $(CONFIGURE) --host=mips --prefix=$(INSTALLDIR)/wol CC=mipsel-uclibc-gcc STRIP=mipsel-uclibc-strip AR=mipsel-uclibc-ar LD=mipsel-uclibc-ld NM=mipsel-uclibc-nm RANLIB=mipsel-uclibc-ranlib
+	touch wol/stamp-h1
 
-#wol: wol/stamp-h1
+wol: wol/stamp-h1
 
-#wol-clean:
-#	-@$(MAKE) -C wol distclean
-#	@rm -f wol/stamp-h1
+wol-clean:
+	-@$(MAKE) -C wol distclean
+	@rm -f wol/stamp-h1
 
-#wol-install: wol
-#	install -D wol/src/wol $(INSTALLDIR)/wol/usr/sbin/wol
-#	$(STRIP) $(INSTALLDIR)/wol/usr/sbin/wol
+wol-install: wol
+	install -D wol/src/wol $(INSTALLDIR)/wol/usr/sbin/wol
+	$(STRIP) $(INSTALLDIR)/wol/usr/sbin/wol
 
-#wol: wol/Makefile
-#	$(MAKE) -C $@
+wol: wol/Makefile
+	$(MAKE) -C $@
 
 dhcpv6: dhcpv6/stamp-h1
 	@$(SEP)

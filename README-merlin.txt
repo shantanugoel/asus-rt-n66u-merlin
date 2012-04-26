@@ -1,5 +1,5 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.108.4 (20-April-2012)
-=================================================================
+Asus RT-N66U Modded Firmware - build 3.0.0.3.108.4 (26-April-2012)
+==================================================================
 
 About
 -----
@@ -21,6 +21,7 @@ The list of changes (so far):
 - Clicking on the MAC address of an unidentified client will do a lookup in
   the OUI database (ported from DD-WRT).
 - Enabled HTTPS access to web interface
+- Optionally turn the WPS button into a radio enable/disable switch
 
 
 Installation
@@ -41,6 +42,8 @@ allow you to store small files (such as scripts) inside the router without
 needing to have a USB disk plugged in.  This space will survive reboot (but 
 it *MIGHT NOT survive firmware flashing*, so back it up first before flashing!).  
 It will also be available fairly early at boot (unlike a USB disk).
+
+To enable this option, go to the Administration page, under the System tab.
 
 First time you enable JFFS, it must be formatted.  This can be done through 
 the web page, same page where you enable it.  Enabling/Disabling/Formating 
@@ -83,12 +86,15 @@ NVRAM space - what the hell was Asus thinking when they went with 32KB?),
 I am limiting this field to 512 characters max.
 
 
+* WPS button mode - toggle radio *
+You can configure the router so pressing the WPS button will 
+toggle the radio on/off instead of starting WPS mode.
+The option to enable this feature can be found on the 
+Administration page, under the System tab.
+
 
 Notes
 -----
-The mods-xxx.tgz archive will contain the files that I added/modified to the original
-firmware sources.
-
 To make it simple to determine which version you are running, I am simply 
 appending another digit to determine my build version.  
 For example, 3.0.0.3.108 becomes 3.0.0.3.108.1.
@@ -102,6 +108,7 @@ History
    - NEW: Clicking on the MAC address of an unidentified client will do a lookup in
           the OUI database (ported from DD-WRT).
    - NEW: Added HTTPS access to web interface (configurable under Administration)
+   - NEW: Option to turn the WPS button into a radio on/off toggle
    - FIXED: sshd would start even if disabled
    - CHANGE: Switched back to wol, as people report better compatibility with it.
              ether-wake remains available over Telnet.

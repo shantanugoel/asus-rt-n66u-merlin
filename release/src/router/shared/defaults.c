@@ -901,6 +901,7 @@ struct nvram_tuple router_defaults[] = {
 	{ "asus_mfg_flash", ""},	// 2008.03 James.
 	{ "btn_rst", "0"},		// 2008.03 James.
 	{ "btn_ez", "0"},		// 2008.03 James.
+	{ "btn_ez_radiotoggle", "0"},
 
 	 /* APCLI/STA parameters */
 	#if 0

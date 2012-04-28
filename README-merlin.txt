@@ -1,4 +1,4 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.108.4 (26-April-2012)
+Asus RT-N66U Modded Firmware - build 3.0.0.3.108.4 (28-April-2012)
 ==================================================================
 
 About
@@ -14,6 +14,7 @@ The list of changes (so far):
 - Updated MiniDLNA from 1.0.21 to 1.0.24 (all Asus patches to the 
   MiniDLNA sources were reapplied).  
   MiniDLNA Changelog: http://sourceforge.net/projects/minidlna/files/minidlna/1.0.24/
+- Added wol binary (wake-on-lan) (in addition to ether-wake already in the firmware)
 - Added Tools menu to web interface (with WakeOnLan page)
 - Added JFFS partition support (configurable under Administration->Advanced->System)
 - Added user scripts that run on specific events
@@ -86,11 +87,19 @@ NVRAM space - what the hell was Asus thinking when they went with 32KB?),
 I am limiting this field to 512 characters max.
 
 
+* HTTPS management *
+I re-enabled HTTPS access in the firmware.  From the Administration->System 
+page you can configure your router so it accepts connections on http, https 
+or both.  You can also change the https port to a different one 
+(default is 8443).
+
+
 * WPS button mode - toggle radio *
 You can configure the router so pressing the WPS button will 
 toggle the radio on/off instead of starting WPS mode.
 The option to enable this feature can be found on the 
 Administration page, under the System tab.
+
 
 
 Notes
@@ -108,7 +117,7 @@ History
    - NEW: Clicking on the MAC address of an unidentified client will do a lookup in
           the OUI database (ported from DD-WRT).
    - NEW: Added HTTPS access to web interface (configurable under Administration)
-   - NEW: Option to turn the WPS button into a radio on/off toggle
+   - NEW: Option to turn the WPS button into a radio on/off toggle (under Administration)
    - FIXED: sshd would start even if disabled
    - CHANGE: Switched back to wol, as people report better compatibility with it.
              ether-wake remains available over Telnet.

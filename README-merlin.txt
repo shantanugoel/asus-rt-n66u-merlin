@@ -110,6 +110,16 @@ For example, 3.0.0.3.108 becomes 3.0.0.3.108.1.
 
 
 
+Source code
+-----------
+The source code with all my modifications can be found 
+on Github, at:
+
+https://github.com/shantanugoel/asus-rt-n66u-merlin/tree/merlin
+
+The "merlin" branch contains my modifications to the Asus firmware.
+
+
 History
 -------
 
@@ -149,7 +159,9 @@ Website: http://www.lostrealm.ca/
 Email: rmerl@lostrealm.ca
 
 Drop me a note if you are using this firmware and are enjoying it.  If you really like it and want 
-to give more than a simple "Thank you", there is also a Paypal donation button on my website. :)
+to give more than a simple "Thank you", there is also a Paypal donation button on my website.  I 
+wouldn't mind being able to afford a second RT-N66U, so I can work on this firmware without 
+constantly cutting my Internet access :)
 
 
 --- 

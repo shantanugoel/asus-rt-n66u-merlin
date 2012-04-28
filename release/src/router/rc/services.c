@@ -3239,7 +3239,9 @@ _dprintf("restart_nas_services(%d): test 12.\n", getpid());
 	{
 		if(action&RC_SERVICE_STOP) {
 			stop_telnetd();
+#ifdef RTCONFIG_SSH
 			stop_sshd();
+#endif
 			stop_logger();
 		}	
 		if(action&RC_SERVICE_START) {

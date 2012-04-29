@@ -33,6 +33,9 @@
 #include <shutils.h>
 #include <shared.h>
 
+// Not a valid RTCONFIG_ constant, so defining it here instead
+#define RTCONFIG_CROND=y
+
 #ifdef RTCONFIG_IPV6
 extern char wan6face[];
 #endif

@@ -1,4 +1,4 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.108.4 (28-April-2012)
+Asus RT-N66U Modded Firmware - build 3.0.0.3.108.5 (28-April-2012)
 ==================================================================
 
 About
@@ -22,6 +22,7 @@ The list of changes (so far):
 - Clicking on the MAC address of an unidentified client will do a lookup in
   the OUI database (ported from DD-WRT).
 - Enabled HTTPS access to web interface
+- Start crond at boot time
 - Optionally turn the WPS button into a radio enable/disable switch
 
 
@@ -60,6 +61,8 @@ certain events occur:
 - WAN interface comes up (includes if it went down and 
   back up): /jffs/scripts/wan-start
 - Firewall is started (rules are applied): /jffs/scripts/firewall-start.
+- Right after jffs is mounted, before any of the services get started:
+  /jffs/scripts/init-start
 
 Those scripts must all be located under /jffs/scripts/ (so JFFS support 
 must be enabled first).
@@ -101,6 +104,15 @@ The option to enable this feature can be found on the
 Administration page, under the System tab.
 
 
+* Crond *
+Crond will automatically start at boot time.  You can 
+put your cron batch in /var/spool/cron/crontabs/ .  The file 
+must be named "admin" as this is the name of the system user.
+Note that this location resides in RAM, so you would have to 
+put your cron script somewhere such as in the jffs partition, 
+and at boot time copy it to /var/spool/cron/crontabs/ using 
+a init-start user script.
+
 
 Notes
 -----
@@ -122,6 +134,13 @@ The "merlin" branch contains my modifications to the Asus firmware.
 
 History
 -------
+
+3.0.0.3.108.5:
+   - NEW: Crond starts at boot time.
+   - NEW: init-start is a new user script that will be run early on
+          at boot time (right after jffs is mounted, and before any 
+          service gets started)
+
 
 3.0.0.3.108.4:
    - NEW: Clicking on the MAC address of an unidentified client will do a lookup in

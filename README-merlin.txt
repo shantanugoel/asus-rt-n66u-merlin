@@ -1,4 +1,4 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.108.5 (28-April-2012)
+Asus RT-N66U Modded Firmware - build 3.0.0.3.108.5 (30-April-2012)
 ==================================================================
 
 About
@@ -24,6 +24,7 @@ The list of changes (so far):
 - Enabled HTTPS access to web interface
 - Start crond at boot time
 - Optionally turn the WPS button into a radio enable/disable switch
+- Optionally save traffic stats to disk (USB or JFFS partition)
 
 
 Installation
@@ -114,6 +115,26 @@ and at boot time copy it to /var/spool/cron/crontabs/ using
 a init-start user script.
 
 
+* Traffic history saving *
+Under Tools -> Other Settings are options that will allow you 
+to save your traffic history to disk, preserving it between 
+router reboots (by default it is currently kept in RAM, 
+so it will disappear when you reboot).
+
+While possible to also save it to nvram, I have kept this 
+option disabled, as nvram is currently too limited, 
+and filling it up would cause people to lose all their 
+settings.
+
+You can save it to a custom location (for 
+example, "/jffs/" if you have jffs enabled), or 
+/mnt/sda1/ if you have a USB disk plugged in.
+Save frequency is also configurable - it is recommended 
+to keep that frequency lower (for example, once a day) 
+if you are saving to jffs, to reduce wearing out 
+your flash RAM.
+
+
 Notes
 -----
 To make it simple to determine which version you are running, I am simply 
@@ -140,6 +161,8 @@ History
    - NEW: init-start is a new user script that will be run early on
           at boot time (right after jffs is mounted, and before any 
           service gets started)
+  - NEW: Can save traffic history to a custom location (USB or 
+         JFFS, for instance) to preserve it between reboots.
 
 
 3.0.0.3.108.4:

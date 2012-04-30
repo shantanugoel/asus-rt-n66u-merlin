@@ -169,7 +169,7 @@ function show_banner(L3){// L3 = The third Level of Menu
 }
 
 //Level 3 Tab
-var tabtitle = new Array(8);
+var tabtitle = new Array(11);
 tabtitle[0] = new Array("", "<#menu5_1_1#>", "<#menu5_1_2#>", "<#menu5_1_3#>", "<#menu5_1_4#>", "<#menu5_1_5#>", "<#menu5_1_6#>");
 tabtitle[1] = new Array("", "<#menu5_2_1#>", "<#menu5_2_2#>", "<#menu5_2_3#>", "IPTV", "Switch Control");
 tabtitle[2] = new Array("", "<#menu5_3_1#>", "Dual WAN", "<#menu5_3_3#>", "<#menu5_3_4#>", "<#menu5_3_5#>", "<#menu5_3_6#>", "<#NAT_passthrough_itemname#>", "<#menu5_4_4#>");
@@ -180,8 +180,9 @@ tabtitle[6] = new Array("", "<#menu5_5_1#>", "<#menu5_5_2#>", "<#menu5_5_3#>", "
 tabtitle[7] = new Array("", "<#menu5_6_1#>", "<#menu5_6_2#>", "<#menu5_6_3#>", "<#menu5_6_4#>", "Performance tuning");
 tabtitle[8] = new Array("", "<#menu5_7_2#>", "<#menu5_7_3#>", "<#menu5_7_4#>", "<#menu5_7_5#>", "<#menu5_7_6#>");
 tabtitle[9] = new Array("", "QoS", "<#traffic_monitor#>");
+tabtitle[10] = new Array("", "WakeOnLAN", "Other Settings");
 
-var tablink = new Array(8);
+var tablink = new Array(11);
 tablink[0] = new Array("", "Advanced_Wireless_Content.asp", "Advanced_WWPS_Content.asp", "Advanced_WMode_Content.asp", "Advanced_ACL_Content.asp", "Advanced_WSecurity_Content.asp", "Advanced_WAdvanced_Content.asp");
 tablink[1] = new Array("", "Advanced_LAN_Content.asp", "Advanced_DHCP_Content.asp", "Advanced_GWStaticRoute_Content.asp", "Advanced_IPTV_Content.asp", "Advanced_SwitchCtrl_Content.asp");
 tablink[2] = new Array("", "Advanced_WAN_Content.asp", "Advanced_WANPort_Content.asp", "Advanced_PortTrigger_Content.asp", "Advanced_VirtualServer_Content.asp", "Advanced_Exposed_Content.asp", "Advanced_ASUSDDNS_Content.asp", "Advanced_NATPassThrough_Content.asp", "Advanced_Modem_Content.asp");
@@ -192,6 +193,7 @@ tablink[6] = new Array("", "Advanced_BasicFirewall_Content.asp", "Advanced_URLFi
 tablink[7] = new Array("", "Advanced_OperationMode_Content.asp", "Advanced_System_Content.asp", "Advanced_FirmwareUpgrade_Content.asp", "Advanced_SettingBackup_Content.asp", "Advanced_PerformanceTuning_Content.asp");
 tablink[8] = new Array("", "Main_LogStatus_Content.asp", "Main_DHCPStatus_Content.asp", "Main_WStatus_Content.asp", "Main_IPTStatus_Content.asp", "Main_RouteStatus_Content.asp");
 tablink[9] = new Array("", "QoS_EZQoS.asp", "Main_TrafficMonitor_realtime.asp", "Main_TrafficMonitor_last24.asp", "Main_TrafficMonitor_daily.asp", "Advanced_QOSUserSpec_Content.asp");
+tablink[10] = new Array("", "Main_WOL.asp", "Main_OtherSettings.asp");
 
 //Level 2 Menu
 menuL2_title = new Array("", "<#menu5_1#>", "<#menu5_2#>", "<#menu5_3#>", "<#menu5_4#>", "IPv6", "VPN server", "<#menu5_5#>", "<#menu5_6#>", "<#menu5_7#>");
@@ -199,7 +201,7 @@ menuL2_link  = new Array("", tablink[0][1], tablink[1][1], tablink[2][1], tablin
 
 //Level 1 Menu
 menuL1_title = new Array("", "<#menu1#>", "<#Guest_Network#>", "<#Menu_TrafficManager#>", "<#Parental_Control#>", "<#Menu_usb_application#>", "Home Cloud", "Tools","<#menu5#>");
-menuL1_link = new Array("", "index.asp", "Guest_network.asp", "QoS_EZQoS.asp", "ParentalControl.asp", "APP_Installation.asp", "cloud.asp", "Main_WOL.asp","");
+menuL1_link = new Array("", "index.asp", "Guest_network.asp", "QoS_EZQoS.asp", "ParentalControl.asp", "APP_Installation.asp", "cloud.asp", tablink[10][1],"");
 
 var rc_support = "<% nvram_get("rc_support"); %>"; 
 var wl_vifnames = "<% nvram_get("wl0_vifnames"); %>";
@@ -425,8 +427,8 @@ function show_menu(){
 		}
 	}
 
-	// special case for Traffic Manager
-	if(L1 == traffic_L1_dx || L2 == traffic_L2_dx){
+	// special case for Traffic Manager and Tools
+	if(L1 == traffic_L1_dx || L2 == traffic_L2_dx || L1 == 7){
 		if(current_url.indexOf("Main_TrafficMonitor_") == 0){
 			L1 = traffic_L1_dx; 
 			L2 = traffic_L2_dx; 
@@ -437,6 +439,12 @@ function show_menu(){
 			L2 = traffic_L2_dx; 
 			L3 = 3;
 		}
+                else if(current_url.indexOf("Main_WOL") == 0){
+                        L1 = 9;
+                        L2 = 11;
+                        L3 = 1;
+                }
+
 		else{
 			L1 = traffic_L1_dx; 
 			L2 = traffic_L2_dx; 
@@ -444,6 +452,9 @@ function show_menu(){
 		}
 	}
 	//end
+//document.write(L1);
+//document.write(L2);
+//document.write(L3);
 
 	show_banner(L3);
 	show_footer();

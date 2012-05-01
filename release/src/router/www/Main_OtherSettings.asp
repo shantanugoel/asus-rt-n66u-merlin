@@ -29,18 +29,6 @@ function initial()
 	hide_rstats_storage(document.form.rstats_location.value);
 }
 
-function testField(field) {
-    var regExpr = new RegExp("^\d*\.?\d*$");
-    if (!regExpr.test(field.value)) {
-      // Case of error
-      field.value = "1";
-    } else if (field.value > 31) {
-	// must be 1-31
-	field.value = "1"
-    }
-
-}
-
 function set_rstats_location()
 {
 	rstats_loc = '<% nvram_get("rstats_path"); %>';

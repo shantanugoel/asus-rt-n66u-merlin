@@ -29,6 +29,18 @@ function initial()
 	hide_rstats_storage(document.form.rstats_location.value);
 }
 
+function testField(field) {
+    var regExpr = new RegExp("^\d*\.?\d*$");
+    if (!regExpr.test(field.value)) {
+      // Case of error
+      field.value = "1";
+    } else if (field.value > 31) {
+	// must be 1-31
+	field.value = "1"
+    }
+
+}
+
 function set_rstats_location()
 {
 	rstats_loc = '<% nvram_get("rstats_path"); %>';
@@ -63,15 +75,13 @@ function applyRule(){
 	} else if (document.form.rstats_location.value = 0)
 	{
 		document.form.rstats_path = "";
-	} else {
-		// Do nothing
 	}
 
 
 	showLoading();
 	document.form.submit();
-
 }
+
 
 function done_validating(action){
         refreshpage();    
@@ -157,19 +167,25 @@ function done_validating(action){
 		                <input type="radio" name="rstats_new" class="input" value="0" <% nvram_match_x("", "rstats_new", "0", "checked"); %>><#checkbox_No#>
        	        	</td>      	
         		</tr>
+			<tr>
+		        <th>Starting day of monthly cycle</th>
+		        <td>
+              			<input type="text" maxlength="2" class="input_3_table" name="rstats_offset" onKeyPress="return is_number(this,event);" onblur="validate_number_range(this, 1, 31)" value="<% nvram_get("rstats_offset"); %>">
+		        </td>
+		        </tr>
 		</table>
 
 
-                        <div class="apply_gen">
-                        <input name="button" type="button" class="button_gen" onclick="applyRule();" value="<#CTL_apply#>"/>
-	                </div>
+                <div class="apply_gen">
+                <input name="button" type="button" class="button_gen" onclick="applyRule();" value="<#CTL_apply#>"/>
+	        </div>
 		</td></tr>
 	        </tbody>
-        	</table>
-                </form>
-                </td>
+            </table>
+            </form>
+            </td>
 
-        </tr>
+       </tr>
       </table>
       <!--===================================Ending of Main Content===========================================-->
     </td>

@@ -134,6 +134,9 @@ to keep that frequency lower (for example, once a day)
 if you are saving to jffs, to reduce wearing out 
 your flash RAM.
 
+Also, a new "Monthly" page has been added to the Traffic 
+Monitor pages.
+
 
 Notes
 -----
@@ -163,6 +166,7 @@ History
           service gets started)
   - NEW: Can save traffic history to a custom location (USB or 
          JFFS, for instance) to preserve it between reboots.
+  - NEW: Added Monthly traffic page (ported from Tomato)
 
 
 3.0.0.3.108.4:

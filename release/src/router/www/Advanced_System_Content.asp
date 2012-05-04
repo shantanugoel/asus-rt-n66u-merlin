@@ -90,7 +90,11 @@ function initial(){
 	else{
 		showLANIPList();
 		hide_https_lanport(document.form.http_enable.value);
-	}	
+// These UI options aren't used anywhere in the fw (yet). --RM
+                $("http_client_tr").style.display = "none";
+                $("http_client_table").style.display = "none";
+                $("http_clientlist_Block").style.display = "none";
+	}
 }
 
 var time_zone_tmp="";
@@ -487,7 +491,7 @@ function add_tz_option(selectObj, str, value, selected){
 }
 
 function hide_https_lanport(_value){
-	$("https_lanport").style.display = (_value == "1") ? "" : "none";
+	$("https_lanport").style.display = (_value == "1" || _value == "2") ? "" : "none";
 }
 
 // show clientlist
@@ -726,6 +730,32 @@ function pullLANIPList(obj){
         </tr>
         </thead>
 
+        <tr id="https_tr">
+           <th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(0, 5);"><#WLANConfig11b_AuthenticationMethod_itemname#></a></th>
+           <td>
+              <select name="http_enable" class="input_option" onchange="hide_https_lanport(this.value);">
+                             <option value="0" <% nvram_match("http_enable", "0", "selected"); %>>HTTP</option>
+                             <option value="1" <% nvram_match("http_enable", "1", "selected"); %>>HTTPS</option>
+                             <option value="2" <% nvram_match("http_enable", "2", "selected"); %>>Both</option>
+              </select>
+           </td>
+        </tr>
+
+        <tr id="https_lanport">
+            <th>HTTPS Lan port</th>
+            <td>
+               <input type="text" maxlength="5" class="input_6_table" name="https_lanport" value="<% nvram_get("https_lanport"); %>">
+            </td>
+        </tr>
+
+        <tr id="http_client_tr">
+              <th>Only allow specific IP</th>
+              <td>
+                 <input type="radio" name="http_client" class="input" value="1" <% nvram_match_x("", "http_client", "1", "checked"); %>><#checkbox_Yes#>
+                 <input type="radio" name="http_client" class="input" value="0" <% nvram_match_x("", "http_client", "0", "checked"); %>><#checkbox_No#>
+              </td>
+        </tr>
+
         <tr>
 	   <th><#Enable_Telnet#></th>
            <td>
@@ -769,32 +799,6 @@ function pullLANIPList(obj){
               </td>
            </tr>
 
-
-          <tr id="https_tr">
-             <th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(0, 5);"><#WLANConfig11b_AuthenticationMethod_itemname#></a></th>
-             <td>
-                <select name="http_enable" class="input_option" onchange="hide_https_lanport(this.value);">
-                               <option value="0" <% nvram_match("http_enable", "0", "selected"); %>>HTTP</option>
-                               <option value="1" <% nvram_match("http_enable", "1", "selected"); %>>HTTPS</option>
-                               <option value="2" <% nvram_match("http_enable", "2", "selected"); %>>BOTH</option>
-                </select>
-             </td>
-          </tr>
-
-          <tr id="https_lanport">
-              <th>HTTPS Lan port</th>
-              <td>
-                 <input type="text" maxlength="5" class="input_6_table" name="https_lanport" value="<% nvram_get("https_lanport"); %>">
-              </td>
-           </tr>
-
-           <tr id="http_client_tr">
-              <th>Only allow specific IP</th>
-              <td>
-                 <input type="radio" name="http_client" class="input" value="1" <% nvram_match_x("", "http_client", "1", "checked"); %>><#checkbox_Yes#>
-                 <input type="radio" name="http_client" class="input" value="0" <% nvram_match_x("", "http_client", "0", "checked"); %>><#checkbox_No#>
-              </td>
-           </tr>
       </table>
 
       <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable" style="margin-top:8px;">
@@ -803,6 +807,15 @@ function pullLANIPList(obj){
           <td colspan="2"><#t2Misc#></td>
         </tr>
     	</thead>
+
+	<tr>
+	  <th>WPS Button behavior</th>
+	  <td>
+            <input type="radio" name="btn_ez_radiotoggle" class="input" value="1" <% nvram_match_x("", "btn_ez_radiotoggle", "1", "checked"); %>>Toggle Radio    
+            <input type="radio" name="btn_ez_radiotoggle" class="input" value="0" <% nvram_match_x("", "btn_ez_radiotoggle", "0", "checked"); %>>Activate WPS 
+	  </td>
+	</tr>
+
         <tr>
           <th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(11,1)"><#LANHostConfig_x_ServerLogEnable_itemname#></a></th>
           <td><input type="text" maxlength="15" class="input_15_table" name="log_ipaddr" value="<% nvram_get("log_ipaddr"); %>" onKeyPress="return is_ipaddr(this, event)" ></td>

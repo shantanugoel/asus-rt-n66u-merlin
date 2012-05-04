@@ -2008,6 +2008,18 @@ start_rstats(int new)
 void
 restart_rstats()
 {
+
+	if (nvram_match("rstats_new", "1"))
+	{
+		start_rstats(1);
+		nvram_set("rstats_new", "0");
+	}
+	else
+	{
+		start_rstats(0);
+	}
+
+/*
 	if (nvram_match("rstats_bak", "1"))
 	{
 		nvram_set("rstats_path", "*nvram");
@@ -2024,7 +2036,10 @@ restart_rstats()
 		nvram_set("rstats_path", "");
 		start_rstats(0);
 	}
+*/
+
 }
+
 ////////^^^^^^^^^^^^^^^^^^^jerry5 2009.07
 
 // TODO: so far, support wan0 only
@@ -3410,6 +3425,11 @@ _dprintf("restart_nas_services(%d): test 12.\n", getpid());
 		_dprintf("%s: shell: %s\n", __FUNCTION__, cmd[1]);
 		if(cmd[1]) system(cmd[1]);
 	}
+        else if (strcmp(script, "rstats") == 0)
+        {
+                if(action&RC_SERVICE_STOP) stop_rstats();
+                if(action&RC_SERVICE_START) restart_rstats();
+        }
 	else
 	{
 		fprintf(stderr,

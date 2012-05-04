@@ -1,4 +1,4 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.108.4 (26-April-2012)
+Asus RT-N66U Modded Firmware - build 3.0.0.3.108.5 (30-April-2012)
 ==================================================================
 
 About
@@ -14,6 +14,7 @@ The list of changes (so far):
 - Updated MiniDLNA from 1.0.21 to 1.0.24 (all Asus patches to the 
   MiniDLNA sources were reapplied).  
   MiniDLNA Changelog: http://sourceforge.net/projects/minidlna/files/minidlna/1.0.24/
+- Added wol binary (wake-on-lan) (in addition to ether-wake already in the firmware)
 - Added Tools menu to web interface (with WakeOnLan page)
 - Added JFFS partition support (configurable under Administration->Advanced->System)
 - Added user scripts that run on specific events
@@ -21,7 +22,9 @@ The list of changes (so far):
 - Clicking on the MAC address of an unidentified client will do a lookup in
   the OUI database (ported from DD-WRT).
 - Enabled HTTPS access to web interface
+- Start crond at boot time
 - Optionally turn the WPS button into a radio enable/disable switch
+- Optionally save traffic stats to disk (USB or JFFS partition)
 
 
 Installation
@@ -59,6 +62,8 @@ certain events occur:
 - WAN interface comes up (includes if it went down and 
   back up): /jffs/scripts/wan-start
 - Firewall is started (rules are applied): /jffs/scripts/firewall-start.
+- Right after jffs is mounted, before any of the services get started:
+  /jffs/scripts/init-start
 
 Those scripts must all be located under /jffs/scripts/ (so JFFS support 
 must be enabled first).
@@ -86,11 +91,51 @@ NVRAM space - what the hell was Asus thinking when they went with 32KB?),
 I am limiting this field to 512 characters max.
 
 
+* HTTPS management *
+I re-enabled HTTPS access in the firmware.  From the Administration->System 
+page you can configure your router so it accepts connections on http, https 
+or both.  You can also change the https port to a different one 
+(default is 8443).
+
+
 * WPS button mode - toggle radio *
 You can configure the router so pressing the WPS button will 
 toggle the radio on/off instead of starting WPS mode.
 The option to enable this feature can be found on the 
 Administration page, under the System tab.
+
+
+* Crond *
+Crond will automatically start at boot time.  You can 
+put your cron batch in /var/spool/cron/crontabs/ .  The file 
+must be named "admin" as this is the name of the system user.
+Note that this location resides in RAM, so you would have to 
+put your cron script somewhere such as in the jffs partition, 
+and at boot time copy it to /var/spool/cron/crontabs/ using 
+a init-start user script.
+
+
+* Traffic history saving *
+Under Tools -> Other Settings are options that will allow you 
+to save your traffic history to disk, preserving it between 
+router reboots (by default it is currently kept in RAM, 
+so it will disappear when you reboot).
+
+While possible to also save it to nvram, I have kept this 
+option disabled, as nvram is currently too limited, 
+and filling it up would cause people to lose all their 
+settings.
+
+You can save it to a custom location (for 
+example, "/jffs/" if you have jffs enabled), or 
+/mnt/sda1/ if you have a USB disk plugged in.
+Save frequency is also configurable - it is recommended 
+to keep that frequency lower (for example, once a day) 
+if you are saving to jffs, to reduce wearing out 
+your flash RAM.
+
+Also, a new "Monthly" page has been added to the Traffic 
+Monitor pages.
 
 
 Notes
@@ -101,14 +146,34 @@ For example, 3.0.0.3.108 becomes 3.0.0.3.108.1.
 
 
 
+Source code
+-----------
+The source code with all my modifications can be found 
+on Github, at:
+
+https://github.com/shantanugoel/asus-rt-n66u-merlin/tree/merlin
+
+The "merlin" branch contains my modifications to the Asus firmware.
+
+
 History
 -------
+
+3.0.0.3.108.5:
+   - NEW: Crond starts at boot time.
+   - NEW: init-start is a new user script that will be run early on
+          at boot time (right after jffs is mounted, and before any 
+          service gets started)
+  - NEW: Can save traffic history to a custom location (USB or 
+         JFFS, for instance) to preserve it between reboots.
+  - NEW: Added Monthly traffic page (ported from Tomato)
+
 
 3.0.0.3.108.4:
    - NEW: Clicking on the MAC address of an unidentified client will do a lookup in
           the OUI database (ported from DD-WRT).
    - NEW: Added HTTPS access to web interface (configurable under Administration)
-   - NEW: Option to turn the WPS button into a radio on/off toggle
+   - NEW: Option to turn the WPS button into a radio on/off toggle (under Administration)
    - FIXED: sshd would start even if disabled
    - CHANGE: Switched back to wol, as people report better compatibility with it.
              ether-wake remains available over Telnet.
@@ -140,7 +205,9 @@ Website: http://www.lostrealm.ca/
 Email: rmerl@lostrealm.ca
 
 Drop me a note if you are using this firmware and are enjoying it.  If you really like it and want 
-to give more than a simple "Thank you", there is also a Paypal donation button on my website. :)
+to give more than a simple "Thank you", there is also a Paypal donation button on my website.  I 
+wouldn't mind being able to afford a second RT-N66U, so I can work on this firmware without 
+constantly cutting my Internet access :)
 
 
 --- 

@@ -644,7 +644,7 @@ function pullLANIPList(obj){
 <input type="hidden" name="modified" value="0">
 <input type="hidden" name="action_mode" value="apply">
 <input type="hidden" name="action_wait" value="5">
-<input type="hidden" name="action_script" value="restart_time">
+<input type="hidden" name="action_script" value="restart_time;restart_httpd">
 <input type="hidden" name="first_time" value="">
 <input type="hidden" name="preferred_lang" id="preferred_lang" value="<% nvram_get("preferred_lang"); %>">
 <input type="hidden" name="firmver" value="<% nvram_get("firmver"); %>">
@@ -794,7 +794,7 @@ function pullLANIPList(obj){
            <tr>
               <th>SSH Authentication key</th>
               <td>
-                 <textarea rows="8" class="textarea_ssh_table" name="sshd_authkeys" cols="55" maxlength="512" ><% nvram_get("sshd_authkeys"); %></textarea>
+                 <textarea rows="8" class="textarea_ssh_table" name="sshd_authkeys" cols="55" maxlength="512" onchange="this.value = this.value.replace(/[\r\n]+/g, '')"><% nvram_get("sshd_authkeys"); %></textarea>
                  <span id="ssh_alert_msg"></span>
               </td>
            </tr>

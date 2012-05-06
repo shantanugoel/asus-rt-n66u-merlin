@@ -2370,10 +2370,6 @@ _dprintf("restart_nas_services(%d): test 9.\n", getpid());
 #ifdef RTCONFIG_SSH
 	stop_sshd();
 #endif
-<<<<<<< HEAD
-
-=======
->>>>>>> merlin
 }
 
 // 2008.10 magic 
@@ -3268,17 +3264,10 @@ _dprintf("restart_nas_services(%d): test 12.\n", getpid());
 			start_logger();
 			start_telnetd();
 #ifdef RTCONFIG_SSH
-<<<<<<< HEAD
-      if (nvram_match("sshd_enable", "1"))
-      {
-        start_sshd();
-      }
-=======
 		        if (nvram_match("sshd_enable", "1"))
 		        {
                 		start_sshd();
 		        }
->>>>>>> merlin
 #endif
 		}
 	}

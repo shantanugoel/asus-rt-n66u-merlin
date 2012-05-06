@@ -65,6 +65,8 @@ certain events occur:
 - Firewall is started (rules are applied): /jffs/scripts/firewall-start.
 - Right after jffs is mounted, before any of the services get started:
   /jffs/scripts/init-start
+- Just before a partition is mounted: /jffs/scripts/pre-mount
+- Just after a partition is mounted: /jffs/scripts/post-mount
 
 Those scripts must all be located under /jffs/scripts/ (so JFFS support 
 must be enabled first).

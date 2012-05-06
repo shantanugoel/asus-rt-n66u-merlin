@@ -769,6 +769,8 @@ int mount_partition(char *dev_name, int host_num, char *dsc_name, char *pt_name,
 	if(!is_valid_hostname(the_label))
 		memset(the_label, 0, 128);
 
+    run_custom_script("pre-mount");
+
 	if (f_exists("/etc/fstab")) {
 		if (strcmp(type, "swap") == 0) {
 			_eval(swp_argv, NULL, 0, NULL);
@@ -860,6 +862,7 @@ done:
 		if (nvram_get_int("usb_automount"))
 			run_nvscript("script_usbmount", mountpoint, 3);
 
+        run_custom_script("post-mount");
 	}
 	return (ret == MOUNT_VAL_RONLY || ret == MOUNT_VAL_RW);
 }

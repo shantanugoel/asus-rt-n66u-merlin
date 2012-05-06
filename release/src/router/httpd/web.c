@@ -3651,6 +3651,9 @@ do_upgrade_post(char *url, FILE *stream, int len, char *boundary)
 	/* Pipe the rest to the FIFO */
 	while (len>0 && filelen>0) 
 	{
+                if (fileno(stream) == -1) {
+                        break;
+                }
 		if (waitfor (fileno(stream), 10) <= 0)
 		{
 			break;
@@ -3766,6 +3769,9 @@ do_upload_post(char *url, FILE *stream, int len, char *boundary)
 	cmpHeader = 0;
 
 	while (len > 0 && filelen > 0) {
+		if (fileno(stream) == -1) {
+			break;
+		}
 		if (waitfor (fileno(stream), 10) <= 0) {
 			break;
 		}

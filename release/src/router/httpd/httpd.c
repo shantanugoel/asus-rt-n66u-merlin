@@ -240,7 +240,6 @@ auth_check( char* dirname, char* authorization ,char* url)
     if ( !strlen(auth_passwd) )
 	/* Yes, let the request go through. */
 	return 1;
-
     /* Basic authorization info? */
     if ( !authorization || strncmp( authorization, "Basic ", 6 ) != 0) 
     {
@@ -733,7 +732,6 @@ handle_request(void)
 		{
 			if (handler->auth) {
 				if(skip_auth) {
-
 				}
 				else if ((mime_exception&MIME_EXCEPTION_NOAUTH_FIRST)&&!x_Setting) {
 					skip_auth=1;
@@ -813,12 +811,16 @@ void http_login(unsigned int ip, char *url) {
 	char *login_ip_str;
 	char login_ipstr[32], login_timestampstr[32];
 	
-	if (http_port != SERVER_PORT 
+	if ((http_port != SERVER_PORT 
 #ifdef RTCONFIG_HTTPS
-		|| http_port != SERVER_PORT_SSL
+		&& http_port != SERVER_PORT_SSL
+		&& http_port != nvram_get_int("https_lanport")
 #endif
-		|| ip == 0x100007f)
+		) || ip == 0x100007f)
+{
 		return;
+}
+
 	
 	login_ip = ip;
 	last_login_ip = 0;
@@ -840,11 +842,12 @@ void http_login(unsigned int ip, char *url) {
 
 // 0: can not login, 1: can login, 2: loginer, 3: not loginer.
 int http_login_check(void) {
-	if (http_port != SERVER_PORT 
+	if ((http_port != SERVER_PORT 
 #ifdef RTCONFIG_HTTPS
-		|| http_port != SERVER_PORT_SSL
+		&& http_port != SERVER_PORT_SSL
+                && http_port != nvram_get_int("https_lanport")
 #endif
-		|| login_ip_tmp == 0x100007f)
+		) || login_ip_tmp == 0x100007f)
 		//return 1;
 		return 0;	// 2008.01 James.
 	
@@ -897,6 +900,11 @@ void http_logout(unsigned int ip) {
 int is_auth(void)
 {
 	if (http_port==SERVER_PORT ||
+#ifdef RTCONFIG_HTTPS
+		http_port==SERVER_PORT_SSL ||
+		http_port==nvram_get_int("https_lanport") ||
+#endif
+
 		strcmp(nvram_get_x("PrinterStatus", "usb_webhttpcheck_x"), "1")==0) return 1;
 	else return 0;
 }

@@ -397,7 +397,7 @@ function getCookie(c_name)
 													</select>										
 												</td> 
 											</tr-->
-											<tr>
+											<tr style="display:none">
 												<th>Spin duty cycle</th>
 												<td> 
 													<select name="fanctrl_dutycycle" class="input_option">

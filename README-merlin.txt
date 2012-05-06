@@ -1,4 +1,4 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.108.5 (30-April-2012)
+Asus RT-N66U Modded Firmware - build 3.0.0.3.108.5 (5-May-2012)
 ==================================================================
 
 About
@@ -21,10 +21,11 @@ The list of changes (so far):
 - Added SSHD (dropbear, configurable under Administration->Advanced->System)
 - Clicking on the MAC address of an unidentified client will do a lookup in
   the OUI database (ported from DD-WRT).
-- Enabled HTTPS access to web interface
+- Enabled HTTPS access to web interface (with certain limitations)
 - Start crond at boot time
 - Optionally turn the WPS button into a radio enable/disable switch
 - Optionally save traffic stats to disk (USB or JFFS partition)
+- Monitor your router's temperature (under Administration -> Performance Tuning)
 
 
 Installation
@@ -97,6 +98,11 @@ page you can configure your router so it accepts connections on http, https
 or both.  You can also change the https port to a different one 
 (default is 8443).
 
+There's currently an issue preventing you from flashing the FW or 
+restoring your settings from a saved file over https - you have 
+to use the regular http webui for now.  This is a bug in 
+Asus' original code that I have been unable to fix so far.
+
 
 * WPS button mode - toggle radio *
 You can configure the router so pressing the WPS button will 
@@ -144,6 +150,9 @@ To make it simple to determine which version you are running, I am simply
 appending another digit to determine my build version.  
 For example, 3.0.0.3.108 becomes 3.0.0.3.108.1.
 
+It's currently not possible to either upgrade your firmware or 
+restore your settings over HTTPS.  You have to use HTTP 
+for that.
 
 
 Source code
@@ -167,6 +176,12 @@ History
   - NEW: Can save traffic history to a custom location (USB or 
          JFFS, for instance) to preserve it between reboots.
   - NEW: Added Monthly traffic page (ported from Tomato)
+  - NEW: Added the Performance Tuning page (with temperature).
+  - FIXED: Webui authentication was bypassed by the web server
+  - FIXED: Httpd crash when uploading a FW or settings file over
+           https - should simply fail now.  For now you have to 
+           use http for flashing the FW or restoring your settings
+           from a saved config file.
 
 
 3.0.0.3.108.4:

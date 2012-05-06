@@ -984,7 +984,7 @@ dhcpv6/stamp-h1:
 	@touch dhcpv6/stamp-h1
 
 wol/stamp-h1:
-	ac_cv_func_malloc_0_nonnull=yes cd $(TOP)/wol && $(CONFIGURE) --host=mips --prefix=$(INSTALLDIR)/wol CC=mipsel-uclibc-gcc STRIP=mipsel-uclibc-strip AR=mipsel-uclibc-ar LD=mipsel-uclibc-ld NM=mipsel-uclibc-nm RANLIB=mipsel-uclibc-ranlib
+	cd $(TOP)/wol && jm_cv_func_working_malloc=yes $(CONFIGURE) --host=mips --prefix=$(INSTALLDIR)/wol CC=mipsel-uclibc-gcc STRIP=mipsel-uclibc-strip AR=mipsel-uclibc-ar LD=mipsel-uclibc-ld NM=mipsel-uclibc-nm RANLIB=mipsel-uclibc-ranlib
 	touch wol/stamp-h1
 
 wol: wol/stamp-h1

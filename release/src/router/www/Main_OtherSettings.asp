@@ -57,12 +57,12 @@ function hide_rstats_storage(_value){
 
 function applyRule(){
 
-	if (document.form.rstats_location.value = 2)
+	if (document.form.rstats_location.value == "2")
 	{
-		document.form.rstats_path = "*nvram";
-	} else if (document.form.rstats_location.value = 0)
+		document.form.rstats_path.value = "*nvram";
+	} else if (document.form.rstats_location.value == "0")
 	{
-		document.form.rstats_path = "";
+		document.form.rstats_path.value = "";
 	}
 
 
@@ -126,7 +126,7 @@ function done_validating(action){
                 			<select name="rstats_location" class="input_option" onchange="hide_rstats_storage(this.value);">
                                 	<option value="0">RAM (Default)</option>
                                 	<option value="1">Custom location</option>
-                	        	<option value="2">NVRam</option>
+<!--                	        	<option value="2">NVRam</option> -->
 					</select>
         			</td>
 			</tr>

@@ -1,4 +1,4 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.108.5 (5-May-2012)
+Asus RT-N66U Modded Firmware - build 3.0.0.3.108.6 (8-May-2012)
 ==================================================================
 
 About
@@ -167,6 +167,13 @@ The "merlin" branch contains my modifications to the Asus firmware.
 
 History
 -------
+
+3.0.0.3.108.6:
+   - FIXED: Traffic history location was't properly saved
+            when changed in webui.
+   - FIXED: Hid the option of saving traffic history to nvram - for 
+            now, to avoid people filling their limited nvram space.
+
 
 3.0.0.3.108.5:
    - NEW: Crond starts at boot time.

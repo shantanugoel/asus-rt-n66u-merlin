@@ -126,7 +126,7 @@ function done_validating(action){
                 			<select name="rstats_location" class="input_option" onchange="hide_rstats_storage(this.value);">
                                 	<option value="0">RAM (Default)</option>
                                 	<option value="1">Custom location</option>
-<!--                	        	<option value="2">NVRam</option> -->
+                	        	<option value="2">NVRAM (Disabled)</option>
 					</select>
         			</td>
 			</tr>

@@ -1311,30 +1311,22 @@ is_invalid_char_for_hostname(char c)
 int
 is_valid_hostname(const char *name)
 {
-	int ret = 1, len, i;
+	int len, i;
 
 	if (!name)
 		return 0;
 
 	len = strlen(name);
-	if (len == 0)
-	{
-		ret = 0;
-		goto ENDERR;
-	}
-
-	for (i = 0; i < len ; i++)
-		if (is_invalid_char_for_hostname(name[i]))
-		{
-			ret = 0;
+	for (i = 0; i < len ; i++) {
+		if (is_invalid_char_for_hostname(name[i])) {
+			len = 0;
 			break;
 		}
-
-ENDERR:
+	}
 #if 0
-	printf("%s is %svalid for hostname\n", name, (ret == 1) ? "  " : "in");
+	printf("%s is %svalid for hostname\n", name, len ? "" : "in");
 #endif
-	return ret;
+	return len;
 }
 
 #ifdef RTCONFIG_OLD_PARENTALCTRL

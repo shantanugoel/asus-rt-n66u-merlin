@@ -37,7 +37,7 @@ function set_rstats_location()
 	{
 		document.form.rstats_location.value = "0";
 	}
-	else if (rstats_loc === "nvram")
+	else if (rstats_loc === "*nvram")
 	{
 		document.form.rstats_location.value = "2";
 	} 

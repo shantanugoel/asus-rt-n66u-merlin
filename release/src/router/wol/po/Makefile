@@ -20,7 +20,7 @@ srcdir = .
 top_srcdir = ..
 
 
-prefix = /root/asuswrt/release/src-rt/router/mipsel-uclibc/install/wol
+prefix = /root/git/asus-rt-n66u-merlin/release/src-rt/router/mipsel-uclibc/install/wol
 exec_prefix = ${prefix}
 datadir = ${prefix}/share
 localedir = $(datadir)/locale

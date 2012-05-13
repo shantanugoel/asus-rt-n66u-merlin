@@ -26,7 +26,7 @@ top_srcdir = ..
 top_builddir = ..
 
 
-prefix = /root/asuswrt/release/src-rt/router/mipsel-uclibc/install/wol
+prefix = /root/git/asus-rt-n66u-merlin/release/src-rt/router/mipsel-uclibc/install/wol
 exec_prefix = ${prefix}
 transform = s,x,x,
 libdir = ${exec_prefix}/lib

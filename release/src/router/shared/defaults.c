@@ -941,7 +941,7 @@ struct nvram_tuple router_defaults[] = {
 
 	/* traffic monitor - added by jerry5 2009/07 */
 	{"rstats_enable", "1"},
-	{"rstats_path", "*nvram"},
+	{"rstats_path", ""},
 	{"rstats_new", "0"},
 	{"rstats_stime", "1"},
 	{"rstats_offset", "1"},

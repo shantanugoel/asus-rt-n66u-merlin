@@ -184,6 +184,9 @@ static void save(int quick)
 	sprintf(hgz, "%s.gz", history_fn);
 
 	if (strcmp(save_path, "*nvram") == 0) {
+// Do nothing - disabled for now
+		return;
+/*
 		if (!wait_action_idle(10)) {
 			_dprintf("%s: busy, not saving\n", __FUNCTION__);
 			return;
@@ -202,6 +205,7 @@ static void save(int quick)
 			}
 		}
 		free(bi);
+*/
 	}
 	else if (save_path[0] != 0) {
 		strcpy(tmp, save_path);

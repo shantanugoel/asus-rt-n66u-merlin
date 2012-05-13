@@ -173,8 +173,8 @@ History
    - NEW: PPTP VPN encryption options (backported from build 112)
    - FIXED: Traffic history location was't properly saved
             when changed in webui.
-   - FIXED: Hid the option of saving traffic history to nvram - for 
-            now, to avoid people filling their limited nvram space.
+   - FIXED: Disabled traffic history saving to nvram for now,
+            to avoid people accidentally filling their limited nvram space.
    - FIXED: Missing bottom pixels from the bottom of General menu
    - FIXED: Removed invalid CSS attribute
    - FIXED: typo in VPN iptables entries (bug in Asus's code)

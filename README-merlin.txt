@@ -1,5 +1,5 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.108.6 (8-May-2012)
-==================================================================
+Asus RT-N66U Modded Firmware - build 3.0.0.3.108.6 (13-May-2012)
+================================================================
 
 About
 -----
@@ -169,10 +169,14 @@ History
 -------
 
 3.0.0.3.108.6:
+   - NEW: HTTP access list (backported from build 112)
+   - NEW: PPTP VPN encryption options (backported from build 112)
    - FIXED: Traffic history location was't properly saved
             when changed in webui.
    - FIXED: Hid the option of saving traffic history to nvram - for 
             now, to avoid people filling their limited nvram space.
+   - FIXED: Missing bottom pixels from the bottom of General menu
+   - FIXED: Removed invalid CSS attribute
 
 
 3.0.0.3.108.5:

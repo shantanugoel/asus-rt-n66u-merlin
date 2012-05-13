@@ -983,9 +983,8 @@ struct nvram_tuple router_defaults[] = {
 #if defined(RTCONFIG_PPTPD) || defined(RTCONFIG_ACCEL_PPTPD)
 	{"pptpd_enable", 	"0"},
 	{"pptpd_broadcast", 	"disable"},
-	{"pptpd_forcemppe",	"auto"}, // will be removed
 	{"pptpd_chap", 		"0"},	 // 0/1/2(Auto/MS-CHAPv1/MS-CHAPv2)
-	{"pptpd_mppe", 		"8"}, 	 // 1|2|4|8(MPPE-128|MPPE-56|MPPE-40|No Encryption)
+	{"pptpd_mppe", 		"0"}, 	 // 1|2|4|8(MPPE-128|MPPE-56|MPPE-40|No Encryption)
 	{"pptpd_dns1", 		""},
 	{"pptpd_dns2", 		""},
 	{"pptpd_wins1", 	""},

@@ -101,7 +101,7 @@ void write_chap_secret(char *file)
 
 void start_pptpd(void)
 {
-	int ret = 0, mss = 0, manual_dns = 0;
+	int ret = 0, mss = 0, manual_dns = 0, pptpd_opt = 0;
 	char *lpTemp;
 	FILE *fp;
 
@@ -125,7 +125,8 @@ void start_pptpd(void)
 	// Create options file that will be unique to pptpd to avoid interference 
 	// with pppoe and pptp
 	fp = fopen("/tmp/pptpd/options.pptpd", "w");
-	fprintf(fp, "logfile /var/log/pptpd-pppd.log\ndebug\n");
+	fprintf(fp, "logfile /var/log/pptpd-pppd.log\n");
+	//fprintf(fp, "debug dump logfd 2 nodetach\n");
 	if (nvram_match("pptpd_radius", "1"))
 		fprintf(fp, "plugin radius.so\nplugin radattr.so\n"
 			"radius-config-file /tmp/pptpd/radius/radiusclient.conf\n");
@@ -148,34 +149,24 @@ void start_pptpd(void)
 		"ipcp-accept-remote\n"
 		"lcp-echo-failure 10\n"
 		"lcp-echo-interval 5\n"
-		"deflate 0\n" "auth\n" "-chap\n" "-mschap\n" "+mschap-v2\n");
+		"deflate 0\n" "auth\n" "-chap\n"
+		"nomppe-stateful\n");
 
-	fprintf(fp, "nomppe-stateful\n");
+	pptpd_opt = nvram_get_int("pptpd_chap");
+	fprintf(fp, "%smschap\n", (pptpd_opt == 0 || pptpd_opt & 1) ? "+" : "-");
+	fprintf(fp, "%smschap-v2\n", (pptpd_opt == 0 || pptpd_opt & 2) ? "+" : "-");
 
-	if (nvram_match("pptpd_forcemppe", "none")) {
-                fprintf(fp, "nomppe nomppc\n");
-        }
-	else if (nvram_match("pptpd_forcemppe", "auto")) {
-                fprintf(fp, "require-mppe-40\n"
-                	    "require-mppe-56\n"
-                	    "require-mppe-128\n");
-        } 
-	else if (nvram_match("pptpd_forcemppe", "+mppe-40")) {
-		fprintf(fp, "require-mppe\n"
-                	    "require-mppe-40\n");
-        } 
-	else if (nvram_match("pptpd_forcemppe", "+mppe-56")) {
-                fprintf(fp, "require-mppe\n"
-			    "nomppe-40\n"
-                            "require-mppe-56\n");
-        } 
-	else if (nvram_match("pptpd_forcemppe", "+mppe-128")) {
-                fprintf(fp, "require-mppe\n"
-			    "nomppe-40\n"
-                            "nomppe-56\n"
-                            "require-mppe-128\n");
-        }
-	
+	pptpd_opt = nvram_get_int("pptpd_mppe");
+	if (pptpd_opt == 0) 
+		pptpd_opt = 1 | 4 | 8;
+	if (pptpd_opt & (1 | 2 | 4)) {
+		fprintf(fp, "%s", (pptpd_opt & 8) ? "" : "require-mppe\n");
+  		fprintf(fp, "%smppe-128\n", (pptpd_opt & 1) ? "require-" : "no");
+  		fprintf(fp, "%smppe-56\n", (pptpd_opt & 2) ? "require-" : "no");
+  		fprintf(fp, "%smppe-40\n", (pptpd_opt & 4) ? "require-" : "no");
+	} else
+  		fprintf(fp, "nomppe nomppc\n");
+
 	fprintf(fp, "ms-ignore-domain\n"
 		"chap-secrets /tmp/pptpd/chap-secrets\n"
 		"ip-up-script /tmp/pptpd/ip-up\n"

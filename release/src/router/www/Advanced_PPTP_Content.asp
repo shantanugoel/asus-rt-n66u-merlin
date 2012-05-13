@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - VPN Server</title>
+<title>ASUS Wireless Router <#Web_Title#> - <#BOP_isp_heart_item#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script language="JavaScript" type="text/javascript" src="/state.js"></script>
@@ -23,33 +23,60 @@ wan_nat_x = '<% nvram_get("wan_nat_x"); %>';
 <% login_state_hook(); %>
 var wireless = [<% wl_auth_list(); %>];	// [[MAC, associated, authorized], ...]
 var pptpd_clientlist_array = '<% nvram_char_to_ascii("", "pptpd_clientlist"); %>';
+var pptpd_clients = '<% nvram_get("pptpd_clients"); %>';
+
+var origin_lan_ip = '<% nvram_get("lan_ipaddr"); %>';
+var lan_ip_subnet = origin_lan_ip.split(".")[0]+"."+origin_lan_ip.split(".")[1]+"."+origin_lan_ip.split(".")[2]+".";
+var lan_ip_end = parseInt(origin_lan_ip.split(".")[3]);
+
+var dhcp_enable = '<% nvram_get("dhcp_enable_x"); %>';
+var pool_start = '<% nvram_get("dhcp_start"); %>';
+var pool_end = '<% nvram_get("dhcp_end"); %>';
+var pool_subnet = pool_start.split(".")[0]+"."+pool_start.split(".")[1]+"."+pool_start.split(".")[2]+".";
+var pool_start_end = parseInt(pool_start.split(".")[3]);
+var pool_end_end = parseInt(pool_end.split(".")[3]);
+
+var static_enable = '<% nvram_get("dhcp_static_x"); %>';
+var dhcp_staticlists = '<% nvram_get("dhcp_staticlist"); %>';
+var staticclist_row = dhcp_staticlists.split('&#60');
 
 function initial(){
 	show_menu();
 	pptpd_clientlist_array = decodeURIComponent(pptpd_clientlist_array);
 	showpptpd_clientlist();
-	if(document.form.pptpd_clients.value != "") {
-		document.form._pptpd_clients_start.value = document.form.pptpd_clients.value.split("-")[0];
-		document.form._pptpd_clients_end.value = document.form.pptpd_clients.value.split("-")[1];
-		$('pptpd_subnet').innerHTML = document.form.pptpd_clients.value.split(".")[0]
-															+"."+document.form.pptpd_clients.value.split(".")[1]
-															+"."+document.form.pptpd_clients.value.split(".")[2]
-															+".";	
+
+	if (pptpd_clients != "") {
+		document.form._pptpd_clients_start.value = pptpd_clients.split("-")[0];
+		document.form._pptpd_clients_end.value = pptpd_clients.split("-")[1];
+		$('pptpd_subnet').innerHTML = pptpd_clients.split(".")[0] + "." +
+					      pptpd_clients.split(".")[1] + "." +
+					      pptpd_clients.split(".")[2] + ".";
 	}
-	addOnlineHelp(["ASUSWRT", "VPN"]);
+	
+	if (document.form.pptpd_mppe.value == 0)
+		document.form.pptpd_mppe.value = (1 | 4 | 8);
+	document.form.pptpd_mppe_128.checked = (document.form.pptpd_mppe.value & 1);
+	//document.form.pptpd_mppe_56.checked = (document.form.pptpd_mppe.value & 4);
+	document.form.pptpd_mppe_40.checked = (document.form.pptpd_mppe.value & 4);
+	document.form.pptpd_mppe_no.checked = (document.form.pptpd_mppe.value & 8);
+
+	addOnlineHelp($("faq"), ["ASUSWRT", "VPN"]);
 }
 
-var old_lan_ipaddr = "<% nvram_get("lan_ipaddr"); %>";
+function changeMppe(){
+	if (!document.form.pptpd_mppe_128.checked &&
+	    //!document.form.pptpd_mppe_56.checked &&
+	    !document.form.pptpd_mppe_40.checked)
+		document.form.pptpd_mppe_no.checked = true;
+}
+
 function applyRule(){
 	var rule_num = $('pptpd_clientlist_table').rows.length;
 	var item_num = $('pptpd_clientlist_table').rows[0].cells.length;
 	var tmp_value = "";
-	var lan_ip_subnet = old_lan_ipaddr.split(".")[0]+"."+old_lan_ipaddr.split(".")[1]+"."+old_lan_ipaddr.split(".")[2]+".";
-	var lan_ip_end = parseInt(old_lan_ipaddr.split(".")[3]);
-	var pptpd_clients_subnet = document.form._pptpd_clients_start.value.split(".")[0]
-															+"."+document.form._pptpd_clients_start.value.split(".")[1]
-															+"."+document.form._pptpd_clients_start.value.split(".")[2]
-															+".";	
+	var pptpd_clients_subnet = document.form._pptpd_clients_start.value.split(".")[0] + "." +
+				   document.form._pptpd_clients_start.value.split(".")[1] + "." +
+				   document.form._pptpd_clients_start.value.split(".")[2] + ".";
 	var pptpd_clients_start_ip = parseInt(document.form._pptpd_clients_start.value.split(".")[3]);
 	var pptpd_clients_end_ip = parseInt(document.form._pptpd_clients_end.value);
 	
@@ -61,34 +88,73 @@ function applyRule(){
 	
 	if(!valid_IP(document.form._pptpd_clients_start, "")){
 			document.form._pptpd_clients_start.focus();
+			document.form._pptpd_clients_start.select();
 			return false;		
 	}
 
-		
 	if(!validate_number_range(document.form._pptpd_clients_end, 1, 254)){
-			document.form._pptpd_clients_start.focus();
+			document.form._pptpd_clients_end.focus();
+			document.form._pptpd_clients_end.select();
 			return false;
 	}	
 	
 	if(pptpd_clients_start_ip > pptpd_clients_end_ip){
 		alert("This value should be higher than "+document.form._pptpd_clients_start.value);
 		document.form._pptpd_clients_end.focus();
+		document.form._pptpd_clients_end.select();
 		return false;
 	}
 	
   if( (pptpd_clients_end_ip - pptpd_clients_start_ip) > 9 ){
       alert("Pptpd server only allows max 10 clients!");
       document.form._pptpd_clients_start.focus();
+      document.form._pptpd_clients_start.select();
       return false;
   }
   
+  //if conflict with LAN ip & DHCP ip pool & static
   if(lan_ip_subnet == pptpd_clients_subnet 
   		&& lan_ip_end >= pptpd_clients_start_ip 
   		&& lan_ip_end <= pptpd_clients_end_ip ){
-  		alert("It is conflict with router's LAN ip: "+old_lan_ipaddr);
+  		//alert("It is conflict with router's LAN ip: "+origin_lan_ip);
+  		$('pptpd_conflict').innerHTML = Untranslated.vpn_conflict_LANip+" <b>"+origin_lan_ip+"</b>";
   		document.form._pptpd_clients_start.focus();	  			
+  		document.form._pptpd_clients_start.select();
 			return false;
+  }/*else if(dhcp_enable == 1){*/	//1
+	else if(pool_subnet == pptpd_clients_subnet
+					&& ((pool_start_end >= pptpd_clients_start_ip && pool_start_end <= pptpd_clients_end_ip)								
+								|| (pool_end_end >= pptpd_clients_start_ip && pool_end_end <= pptpd_clients_end_ip)								
+								|| (pptpd_clients_start_ip >= pool_start_end && pptpd_clients_start_ip <= pool_end_end)
+								|| (pptpd_clients_end_ip >= pool_start_end && pptpd_clients_end_ip <= pool_end_end))
+					){
+  		//alert("It is conflict with router's DHCP pool: "+pool_start+" ~ "+pool_end);
+  		$('pptpd_conflict').innerHTML = Untranslated.vpn_conflict_DHCPpool+" <b>"+pool_start+" ~ "+pool_end+"</b>";
+  		document.form._pptpd_clients_start.focus();
+  		document.form._pptpd_clients_start.select();
+			return false;				
+		
+	}/*}else if(static_enable == 1){*/ //2
+	else if(dhcp_staticlists != ""){
+			for(var i = 1; i < staticclist_row.length; i++){
+					var static_subnet ="";
+					var static_end ="";					
+					var static_ip = staticclist_row[i].split('&#62')[1];
+					static_subnet = static_ip.split(".")[0]+"."+static_ip.split(".")[1]+"."+static_ip.split(".")[2]+".";
+					static_end = parseInt(static_ip.split(".")[3]);
+					if(static_subnet == pptpd_clients_subnet 
+  						&& static_end >= pptpd_clients_start_ip 
+  						&& static_end <= pptpd_clients_end_ip){
+  							//alert("It is conflict with router's DHCP static ip: "+static_ip);
+  							$('pptpd_conflict').innerHTML = Untranslated.vpn_conflict_DHCPstatic+" <b>"+static_ip+"</b>";
+  							document.form._pptpd_clients_start.focus();
+  							document.form._pptpd_clients_start.select();
+								return false;  							
+  				}				
   }
+	}
+		
+	/*}*/ //3
 	
 	for(i=0; i<rule_num; i++){
 		tmp_value += "<"		
@@ -103,6 +169,17 @@ function applyRule(){
 	document.form.pptpd_clientlist.value = tmp_value;
 
 	document.form.pptpd_clients.value = document.form._pptpd_clients_start.value + "-" + document.form._pptpd_clients_end.value;
+
+	document.form.pptpd_mppe.value = 0;
+	if (document.form.pptpd_mppe_128.checked)
+		document.form.pptpd_mppe.value |= 1;
+	//if (document.form.pptpd_mppe_56.checked)
+	//	document.form.pptpd_mppe.value |= 2;
+	if (document.form.pptpd_mppe_40.checked)
+		document.form.pptpd_mppe.value |= 4;
+	if (document.form.pptpd_mppe_no.checked)
+		document.form.pptpd_mppe.value |= 8;
+
 	showLoading();
 	document.form.submit();	
 }
@@ -216,8 +293,7 @@ function showpptpd_clientlist(){
 	$("pptpd_clientlist_Block").innerHTML = code;
 }
 
-// test if WAN IP & Gateway & DNS IP is a valid IP
-// DNS IP allows to input nothing
+// test if Private ip
 function valid_IP(obj_name, obj_flag){
 		// A : 1.0.0.0~126.255.255.255
 		// B : 127.0.0.0~127.255.255.255 (forbidden)
@@ -230,15 +306,7 @@ function valid_IP(obj_name, obj_flag){
 		var C_class_end = inet_network("255.255.255.255");
 		
 		var ip_obj = obj_name;
-		var ip_num = inet_network(ip_obj.value);
-
-		if(obj_flag == "DNS" && ip_num == -1){ //DNS allows to input nothing
-			return true;
-		}
-		
-		if(obj_flag == "GW" && ip_num == -1){ //GW allows to input nothing
-			return true;
-		}
+		var ip_num = inet_network(ip_obj.value);	//-1 means nothing
 		
 		//1~254
 		if(obj_name.value.split(".")[3] < 1 || obj_name.value.split(".")[3] > 254){
@@ -312,7 +380,7 @@ function setEnd(){
 			<input type="hidden" name="wl_ssid" value="<% nvram_get("wl_ssid"); %>">
 			<input type="hidden" name="pptpd_clientlist" value="<% nvram_get("pptpd_clientlist"); %>">
 			<input type="hidden" name="pptpd_clients" value="<% nvram_get("pptpd_clients"); %>">
-			
+			<input type="hidden" name="pptpd_mppe" value="<% nvram_get("pptpd_mppe"); %>">	
 
 			<table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
 				<tr>
@@ -322,7 +390,7 @@ function setEnd(){
 								<tr>
 								  <td bgcolor="#4D595D" valign="top">
 								  <div>&nbsp;</div>
-								  <div class="formfonttitle">VPN Server</div>
+								  <div class="formfonttitle"><#BOP_isp_heart_item#></div>
 								  <div style="margin-left:5px;margin-top:10px;margin-bottom:10px"><img src="/images/New_ui/export/line_export.png"></div>
 								  <div class="formfontdesc"><#PPTP_desc#></div>
 								  <div class="formfontdesc"><#PPTP_desc2#> <% nvram_get("wan0_ipaddr"); %></div>
@@ -361,18 +429,24 @@ function setEnd(){
 									  </tr>
 							
 										<tr>
-											<th>Force MPPE Encryption</th>
+											<th><#PPPConnection_Authentication_itemname#></th>
 											<td>
-												<select name="pptpd_forcemppe" class="input_option">
-													<option value="auto" <% nvram_match("pptpd_forcemppe", "auto","selected"); %>>Auto</option>
-													<option value="none" <% nvram_match("pptpd_forcemppe", "none","selected"); %>>No Encryption</option>
-													<option value="+mppe-40" <% nvram_match("pptpd_forcemppe", "+mppe-40","selected"); %>>MPPE 40</option>
-													<option value="+mppe-128" <% nvram_match("pptpd_forcemppe", "+mppe-128","selected"); %>>MPPE 128</option> 
-
+												<select name="pptpd_chap" class="input_option">
+													<option value="0" <% nvram_match("pptpd_chap", "0","selected"); %>><#Auto#></option>
+													<option value="1" <% nvram_match("pptpd_chap", "1","selected"); %>>MS-CHAPv1</option>
+													<option value="2" <% nvram_match("pptpd_chap", "2","selected"); %>>MS-CHAPv2</option>
 												</select>			
 											</td>
 									  </tr>
-
+										<tr>
+                                                                                        <th><#MPPE_Encryp#></th>
+                                                                                        <td>
+												<input type="checkbox" class="input" name="pptpd_mppe_128" onClick="return changeMppe();">MPPE-128<br>
+												<!--input type="checkbox" class="input" name="pptpd_mppe_56" onClick="return changeMppe();">MPPE-56<br-->
+												<input type="checkbox" class="input" name="pptpd_mppe_40" onClick="return changeMppe();">MPPE-40<br>
+												<input type="checkbox" class="input" name="pptpd_mppe_no" onClick="return changeMppe();"><#No_Encryp#>
+											</td>
+									 </tr>
 			          		<tr>
 			            		<th><a class="hintstyle" href="javascript:void(0);"><#IPConnection_x_DNSServer1_itemname#></a></th>
 			            		<td><input type="text" maxlength="15" class="input_15_table" name="pptpd_dns1" value="<% nvram_get("pptpd_dns1"); %>" onkeypress="return is_ipaddr(this, event)" ></td>
@@ -397,7 +471,8 @@ function setEnd(){
 			            		<th><#vpn_client_ip#></th>
 			            		<td>
                           <input type="text" maxlength="15" class="input_15_table" name="_pptpd_clients_start" onBlur="setEnd();"  onKeyPress="return is_ipaddr(this, event);" value=""/> ~
-                          <span id="pptpd_subnet" style="font-family: Lucida Console;color: #FFF;">192.168.10.</span><input type="text" maxlength="3" class="input_3_table" name="_pptpd_clients_end" value=""/><span style="color:#FFCC00;"> <#vpn_maximum_clients#></span>
+                          <span id="pptpd_subnet" style="font-family: Lucida Console;color: #FFF;"></span><input type="text" maxlength="3" class="input_3_table" name="_pptpd_clients_end" value=""/><span style="color:#FFCC00;"> <#vpn_maximum_clients#></span>
+                          <br><span id="pptpd_conflict"></span>	
 											</td>
 			          		</tr>
 
@@ -406,7 +481,7 @@ function setEnd(){
 									<table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" class="FormTable_table" style="margin-top:8px;">
 									  	<thead>
 									  		<tr>
-												<td colspan="3" id="GWStatic">Username and Password</td>
+												<td colspan="3" id="GWStatic"><#Username_Pwd#></td>
 									  		</tr>
 									  	</thead>
 									  

@@ -147,6 +147,8 @@ time_t login_timestamp=0; // the timestamp of the logined ip
 unsigned int login_ip_tmp=0; // the ip of the current session.
 unsigned int login_try=0;
 unsigned int last_login_ip = 0;	// the last logined ip 2008.08 magic
+/* limit login IP addr; 2012.03 Yau */
+unsigned int access_ip[4]; 
 
 // 2008.08 magic {
 time_t request_timestamp = 0;
@@ -240,6 +242,7 @@ auth_check( char* dirname, char* authorization ,char* url)
     if ( !strlen(auth_passwd) )
 	/* Yes, let the request go through. */
 	return 1;
+
     /* Basic authorization info? */
     if ( !authorization || strncmp( authorization, "Basic ", 6 ) != 0) 
     {
@@ -732,6 +735,7 @@ handle_request(void)
 		{
 			if (handler->auth) {
 				if(skip_auth) {
+
 				}
 				else if ((mime_exception&MIME_EXCEPTION_NOAUTH_FIRST)&&!x_Setting) {
 					skip_auth=1;
@@ -799,27 +803,49 @@ handle_request(void)
 void http_login_cache(usockaddr *u) {
 	struct in_addr temp_ip_addr;
 	char *temp_ip_str;
-	
+
 	login_ip_tmp = (unsigned int)(u->sa_in.sin_addr.s_addr);
 	temp_ip_addr.s_addr = login_ip_tmp;
 	temp_ip_str = inet_ntoa(temp_ip_addr);
 }
 
+void http_get_access_ip(void) {
+        struct in_addr tmp_access_addr;
+	char tmp_access_ip[32];
+	char *nv, *nvp, *b;
+	int i=0, p=0;
+
+	for(; i<4; i++)
+		access_ip[i]=0;
+
+        nv = nvp = strdup(nvram_safe_get("http_clientlist"));
+
+        if (nv) {
+                while ((b = strsep(&nvp, "<")) != NULL) {
+                        if (strlen(b)==0) continue;
+                        sprintf(tmp_access_ip, "%s", b);
+                        inet_aton(tmp_access_ip, &tmp_access_addr);
+			
+                        access_ip[p] = (unsigned int)tmp_access_addr.s_addr;
+			p++;
+                }
+                free(nv);
+        }
+}
 
 void http_login(unsigned int ip, char *url) {
 	struct in_addr login_ip_addr;
 	char *login_ip_str;
 	char login_ipstr[32], login_timestampstr[32];
-	
-        if (
+
+	if (
 #ifndef RTCONFIG_HTTPS
-		http_port != SERVER_PORT
+                http_port != SERVER_PORT
 #else
-		((http_port != SERVER_PORT)&&(http_port != SERVER_PORT_SSL) && (http_port != nvram_get_int("https_lanport")))
+                ((http_port != SERVER_PORT)&&(http_port != SERVER_PORT_SSL) && (http_port != nvram_get_int("https_lanport")))
 #endif
 		|| ip == 0x100007f)
 		return;
-
 	
 	login_ip = ip;
 	last_login_ip = 0;
@@ -839,17 +865,34 @@ void http_login(unsigned int ip, char *url) {
 	nvram_set("login_timestamp", login_timestampstr);
 }
 
-// 0: can not login, 1: can login, 2: loginer, 3: not loginer.
+int http_client_ip_check(void) {
+
+        int i = 0;
+        if(nvram_match("http_client", "1")) {
+                while(i<4) {
+                        if(access_ip[i]!=0) {
+                                if(login_ip_tmp==access_ip[i])
+                                        return 1;
+                        }
+                        i++;
+                }
+		return 0;
+        }
+
+	return 1;
+}
+
+// 0: can not login, 1: can login, 2: loginer, 3: not loginer
 int http_login_check(void) {
 	if (
 #ifndef RTCONFIG_HTTPS
-                http_port != SERVER_PORT 
+		http_port != SERVER_PORT 
 #else
-                ((http_port != SERVER_PORT)&&(http_port != SERVER_PORT_SSL)&& (http_port != nvram_get_int("https_lanport")))
+		((http_port != SERVER_PORT)&&(http_port != SERVER_PORT_SSL)&& (http_port != nvram_get_int("https_lanport")))
 #endif
-                || login_ip_tmp == 0x100007f)
-                //return 1;
-                return 0;       // 2008.01 James.
+		|| login_ip_tmp == 0x100007f)
+		//return 1;
+		return 0;	// 2008.01 James.
 	
 	if (login_ip == 0)
 		return 1;
@@ -1303,6 +1346,8 @@ int main(int argc, char **argv)
 	detect_timestamp = 0;
 	signal_timestamp = 0;
 
+	http_get_access_ip();
+
 	/* Ignore broken pipes */
 	signal(SIGPIPE, SIG_IGN);
 	signal(SIGCHLD, reapchild);	// 0527 add
@@ -1412,7 +1457,8 @@ int main(int argc, char **argv)
 				}
 
 				http_login_cache(&item->usa);
-				handle_request();
+				if(http_client_ip_check())
+					handle_request();
 #ifdef RTCONFIG_HTTPS
 				if(conn_fp!=NULL) {
 					fflush(conn_fp);

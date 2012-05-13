@@ -90,10 +90,6 @@ function initial(){
 	else{
 		showLANIPList();
 		hide_https_lanport(document.form.http_enable.value);
-// These UI options aren't used anywhere in the fw (yet). --RM
-                $("http_client_tr").style.display = "none";
-                $("http_client_table").style.display = "none";
-                $("http_clientlist_Block").style.display = "none";
 	}
 }
 

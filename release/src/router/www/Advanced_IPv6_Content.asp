@@ -34,7 +34,7 @@ function initial(){
 	show_menu();
 	$('ipv6_ipaddr_span').innerHTML = '<% nvram_get("ipv6_rtr_addr"); %>';
 	showInputfield(ipv6_proto);
-	addOnlineHelp(["ASUSWRT", "IPv6"]);
+	addOnlineHelp($("faq"), ["ASUSWRT", "IPv6"]);
 }
 
 function showInputfield(v){

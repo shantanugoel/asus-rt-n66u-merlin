@@ -565,3 +565,13 @@ width:122px;
 	font-size:18px;
 	text-shadow:1px 1px 1px black;
 }
+
+.modelName_top{
+	font:Impact;
+	font-size:18px;
+	text-shadow:1px 1px 1px black;
+	float:left;
+	margin-top:20px;
+	margin-left:-95px;
+	font-weight:bolder;
+}

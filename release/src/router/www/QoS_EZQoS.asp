@@ -53,7 +53,7 @@ function initial(){
 	}
 	init_changeScale("qos_obw");
 	init_changeScale("qos_ibw");	
-	addOnlineHelp(["ASUSWRT", "QoS"]);
+	addOnlineHelp($("faq"), ["ASUSWRT", "QoS"]);
 }
 
 function init_changeScale(_obj_String){

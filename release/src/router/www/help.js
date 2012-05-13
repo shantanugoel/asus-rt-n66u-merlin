@@ -1,5 +1,10 @@
 ﻿var Untranslated = {
-	deviceDiscorvy : '<span style="color:#FC0"><% nvram_get("productid"); %> IP will be different after changing to Access Point mode. To help find the wireless router\'s IP, please download the <a href="http://dlcdnet.asus.com/pub/ASUS/wireless/ASUSWRT/Discovery.zip" style="font-family:Lucida Console;text-decoration:underline;color:#FC0;">Device Discovery</a> first.</span>'
+	deviceDiscorvy : '<span style="color:#FC0"><% nvram_get("productid"); %> IP will be different after changing to Access Point mode. To help find the wireless router\'s IP, please download the <a href="http://dlcdnet.asus.com/pub/ASUS/wireless/ASUSWRT/Discovery.zip" style="font-family:Lucida Console;text-decoration:underline;color:#FC0;">Device Discovery</a> first.</span>',
+	ContinuedPrevWLKey : 'Continuation of the previous wireless security setting?',
+	dhcp_conflict_vpn : 'There is a conflict with VPN clients: ',
+	vpn_conflict_LANip : '* It is a conflict with router\'s LAN ip:',
+	vpn_conflict_DHCPpool : '* It is a conflict with router\'s DHCP pool:',
+	vpn_conflict_DHCPstatic : '* It is a conflict with router\'s DHCP static ip:'
 };
 
 var helptitle = new Array(19);
@@ -473,6 +478,17 @@ function overHint(itemNum){
 	var title2 = 0;
 	var title5 = 0;
 
+	// wifi hw switch
+	if(itemNum == 8){
+		statusmenu = "<div class='StatusHint'>Wi-Fi:</div>";
+		if(wifi_hw_switch == "wifi_hw_switch=0")
+			wifiDesc = "Wi-Fi=Disabled"
+		else
+			wifiDesc = "Wi-Fi=Enabled"
+
+		statusmenu += "<span>" + wifiDesc.substring(6, wifiDesc.length) + "</span>";
+	}	
+	
 	// cooler
 	if(itemNum == 7){
 		statusmenu = "<div class='StatusHint'>Cooler:</div>";
@@ -650,7 +666,7 @@ function openHint(hint_array_id, hint_show_id, flag){
 				}
 			}
 			else if(sw_mode == 2){
-				statusmenu = "<span class='StatusClickHint' onclick='top.location.href=\"/QIS_wizard.htm?flag=sitesurvey\";' onmouseout='this.className=\"StatusClickHint\"' onmouseover='this.className=\"StatusClickHint_mouseover\"'><#APSurvey_action_search_again_hint2#></span>";
+				statusmenu = "<span class='StatusClickHint' onclick='top.location.href=\"http://www.asusnetwork.net/QIS_wizard.htm?flag=sitesurvey\";' onmouseout='this.className=\"StatusClickHint\"' onmouseover='this.className=\"StatusClickHint_mouseover\"'><#APSurvey_action_search_again_hint2#></span>";
 			}
 			_caption = "Internet Status";
 		}

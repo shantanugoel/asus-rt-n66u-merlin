@@ -26,11 +26,6 @@ var gn_array_5g = <% wl_get_guestnetwork("1"); %>;
 <% available_disk_names_and_sizes(); %>
 <% disk_pool_mapping_info(); %>
 
-// hide navibar on iOS
-/*window.addEventListener("load", function(){ 
-	setTimeout(scrollTo, 0, 0, 1);
-}, false);*/
-
 function unload_body(){
 }
 
@@ -122,6 +117,7 @@ function show_banner(L3){// L3 = The third Level of Menu
 	banner_code +='</form>\n';
 
 	banner_code +='<div class="banner1" align="center"><img src="images/New_ui/asustitle.png" width="218" height="54" align="left">\n';
+	banner_code +='<div style="margin-top:13px;margin-left:-90px;*margin-top:0px;*margin-left:0px;" align="center"><span class="modelName_top"><#Web_Title#></span></div>';
 	banner_code +='<a href="javascript:logout();"><div style="margin-top:13px;margin-left:100px; *width:136px;" class="titlebtn" align="center"><span><#t1Logout#></span></div></a>\n';
 	banner_code +='<a href="javascript:reboot();"><div style="margin-top:13px;margin-left:20px;*width:136px;" class="titlebtn" align="center"><span><#BTN_REBOOT#></span></div></a>\n';
 	//banner_code +='<span style="color:white"><#PASS_LANG#></span>\n';
@@ -141,6 +137,9 @@ function show_banner(L3){// L3 = The third Level of Menu
 	banner_code +='<span onclick="change_wl_unit_status(0)" id="elliptic_ssid_2g" class="title_link"></span>';
 	banner_code +='<span onclick="change_wl_unit_status(1)" id="elliptic_ssid_5g" style="margin-left:-5px;" class="title_link"></span>\n';
   banner_code +='</td>\n';
+
+//        if(wifi_hw_sw_support != -1)
+//        banner_code +='<td width="30"><div id="wifi_hw_sw_status"></div></td>\n';
 
 	if(cooler_support != -1)
   	banner_code +='<td width="30"><div id="cooler_status"" style="display:none;"></div></td>\n';
@@ -225,6 +224,7 @@ if(multissid_support != -1)
 	multissid_support = wl_vifnames.split(" ").length;
 
 var nat_support = <% nvram_get("wan_nat_x"); %>;
+var wifi_hw_sw_support = rc_support.search("wifi_hw_sw");
 var usb_support = rc_support.search("usb"); 
 var printer_support = rc_support.search("printer"); 
 var appbase_support = rc_support.search("appbase");
@@ -535,14 +535,44 @@ function show_menu(){
 	cal_height();
 }
 
-function addOnlineHelp(keywordArray){
-	if($("faq")){
-		$("faq").href = "http://support.asus.com/search.aspx?SLanguage=";
-		$("faq").href += ('<% nvram_get("preferred_lang"); %>' == 'TW') ? "zh-tw" : "en";
-		$("faq").href += "&keyword=";
+function addOnlineHelp(obj, keywordArray){
+	var faqLang = {
+		EN : "en",
+		TW : "en",
+		CN : "en",
+		CZ : "en",
+		PL : "en",
+		RU : "en",
+		DE : "en",
+		FR : "en",
+		TR : "en",
+		TH : "en",
+		MS : "en",
+		NO : "en",
+		FI : "en",
+		DA : "en",
+		SV : "en",
+		BR : "en",
+		JP : "en"
+	}
+
+	// exception
+	if(keywordArray[1] == "ez" || keywordArray[1] == "lpr" || keywordArray[1] == "VPN"){
+		faqLang.TW = "zh-tw";
+		faqLang.CN = "zh-cn";
+	}
+
+	if(keywordArray[1] == "ez" || (keywordArray[1] == "lpr" && keywordArray[0] == "ASUSWRT")){
+		faqLang.FR = "fr-fr";
+	}
+
+	if(obj){
+		obj.href = "http://support.asus.com/search.aspx?SLanguage=";
+		obj.href += faqLang.<% nvram_get("preferred_lang"); %>;
+		obj.href += "&keyword=";
 		for(var i=0; i<keywordArray.length; i++){
-			$("faq").href += keywordArray[i];
-			$("faq").href += "%20";
+			obj.href += keywordArray[i];
+			obj.href += "%20";
 		}
 	}
 }
@@ -1353,6 +1383,7 @@ function refresh_info_status(xmldoc)
 	cooler = wanStatus[6].firstChild.nodeValue;	
 	_wlc_state = wanStatus[7].firstChild.nodeValue;	
 	_wlc_sbstate = wanStatus[8].firstChild.nodeValue;	
+//	wifi_hw_switch = wanStatus[9].firstChild.nodeValue;
 
 	if(location.pathname == "/QIS_wizard.htm")
 		return false;	
@@ -1392,6 +1423,20 @@ function refresh_info_status(xmldoc)
 		$("connect_status").onmouseover = function(){overHint(3);}
 		$("connect_status").onmouseout = function(){nd();}
 	}
+
+	// wifi hw sw status
+	if(wifi_hw_sw_support != -1){
+		if(wifi_hw_switch == "wifi_hw_switch=0"){
+			$("wifi_hw_sw_status").className = "wifihwswstatusoff";
+			$("wifi_hw_sw_status").onclick = function(){}
+			}
+			else{
+			$("wifi_hw_sw_status").className = "wifihwswstatuson";
+			$("wifi_hw_sw_status").onclick = function(){}
+				}
+		$("wifi_hw_sw_status").onmouseover = function(){overHint(8);}
+		$("wifi_hw_sw_status").onmouseout = function(){nd();}
+	}	
 
 	// usb
 	if(usb_support != -1){

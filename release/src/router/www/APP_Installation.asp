@@ -11,8 +11,6 @@
 <link rel="stylesheet" type="text/css" href="index_style.css">
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="usp_style.css">
-<link href="/sliderplugin/slider_css.css" rel="stylesheet" type="text/css" /> 
-<link rel="stylesheet" href="/sliderplugin/jquery.tabs.css" type="text/css" media="print, projection, screen"> 
 <style type="text/css"> 
 	div.wrapper { margin: 0 auto; width: 730px;}
 	td.sidenav { width:200px;}
@@ -24,9 +22,6 @@
 <script type="text/javascript" src="/help.js"></script>
 <script type="text/javascript" src="/disk_functions.js"></script>
 <script type="text/javascript" src="/jquery.js"></script>
-<script src="/sliderplugin/jquery-easing.1.2.pack.js" type="text/javascript"></script> 
-<script src="/sliderplugin/jquery-easing-compatibility.1.2.pack.js" type="text/javascript"></script> 
-<script src="/sliderplugin/coda-slider.1.1.1.pack.js" type="text/javascript"></script> 
 <style type="text/css">
 .app_table{
 	width:750px;
@@ -108,10 +103,6 @@
 </style>
 <script>
 var $j = jQuery.noConflict();
-jQuery(window).bind("load", function() {
-jQuery("div#slider1").codaSlider()
-jQuery("div#slider2").codaSlider()
-});
 </script>
 <script>
 <% login_state_hook(); %>
@@ -146,10 +137,19 @@ if(dm_http_port == "")
 function initial(){
 	show_menu();
 
-	default_apps_array = [["AiDisk", "aidisk.asp", "<#AiDiskWelcome_desp1#>", "Aidisk.png"],
-												["Servers Center", tablink[3][1], "<#UPnPMediaServer_Help#>", "server.png"],
-												["<#Network_Printer_Server#>", "PrinterServer.asp#1", "<#Network_Printer_desc#>", "PrinterServer.png"],
-												["3G/WiMax", "Advanced_Modem_Content.asp", "<#HSDPAConfig_hsdpa_enable_hint1#>", "modem.png"]];
+	// to jerry, please change it if you want
+	if (dualWAN_support == -1) {
+		default_apps_array = [["AiDisk", "aidisk.asp", "<#AiDiskWelcome_desp1#>", "Aidisk.png"],
+													["Servers Center", tablink[3][1], "<#UPnPMediaServer_Help#>", "server.png"],
+													["<#Network_Printer_Server#>", "PrinterServer.asp#1", "<#Network_Printer_desc#>", "PrinterServer.png"],
+													["3G/WiMax", "Advanced_Modem_Content.asp", "<#HSDPAConfig_hsdpa_enable_hint1#>", "modem.png"]];
+	}
+	else {
+		default_apps_array = [["AiDisk", "aidisk.asp", "<#AiDiskWelcome_desp1#>", "Aidisk.png"],
+													["Servers Center", tablink[3][1], "<#UPnPMediaServer_Help#>", "server.png"],
+													["<#Network_Printer_Server#>", "PrinterServer.asp#1", "<#Network_Printer_desc#>", "PrinterServer.png"],
+													["3G/WiMax", "Advanced_WANPort_Content.asp", "<#HSDPAConfig_hsdpa_enable_hint1#>", "modem.png"]];
+	}
 	
 	if(sw_mode == 3){
 		default_apps_array.splice(3, 1);
@@ -160,10 +160,11 @@ function initial(){
 		default_apps_array.splice(3, 1);
 
 	trNum = default_apps_array.length;
-	setTimeout("showMethod('','none');", 100);
+	//setTimeout("showMethod('','none');", 100);
 	calHeight(0);
 	setTimeout("update_appstate();", 500);
-	addOnlineHelp(["ASUSWRT", "download","master"]);
+	addOnlineHelp($("faq"), ["ASUSWRT", "download","master"]);
+	addOnlineHelp($("faq2"), ["ASUSWRT", "download","tool"]);
 }
 
 function calHeight(_trNum){
@@ -347,24 +348,23 @@ function check_appstate(){
 				installPercent = 99;
 			$("loadingicon").style.display = "none";
 			$("apps_state_desc").innerHTML = "Installing... <b>" + Math.round(installPercent) +"</b> <span style='font-size: 16px;'>%</span>";
-			installPercent = installPercent + 3.5;
+			installPercent = installPercent + 1.5;
 		}
 	}
 	else{
 		$("loadingicon").style.display = "";
 		$("apps_state_desc").innerHTML = "Please wait...";
 	}
-
+	
 	if(apps_state_error != 0){
 		$("return_btn").style.display = "";
 		$("loadingicon").style.display = "none";
-		//$("apps_state_desc").innerHTML = "<br/>Please click Return button and try again."
-		/*$("apps_state_desc").innerHTML = "<div>Something is wrong:<br/>" + errorcode + "<br/>error_code = " + apps_state_error + "<br/><br/>Please click Return button and try again.</div>";*/
 		stoppullstate = 1;
 	}
 	else
 		$("return_btn").style.display = "none";
 
+	$("apps_state_desc").innerHTML += '<span class="app_action" onclick="apps_form(\'stop\',\'\',\'\');">(<#CTL_Cancel#>)</span>';
 	return false;
 }
 
@@ -623,8 +623,6 @@ function divdisplayctrl(flag1, flag2, flag3, flag4){
 
 		$("quick_dmlink").onclick = function(){location.href=_quick_dmlink;}
 		$("return_btn").style.display = "";
-		$("DMDesc").style.visibility = 'visible';
-		calHeight(825);
 	}
 	else{ // status
 		calHeight(0);
@@ -636,14 +634,13 @@ function divdisplayctrl(flag1, flag2, flag3, flag4){
 		$("usbHint").style.display = "none";
 }
 
-function showMethod(flag1, flag2){
+/*function showMethod(flag1, flag2){
 	document.getElementById("method1").style.display = flag1;
 	document.getElementById("method1Title").style.display = flag1;
 	document.getElementById("method2").style.display = flag2;
 	document.getElementById("method2Title").style.display = flag2;
 	if(flag1 == ""){
 		$("help1").style.color = "#FFF";
-		$("DMVedio").style.color = "#FFF";
 		$("faq").style.color = "#FFF";		
 		$("help2").style.color = "gray";
 		$("DMUtilityLink").style.color = "gray";
@@ -655,7 +652,7 @@ function showMethod(flag1, flag2){
 		$("help2").style.color = "#FFF";
 		$("DMUtilityLink").style.color = "#FFF";
 	}
-}
+}*/
 
 window.onbeforeunload = function(){
 	cookie_help.set("apps_last", _appname, 1000);
@@ -669,13 +666,13 @@ window.onbeforeunload = function(){
 <div id="TopBanner"></div>
 <div id="Loading" class="popup_bg"></div>
 
-<div id="ParentalCtrlHelp" class="popup_bg">
+<div id="ParentalCtrlHelp" class="popup_bg" style="display:none;visibility:visible;">
 <table cellpadding="5" cellspacing="0" id="loadingBlock" class="loadingBlock" align="center" style="margin:auto;margin-top:50px;">
 <tbody>
 	<tr>
 		<td>
 			<object width="640" height="360">
-				<div onclick="document.body.style.overflow='auto';document.getElementById('ParentalCtrlHelp').style.visibility='hidden';">
+				<div onclick="document.body.style.overflow='auto';document.getElementById('ParentalCtrlHelp').style.display='none';">
 					<span style="float:right;margin-bottom:5px;">
 						<img align="right" title="Back" src="/images/backprev.png" onMouseOver="this.src='/images/backprevclick.png'" onMouseOut="this.src='/images/backprev.png'">
 					</span>
@@ -753,9 +750,9 @@ window.onbeforeunload = function(){
 
   <tr>
    	<td valign="top">
-			<div id="partition_div"></div>
-			<div id="app_state" class="app_state"><span id="apps_state_desc">Loading APP list...</span><img id="loadingicon" style="margin-left:5px;" src="/images/InternetScan.gif"></div>
-			<div id="DMDesc" style="visibility:hidden;">
+		<div id="partition_div"></div>
+		<div id="app_state" class="app_state"><span id="apps_state_desc">Loading APP list...</span><img id="loadingicon" style="margin-left:5px;" src="/images/InternetScan.gif"></div>
+		<div id="DMDesc" style="display:none;">
 			<div style="margin-left:10px;" id="isInstallDesc">
 				<h2>Download Master install success!</h2>
 				<div class="top-heading" style="cursor:pointer;" id="quick_dmlink">
@@ -775,106 +772,22 @@ window.onbeforeunload = function(){
 											<div class="">
 												<ul class="" style="margin-left:10px;">
 													<li>
-														<span id="help1" onclick="showMethod('','none');" style="cursor:pointer;text-decoration:underline;font-weight:bolder;">How to use download master?</span>&nbsp;&nbsp;
-														<span id="DMVedio" style="cursor:pointer;text-decoration:underline;font-size:14px;font-weight:bolder;" onclick="document.body.style.overflow='hidden';document.getElementById('ParentalCtrlHelp').style.visibility='visible';">Click to open tutorial video.</span>
-														<a href="http://www.youtube.com/watch?v=Em6Hddyytlw" target="_blank" style="text-decoration:underline;font-size:14px;font-weight:bolder;color:#FFF;display:none;">Click to open tutorial video.</a>&nbsp;&nbsp;
-														<a id="faq" href="" target="_blank" style="text-decoration:underline;font-size:14px;font-weight:bolder;color:#FFF">Download master FAQ</a>
+														<a id="faq" href="" target="_blank" style="text-decoration:underline;font-size:14px;font-weight:bolder;color:#FFF">Download Master FAQ</a>
 													</li>
 													<li style="margin-top:10px;">
-														<span id="help2" onclick="showMethod('none','');" style="cursor:pointer;text-decoration:underline;font-weight:bolder;">How to associate the torrent file with download master on Windows?</span>&nbsp;&nbsp;
-														<a id="DMUtilityLink" href="http://dlcdnet.asus.com/pub/ASUS/wireless/ASUSWRT/DM2_2017.zip" style="text-decoration:underline;font-size:14px;font-weight:bolder;color:#FFF">Download Now!</a>
+														<a id="faq2" href="" target="_blank" style="text-decoration:underline;font-size:14px;font-weight:bolder;color:#FFF">Download Master Tool FAQ</a>
 													</li>
-												</ul>	
-												<div class="moduletable">
-													<center>		
-														<div id="container" >
-															<div class="top-heading" id="method1Title">
-															</div>
-															<div class="slider-wrap" id="method1">
-																<div class="stripNavL" id="stripNavL0"><a href="#">Left</a></div><div class="stripNav" id="stripNav0" style="width: 10px; "><ul><li class="tab1" style=""><a href="#1">Step 1</a></li><li class="tab2" style=""><a href="#2">Step 2</a></li><li class="tab3" style=""><a href="#3">Step 3</a></li><li class="tab4" style=""><a href="#4" class="current">Step 4</a></li><li class="tab5" style=""><a href="#5">Step 5</a></li></ul></div><div id="slider1" class="stripViewer">
-																	<div class="panelContainer" style="width: 3000px; left: 0px; ">
-																		<div class="panel">
-																			<div class="wrapperDesc">
-																				<div style="color: #FFF; text-align: left;">
-																					<font size="3"><b style="color:#5AD;">Step 1 <br/></b></font> 
-																					Click the Download Master name or icon in the USB application page.
-																				</div>
-																				<p>
-																					<img src="/images/appinstall/DM_Step1.jpg" border="0" hspace="0" vspace="0" alt="" class="imdShade">
-																				</p>
-																			</div>
-																		</div>
-																		<div class="panel">	
-																			<div class="wrapperDesc">
-																				<div style="color: #FFF; text-align: left;">
-																					<font size="3"><b style="color:#5AD;">Step 2 <br/></b></font>
-	 																				The Download Master will open in new browser window. Click "Add" icon to add download task
-																				</div>
-																				<p>
-																					<img src="/images/appinstall/DM_Step2.jpg" border="0" hspace="0" vspace="0" alt="" class="imdShade">
-																				</p>
-																			</div>
-																		</div>		
-																		<div class="panel">
-																			<div class="wrapperDesc">
-																				<div style="color: #FFF; text-align: left;">
-																					<font size="3"><b style="color:#5AD;">Step 3 <br/></b></font>
-																					To download the BitTorrent or NZB file, click the "choose file" button to upload  *.torrent or *.nzb file.
-																				</div>
-																				<p>
-																					<img src="/images/appinstall/DM_Step3.jpg" border="0" hspace="0" vspace="0" alt="" class="imdShade">
-																				</p>
-																			</div>
-																		</div>
-																		<div class="panel">
-																			<div class="wrapperDesc">
-																				<div style="color: #FFF; text-align: left;">
-																					<font size="3"><b style="color:#5AD;">Step 4 <br/></b></font> 
-																					 To download the FTP, HTTP or Magnet link, eMule eD2k link copy and paste the URL to the URL field.
-																				</div>
-																				<p>
-																					<img src="/images/appinstall/DM_Step4.jpg" border="0" hspace="0" vspace="0" alt="" class="imdShade">
-																				</p>
-																			</div>
-																		</div>
-																	</div>
-																</div><div class="stripNavR" id="stripNavR0"><a href="#">Right</a></div>
-															</div>
-	
-															<div class="top-heading" id="method2Title">
-																<a name="FTP_Upload"></a>
-														  	<!--h2>Install the Windows Utiity</h2-->
-															</div>														
-															<div class="slider-wrap" id="method2">
-																<div class="stripNavL" id="stripNavL1"><a href="#">Left</a></div><div class="stripNav" id="stripNav1" style="width: 6px; "><ul><li class="tab1" style=""><a href="#1" class="current">Step 1</a></li><li class="tab2" style=""><a href="#2">Step 2</a></li></ul></div><div id="slider2" class="stripViewer">
-																	<div class="panelContainer" style="left: 0px; ">																		
-																		<div class="panel">
-																			<div class="wrapperDesc">
-																				<div style="color: #FFF; text-align: left;">
-																					<font size="3"><b style="color:#5AD;">Step 1 <br/></b></font> Download and install the Windows Utility.
-																				</div>
-																				<p>
-																					<img src="/images/PrinterServer/DM_Utility1.jpg" border="0" hspace="0" vspace="0" alt="" class="imdShade">
-																				</p>
-																			</div>
-																		</div>
-																		<div class="panel">
-																			<div class="wrapperDesc">																			
-																				<div style="color: #FFF; text-align: left;">
-																					<font size="3"><b style="color:#5AD;">Step 2 <br/></b></font> 
-																					After installed the utility, double click the torent file and it will be added to download master task automatically.
-																				</div>
-																				<p>
-																					<img src="/images/PrinterServer/DM_Utility2.jpg" border="0" hspace="0" vspace="0" alt="" class="imdShade">
-																				</p>
-																			</div>
-																		</div>		
-																	</div>
-																</div><div class="stripNavR" id="stripNavR1"><a href="#">Right</a></div>
-															</div>		
-	
-														</div>														
-													</center>			
+													<li style="margin-top:10px;">
+														<a id="DMUtilityLink" href="http://dlcdnet.asus.com/pub/ASUS/wireless/ASUSWRT/DM2_2017.zip" style="text-decoration:underline;font-size:14px;font-weight:bolder;color:#FFF">Download "Download Master Tool" Now!</a>
+													</li>
+												</ul>
+												<br>
+												<br>
+												<div style="margin-left:35px" id="helpVedio" style="display:none">
+													<object width="640" height="360">
+														<param name="movie" value="http://www.youtube.com/v/Em6Hddyytlw&feature=player_embedded&version=3"></param><param name="allowFullScreen" value="true"></param><param name="allowScriptAccess" value="always"></param>
+														<embed src="http://www.youtube.com/v/Em6Hddyytlw&feature=player_embedded&version=3" type="application/x-shockwave-flash" allowfullscreen="true" allowScriptAccess="always" width="640" height="360"></embed>
+													</object>
 												</div>
 											</div>	
 										<span class="article_seperator">&nbsp;</span>

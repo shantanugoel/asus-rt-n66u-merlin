@@ -177,6 +177,7 @@ History
             now, to avoid people filling their limited nvram space.
    - FIXED: Missing bottom pixels from the bottom of General menu
    - FIXED: Removed invalid CSS attribute
+   - FIXED: typo in VPN iptables entries (bug in Asus's code)
 
 
 3.0.0.3.108.5:
@@ -188,7 +189,8 @@ History
          JFFS, for instance) to preserve it between reboots.
   - NEW: Added Monthly traffic page (ported from Tomato)
   - NEW: Added the Performance Tuning page (with temperature).
-  - FIXED: Webui authentication was bypassed by the web server
+  - FIXED: Webui authentication was bypassed by the web server (bug in
+           Asus's code)
   - FIXED: Httpd crash when uploading a FW or settings file over
            https - should simply fail now.  For now you have to 
            use http for flashing the FW or restoring your settings

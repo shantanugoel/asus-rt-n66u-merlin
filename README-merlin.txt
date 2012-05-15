@@ -1,4 +1,4 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.108.6 (13-May-2012)
+Asus RT-N66U Modded Firmware - build 3.0.0.3.108.6 (14-May-2012)
 ================================================================
 
 About
@@ -25,6 +25,7 @@ The list of changes (so far):
 - Start crond at boot time
 - Optionally turn the WPS button into a radio enable/disable switch
 - Optionally save traffic stats to disk (USB or JFFS partition)
+- Display monthly traffic reports
 - Monitor your router's temperature (under Administration -> Performance Tuning)
 
 

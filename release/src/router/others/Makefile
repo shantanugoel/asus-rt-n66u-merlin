@@ -28,4 +28,6 @@ endif
 # chpasswd script
 	install -m 0700 chpasswd.sh $(INSTALLDIR)/usr/sbin
 
+# Display active connections
+	install -m 0700 connections.sh $(INSTALLDIR)/usr/sbin/
 clean:

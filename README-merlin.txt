@@ -27,6 +27,7 @@ The list of changes (so far):
 - Optionally save traffic stats to disk (USB or JFFS partition)
 - Display monthly traffic reports
 - Monitor your router's temperature (under Administration -> Performance Tuning)
+- Display active/tracked network connections
 
 
 Installation
@@ -171,6 +172,8 @@ History
 
 3.0.0.3.108.7:
    - NEW: Added no-ip.com support to DDNS (patch submitted by Igor Pavlov)
+   - NEW: Added webui page under System Log to display active/tracked
+          network connections.
 
 
 3.0.0.3.108.6:

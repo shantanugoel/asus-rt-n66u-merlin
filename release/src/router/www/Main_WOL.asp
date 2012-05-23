@@ -13,7 +13,7 @@
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <style>
 #ClientList_Block_PC{
-        border:1px outset #999;
+        border:1px inset #999;
         background-color:#576D73;
         width:255px;
         text-align:left;

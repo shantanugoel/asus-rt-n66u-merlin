@@ -1636,6 +1636,8 @@ start_ddns(void)
 		strcpy(service, "dyndns");
 	else if (strcmp(server, "WWW.DNSOMATIC.COM")==0)
 		strcpy(service, "dnsomatic");
+	else if (strcmp(server, "WWW.NO-IP.COM")==0)
+		strcpy(service, "noip");
 	else strcpy(service, "dyndns");
 			
 	sprintf(usrstr, "%s:%s", user, passwd);

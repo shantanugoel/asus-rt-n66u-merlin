@@ -2665,6 +2665,8 @@ function openLink(s){
 			tourl = "http://www.zoneedit.com/signUp.html";
 		else if (document.form.ddns_server_x.value == 'WWW.DNSOMATIC.COM')
 			tourl = "http://dnsomatic.com/create/";
+		else if (document.form.ddns_server_x.value == 'WWW.NO-IP.COM')
+		    tourl = "http://www.no-ip.com/newUser.php";
 		else if (document.form.ddns_server_x.value == 'WWW.ASUS.COM')
 			tourl = "";
 		else	tourl = "";

@@ -61,7 +61,7 @@ wan_proto = '<% nvram_get("wan_proto"); %>';
 		  		<div style="margin-left:5px;margin-top:10px;margin-bottom:10px"><img src="/images/New_ui/export/line_export.png"></div>
 		  		<div class="formfontdesc">This is a list of tracked connections.</div>
 					<div style="margin-top:8px">   
-						<textarea style="width:99%; font-family:'Courier New', Courier, mono; font-size:13px;background:#475A5F;color:#FFFFFF;" cols="63" rows="25" readonly="readonly" wrap=off ><% nvram_dump("syscmd.log","../usr/sbin/connections.sh > /tmp/syscmd.log 2>&1"); %></textarea></td>
+						<textarea style="width:99%; font-family:'Courier New', Courier, mono; font-size:13px;background:#475A5F;color:#FFFFFF;" cols="63" rows="25" readonly="readonly" wrap=off ><% nvram_dump("syscmd.log","../usr/sbin/netstat-nat.sh > /tmp/syscmd.log 2>&1"); %></textarea></td>
 					</div>
 				</td>
 			</tr>

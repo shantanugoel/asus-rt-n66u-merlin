@@ -7,4 +7,4 @@ else
    OPTS="-r state -n"
 fi
 
-/usr/bin/netstat-nat $OPTS
+/usr/sbin/netstat-nat $OPTS

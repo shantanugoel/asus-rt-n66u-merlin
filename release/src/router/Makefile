@@ -216,6 +216,7 @@ obj-y += ez-ipupdate
 
 # Merlin addons
 obj-y += wol
+obj-y += netstat-nat
 
 
 #obj-y += lighttpd-1.4.28
@@ -999,6 +1000,22 @@ wol-install: wol
 
 wol: wol/Makefile
 	$(MAKE) -C $@
+
+netstat-nat-clean:
+	-@$(MAKE) -C netstat-nat clean
+	@rm -f netstat-nat/Makefile
+
+
+netstat-nat-install: netstat-nat
+	install -D netstat-nat/netstat-nat $(INSTALLDIR)/netstat-nat/usr/bin/netstat-nat
+	$(STRIP) -s $(INSTALLDIR)/netstat-nat/usr/bin/netstat-nat
+
+netstat-nat: netstat-nat/Makefile
+	cd netstat-nat && \
+	CC=$(CC) CFLAGS="-Os -Wall $(EXTRACFLAGS) -ffunction-sections -fdata-sections" \
+	        LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections -fPIC" \
+	        $(CONFIGURE)
+	$(MAKE) -C netstat-nat
 
 dhcpv6: dhcpv6/stamp-h1
 	@$(SEP)

@@ -174,6 +174,7 @@ History
    - NEW: Added no-ip.com support to DDNS (patch submitted by Igor Pavlov)
    - NEW: Added webui page under System Log to display active/tracked
           network connections.
+   - NEW: Added netstat-nat command.
 
 
 3.0.0.3.108.6:

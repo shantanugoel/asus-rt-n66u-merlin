@@ -146,6 +146,22 @@ Also, a new "Monthly" page has been added to the Traffic
 Monitor pages.
 
 
+* Display active connections *
+There is a new page under System Log called "Connections".
+This page will list the currently tracked network connections.
+You can enable name resolution for IPs by setting the 
+webui_resolve_conn setting to "1" in nvram:
+
+	nvram set webui_resolve_conn=1
+	nvram commit
+
+This option will be added to the WebUI at a later time.
+Note that name resolution can slow down the loading of 
+this page, especially if you have a lot of tracked 
+connections (for instance while torrenting).
+
+
+
 Notes
 -----
 To make it simple to determine which version you are running, I am simply 

@@ -2318,9 +2318,6 @@ release/src/router/bridge/doc/Makefile
 release/src/router/bridge/libbridge/Makefile
 release/src/router/bridge/libbridge/config.h
 release/src/router/bridge/libbridge/libbridge.a
-release/src/router/dropbear/cli-agentfwd.c
-release/src/router/dropbear/list.c
-release/src/router/dropbear/list.h
 release/src/router/ebtables/ebtables
 release/src/router/ebtables/ebtables-restore
 release/src/router/ebtables/extensions/libebt_arp.so

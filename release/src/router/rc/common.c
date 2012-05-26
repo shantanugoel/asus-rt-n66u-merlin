@@ -1430,3 +1430,15 @@ void run_custom_script(char *name)
 }
 // Merlin's additions - End
 
+void run_custom_script_blocking(char *name, char *args)
+{
+	char script[120];
+
+	sprintf(script, "/jffs/scripts/%s", name);
+
+        if(f_exists(script)) {
+                _dprintf("Script: running %s\n", script);
+                eval(script, args);
+        }
+
+}

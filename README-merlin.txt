@@ -65,7 +65,7 @@ certain events occur:
 - Firewall is started (rules are applied): /jffs/scripts/firewall-start.
 - Right after jffs is mounted, before any of the services get started:
   /jffs/scripts/init-start
-- Just before a partition is mounted: /jffs/scripts/pre-mount
+- Just before a partition is mounted: /jffs/scripts/pre-mount (Be careful with this script. This is run in a blocking call and will block the mounting of the said partition till its execution is complete. This is done so that it can be used for things like running e2fsck on the partition before mounting)
 - Just after a partition is mounted: /jffs/scripts/post-mount
 
 Those scripts must all be located under /jffs/scripts/ (so JFFS support 

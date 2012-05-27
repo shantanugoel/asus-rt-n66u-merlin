@@ -107,8 +107,6 @@ function applyRule(){
 
 	document.form.ct_udp_timeout.value = document.form.udp_unreplied.value + " "+document.form.udp_assured.value;
 
-document.form.ct_max.value = "199999";
-
 	document.form.submit();
 }
 

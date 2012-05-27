@@ -28,6 +28,7 @@ The list of changes (so far):
 - Display monthly traffic reports
 - Monitor your router's temperature (under Administration -> Performance Tuning)
 - Display active/tracked network connections
+- Allows tweaking TCP/UDP connection tracking timeouts
 
 
 Installation
@@ -169,6 +170,16 @@ connections (for instance while torrenting).
 
 
 
+* Adjust TCP/IP connection tracking settings *
+Under Tools -> Other Settings there are various parameters 
+that lets you tweak the timeout values related to connection 
+tracking for TCP and UDP connections.  You should be careful with 
+those settings.  Most commonly, people will tweak the UDP timeout 
+values to make them more VoIP-friendly, by using smaller timeouts.
+Timeout values are in seconds.
+
+
+
 Notes
 -----
 To make it simple to determine which version you are running, I am simply 
@@ -200,6 +211,7 @@ History
    - NEW: Added netstat-nat command.
    - NEW: Added pre-mount and post-mount user scripts (patch submitted by 
           Shantanu Goel)
+   - NEW: Allows tweaking TCP/UDP connection tracking timeouts
 
 
 3.0.0.3.108.6:

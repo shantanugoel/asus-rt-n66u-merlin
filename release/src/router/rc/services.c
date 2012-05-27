@@ -3421,6 +3421,12 @@ _dprintf("restart_nas_services(%d): test 12.\n", getpid());
                 if(action&RC_SERVICE_STOP) stop_rstats();
                 if(action&RC_SERVICE_START) restart_rstats();
         }
+        else if (strcmp(script, "conntrack") == 0)
+	{
+		setup_conntrack();
+		setup_udp_timeout(TRUE);
+//		start_firewall(wan_primary_ifunit(), 0);
+	}
 	else
 	{
 		fprintf(stderr,

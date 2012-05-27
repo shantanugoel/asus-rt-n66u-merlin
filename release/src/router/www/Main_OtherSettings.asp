@@ -58,11 +58,6 @@ function hide_rstats_storage(_value){
 
 function initConntrackValues(){
 
-/* TODO: Ensure settings are re-applied after apply */
-
-/* TODO: add ct_timeout to HTML?  FW only writes icmp timeout, not generic timeout tho. */
-/* TODO: Check if the FW actually sets ct_udp_timeouts */
-
 	tcp_array = document.form.ct_tcp_timeout.value.split(" ");
 
 	document.form.tcp_established.value = tcp_array[1];
@@ -131,7 +126,7 @@ function done_validating(action){
 <input type="hidden" name="next_host" value="">
 <input type="hidden" name="modified" value="0">
 <input type="hidden" name="action_mode" value="apply">
-<input type="hidden" name="action_script" value="restart_rstats">
+<input type="hidden" name="action_script" value="restart_rstats;restart_conntrack">
 <input type="hidden" name="action_wait" value="5">
 <input type="hidden" name="first_time" value="">
 <input type="hidden" name="SystemCmd" value="">
@@ -213,44 +208,50 @@ function done_validating(action){
 				</table>
 
 
-		        <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable">
+				<table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable">
 					<thead>
 						<tr>
 							<td colspan="2">TCP/IP settings</td>
-                        </tr>
+						</tr>
 					</thead>
  					<tr>
 						<th>TCP connections limit</th>
-                        <td>
+						<td>
 							<input type="text" maxlength="6" class="input_12_table" name="ct_max" onKeyPress="return is_number(this,event);" onblur="validate_number_range(this, 256, 300000)" value="<% nvram_get("ct_max"); %>">
-                        </td>
-                        </tr>
+							<span>Default: 300000</span>
+						</td>
+						</tr>
 
 						<tr>
-	                        <th>TCP Timeout: Established</th>
-	                        <td>
+							<th>TCP Timeout: Established</th>
+							<td>
 								<input type="text" maxlength="5" class="input_6_table" name="tcp_established" onKeyPress="return is_number(this,event);" onblur="validate_number_range(this, 1, 86400)" value="">
- 	                       </td>
-                        </tr>
+								<span>Default: 1200</span>
+							</td>
+                        
+						</tr>
 
  						<tr>
-                       		<th>TCP Timeout: syn_sent</th>
-                        	<td>
+							<th>TCP Timeout: syn_sent</th>
+							<td>
  								<input type="text" maxlength="5" class="input_6_table" name="tcp_syn_sent" onKeyPress="return is_number(this,event);" onblur="validate_number_range(this, 1, 86400)" value="">
-                        	</td>
-                        </tr>
+								<span>Default: 120</span>
+							</td>
+						</tr>
 
- 						<tr>
-                        	<th>TCP Timeout: syn_recv</th>
-                        	<td>
+						<tr>
+							<th>TCP Timeout: syn_recv</th>
+							<td>
 								<input type="text" maxlength="5" class="input_6_table" name="tcp_syn_recv" onKeyPress="return is_number(this,event);" onblur="validate_number_range(this, 1, 86400)" value="">
-                        	</td>
+								<span>Default: 60</span>
+							</td>
 						</tr>
 
 						<tr>
 							<th>TCP Timeout: fin_wait</th>
 							<td>
 								<input type="text" maxlength="5" class="input_6_table" name="tcp_fin_wait" onKeyPress="return is_number(this,event);" onblur="validate_number_range(this, 1, 86400)" value="">
+								<span>Default: 120</span> 
 							</td>
 						</tr>
 
@@ -258,6 +259,7 @@ function done_validating(action){
 							<th>TCP Timeout: time_wait</th>
 							<td>
 								<input type="text" maxlength="5" class="input_6_table" name="tcp_time_wait" onKeyPress="return is_number(this,event);" onblur="validate_number_range(this, 1, 86400)" value="">
+								<span>Default: 120</span> 
 							</td>
 						</tr>
 
@@ -265,6 +267,7 @@ function done_validating(action){
 							<th>TCP Timeout: close</th>
 							<td>
 								<input type="text" maxlength="5" class="input_6_table" name="tcp_close" onKeyPress="return is_number(this,event);" onblur="validate_number_range(this, 1, 86400)" value="">
+								<span>Default: 10</span> 
 							</td>
 						</tr>
 
@@ -272,6 +275,7 @@ function done_validating(action){
 							<th>TCP Timeout: close_wait</th>
 							<td>
 								<input type="text" maxlength="5" class="input_6_table" name="tcp_close_wait" onKeyPress="return is_number(this,event);" onblur="validate_number_range(this, 1, 86400)" value="">
+								<span>Default: 60</span> 
 							</td>
 						</tr>
 
@@ -279,6 +283,7 @@ function done_validating(action){
 							<th>TCP Timeout: last_ack</th>
 							<td>
 								<input type="text" maxlength="5" class="input_6_table" name="tcp_last_ack" onKeyPress="return is_number(this,event);" onblur="validate_number_range(this, 1, 86400)" value="">
+								<span>Default: 30</span> 
 							</td>
 						</tr>
 
@@ -286,6 +291,7 @@ function done_validating(action){
 							<th>UDP Timeout: Assured</th>
 							<td>
 								<input type="text" maxlength="5" class="input_6_table" name="udp_assured" onKeyPress="return is_number(this,event);" onblur="validate_number_range(this, 1, 86400)" value="">
+								<span>Default: 180</span>
 							</td>
 						</tr>
 
@@ -293,6 +299,7 @@ function done_validating(action){
 							<th>UDP Timeout: Unreplied</th>
 							<td>
 								<input type="text" maxlength="5" class="input_6_table" name="udp_unreplied" onKeyPress="return is_number(this,event);" onblur="validate_number_range(this, 1,86400)" value="">
+								<span>Default: 30</span> 
 							</td>
 						</tr>
 					</table>

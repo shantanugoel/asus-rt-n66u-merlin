@@ -67,7 +67,12 @@ certain events occur:
 - Firewall is started (rules are applied): /jffs/scripts/firewall-start.
 - Right after jffs is mounted, before any of the services get started:
   /jffs/scripts/init-start
-- Just before a partition is mounted: /jffs/scripts/pre-mount (Be careful with this script. This is run in a blocking call and will block the mounting of the partition  for which it is invoked till its execution is complete. This is done so that it can be used for things like running e2fsck on the partition before mounting. This script is also passed the device path being mounted as an argument which can be used in the script using $1)
+- Just before a partition is mounted: /jffs/scripts/pre-mount (Be careful with 
+  this script. This is run in a blocking call and will block the mounting of the 
+  partition  for which it is invoked till its execution is complete. This is done 
+  so that it can be used for things like running e2fsck on the partition before 
+  mounting. This script is also passed the device path being mounted as an 
+  argument which can be used in the script using $1)
 - Just after a partition is mounted: /jffs/scripts/post-mount
 
 Those scripts must all be located under /jffs/scripts/ (so JFFS support 
@@ -193,6 +198,8 @@ History
    - NEW: Added webui page under System Log to display active/tracked
           network connections.
    - NEW: Added netstat-nat command.
+   - NEW: Added pre-mount and post-mount user scripts (patch submitted by 
+          Shantanu Goel)
 
 
 3.0.0.3.108.6:

@@ -123,7 +123,7 @@ function applyRule(){
 		return false;
 	}
 
-	if(parseInt(document.form.wl0_TxPower.value) > 80 && flag < 2){
+	if(parseInt(document.form.wl0_TxPower.value) > 80 && flag < 0){
 		$("TxPowerHint_2").style.display = "";
 		document.form.wl0_TxPower.focus();
 		flag++;
@@ -132,7 +132,7 @@ function applyRule(){
 	else
 		$("TxPowerHint_2").style.display = "none";
 		
-	if(parseInt(document.form.wl1_TxPower.value) > 80 && flag < 2){
+	if(parseInt(document.form.wl1_TxPower.value) > 80 && flag < 0){
 		$("TxPowerHint_5").style.display = "";
 		document.form.wl1_TxPower.focus();
 		flag++;

@@ -212,6 +212,11 @@ History
    - NEW: Added pre-mount and post-mount user scripts (patch submitted by 
           Shantanu Goel)
    - NEW: Allows tweaking TCP/UDP connection tracking timeouts
+   - FIXED: Removed check in Asus's code that would reject txpower > 80
+            unless you clicked three times on Apply (?!).
+            NOTE: Still not sure power setting even works, as I get
+            -80db from the other end of the house no matter if I use 
+            40 or 500 mW.
 
 
 3.0.0.3.108.6:

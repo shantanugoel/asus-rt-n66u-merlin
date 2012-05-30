@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 	/* Load modules */
 	fprintf(fp, "server.modules+=(\"mod_alias\")\n");
 	fprintf(fp, "server.modules+=(\"mod_userdir\")\n");
-	fprintf(fp, "server.modules+=(\"mod_smbdav_access\")\n");
+	fprintf(fp, "server.modules+=(\"mod_aidisk_access\")\n");
 	fprintf(fp, "server.modules+=(\"mod_webdav\")\n");
 	fprintf(fp, "server.modules+=(\"mod_smbdav\")\n");
 	fprintf(fp, "server.modules+=(\"mod_redirect\")\n");
@@ -106,7 +106,10 @@ int main(int argc, char *argv[]) {
 	fprintf(fp, "\".png\" => \"image/png\",\n");
 	fprintf(fp, "\".pdf\" => \"application/pdf\",\n");
 	fprintf(fp, "\".mp4\" => \"video/mp4\",\n");
-	fprintf(fp, "\".mp3\" => \"audio/mpeg\"");
+	fprintf(fp, "\".m4v\" => \"video/mp4\",\n");
+	fprintf(fp, "\".wmv\" => \"video/wmv\",\n");
+	fprintf(fp, "\".mp3\" => \"audio/mpeg\",\n");
+	fprintf(fp, "\".mov\" => \"video/mov\"");
 	fprintf(fp, ")\n");
 
 	// **** Index file names **** //

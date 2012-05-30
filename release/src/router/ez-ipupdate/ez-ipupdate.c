@@ -4808,16 +4808,18 @@ int main(int argc, char **argv)
 #ifdef ASUS_DDNS
         if (g_asus_ddns_mode != 0)      {
                 nvram_set ("ddns_return_code", "ddns_query");
+                nvram_set ("ddns_return_code_chk", "ddns_query");
                 nvram_unset ("ddns_suggest_name");
                 nvram_unset ("ddns_old_name");
                 if (asus_private() == -1) {
 			nvram_set ("ddns_return_code", "connect_fail");
+			nvram_set ("ddns_return_code_chk", "connect_fail");
                         goto exit_main;
 		}
         }
         if (g_asus_ddns_mode == 1)      {
-                asus_reg_domain ();
-                goto exit_main;
+              retval = asus_reg_domain ();
+              goto asusddns_update;
         } else if (g_asus_ddns_mode == 2)       {
                 // override update_entry() method
                 service->update_entry = asus_update_entry;
@@ -4922,7 +4924,6 @@ int main(int argc, char **argv)
         last_sig = 0;
       }
 #endif
-printf("Get IF addr\n");
       if(get_if_addr(sock, interface, &sin2) == 0)
       {
         ifresolve_warned = 0;
@@ -5168,6 +5169,7 @@ printf("Get IF addr\n");
         if(i+1 != ntrys) { sleep(10 + 10*i); }
       }
 
+asusddns_update:
       // write cache file
       if(retval == 0 && cache_file)
       {
@@ -5229,10 +5231,9 @@ printf("Get IF addr\n");
       show_message("no update needed at this time\n");
     }
   }
-
 //2007.03.14 Yau add
 #ifdef ASUS_DDNS
-exit_main:
+  exit_main:
 #endif  // ASUS_DDNS
 
 #ifdef IF_LOOKUP

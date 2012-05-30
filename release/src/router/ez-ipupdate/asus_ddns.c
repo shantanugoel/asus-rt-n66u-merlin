@@ -230,7 +230,8 @@ int asus_reg_domain (void)
 	if (do_connect((int *) &client_sockfd, server, port) != 0) {
 		PRINT ("error connecting to %s:%s\n", server, port);
 		syslog (LOG_NOTICE,"error connecting to %s:%s\n", server, port);
-		nvram_set ("ddns_return_code", "time_out");
+		nvram_set ("ddns_return_code", "Time-out");
+		nvram_set ("ddns_return_code_chk", "Time-out");
 		return (REGISTERES_ERROR);
 	}
 
@@ -253,7 +254,6 @@ int asus_reg_domain (void)
 	while ((bytes = read_input(bp, BUFFER_SIZE - btot)) > 0) {
 		bp += bytes;
 		btot += bytes;
-		PRINT("btot: %d\n", btot);
 	}
 	close(client_sockfd);
 	buf[btot] = '\0';
@@ -274,6 +274,7 @@ int asus_reg_domain (void)
 	}
 
 	nvram_set ("ddns_return_code", ret_buf);
+	nvram_set ("ddns_return_code_chk", ret_buf);
 	switch (ret) {
 	case -1:
 		PRINT ("strange server response, are you connecting to the right server?\n");
@@ -345,9 +346,11 @@ int asus_reg_domain (void)
 		if (ret >= 500)	{
 			retval = REGISTERES_SHUTDOWN;
 			nvram_set ("ddns_return_code","unknown_error");
+			nvram_set ("ddns_return_code_chk","unknown_error");
 		} else {
 			retval = REGISTERES_ERROR;
-			nvram_set ("ddns_return_code","time_out");
+			nvram_set ("ddns_return_code","Time-out");
+			nvram_set ("ddns_return_code_chk","Time-out");
 		}
 		break;
 	}
@@ -372,6 +375,7 @@ int asus_update_entry(void)
 	if (do_connect((int *) &client_sockfd, server, port) != 0) {
 		PRINT("error connecting to %s:%s\n", server, port);
 		nvram_set ("ddns_return_code", "connect_fail");
+		nvram_set ("ddns_return_code_chk", "connect_fail");
 		return (UPDATERES_ERROR);
 	}
 
@@ -392,7 +396,6 @@ int asus_update_entry(void)
 	while ((bytes = read_input(bp, BUFFER_SIZE - btot)) > 0) {
 		bp += bytes;
 		btot += bytes;
-		dprintf((stderr, "btot: %d\n", btot));
 	}
 	close(client_sockfd);
 	buf[btot] = '\0';
@@ -404,15 +407,20 @@ int asus_update_entry(void)
 
 	snprintf (ret_buf, sizeof (ret_buf), "%s,%d", "update", ret);
 	nvram_set ("ddns_return_code", ret_buf);
+	nvram_set ("ddns_return_code_chk", ret_buf);
 	switch (ret) {
 	case -1:
-		PRINT ("strange server response, are you connecting to the right server?\n");
+		PRINT("strange server response, are you connecting to the right server?\n");
 		retval = UPDATERES_ERROR;
 		break;
 
 	case 200:
 		PRINT("Update IP successful\n");
 		break;
+
+        case 220:
+                PRINT("Update same domain success.\n");
+                break;
 
 	case 297:
 		PRINT("Invalid hostname\n");

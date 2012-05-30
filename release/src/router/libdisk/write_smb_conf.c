@@ -189,13 +189,14 @@ int main(int argc, char *argv[]) {
 	fprintf(fp, "obey pam restrictions = no\n");
 	fprintf(fp, "use spne go = no\n");		// ASUS add
 	fprintf(fp, "client use spnego = no\n");	// ASUS add
+	// fprintf(fp, "client use spnego = yes\n");  // ASUS add
 	fprintf(fp, "disable spoolss = yes\n");		// ASUS add
 	fprintf(fp, "host msdfs = no\n");		// ASUS add
 	fprintf(fp, "strict allocate = No\n");		// ASUS add
 //	fprintf(fp, "mangling method = hash2\n");	// ASUS add
 	fprintf(fp, "bind interfaces only = yes\n");	// ASUS add
 	fprintf(fp, "interfaces = lo br0 %s\n", (!nvram_match("sw_mode", "3") ? nvram_safe_get("wan0_ifname") : ""));
-//	fprintf(fp, "dns proxy = no\n");				// J--
+	//	fprintf(fp, "dns proxy = no\n");				// J--
 	fprintf(fp, "use sendfile = yes\n");
 
 //	fprintf(fp, "domain master = no\n");				// J++

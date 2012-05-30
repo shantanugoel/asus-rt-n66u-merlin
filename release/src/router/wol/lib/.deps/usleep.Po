@@ -1,3 +1,0 @@
-usleep.o usleep.o: usleep.c ../config.h
-
-../config.h:

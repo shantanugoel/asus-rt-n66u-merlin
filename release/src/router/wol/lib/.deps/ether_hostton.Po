@@ -1,3 +1,0 @@
-ether_hostton.o ether_hostton.o: ether_hostton.c ../config.h
-
-../config.h:

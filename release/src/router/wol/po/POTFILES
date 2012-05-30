@@ -1,5 +1,0 @@
-     ../lib/error.c \
-     ../lib/getopt.c \
-     ../lib/xmalloc.c \
-     ../src/wol.c \
-     ../src/net.c

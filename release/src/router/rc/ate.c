@@ -6,6 +6,7 @@
 
 #define MULTICAST_BIT  0x0001
 #define UNIQUE_OUI_BIT 0x0002
+
 int isValidMacAddr(const char* mac) {
         int sec_byte;
         int i = 0, s = 0;
@@ -137,6 +138,51 @@ pincheck(const char *a)
                 return 0;
 }
 
+int isValidSN(const char *sn)
+{
+	int i;
+	unsigned char *c;
+
+	if(strlen(sn) != SERIAL_NUMBER_LENGTH)
+		return 0;
+
+	c = (char *)sn;
+	/* [1]year: C~Z (2012=C, 2013=D, ...) */
+	if(*c<0x43 || *c>0x5A)
+		return 0;
+	c++;
+	/* [2]month: 1~9 & ABC */
+        if(!((*c>0x30 && *c<0x3A) || *c==0x41||*c==0x42||*c==0x43))
+                return 0;
+        c++;
+	/* [3]WLAN & ADSL: I(aye) */
+        if(*c!=0x49)
+                return 0;
+        c++;
+	/* [4]Channel: AEJ0(zero) (A:11ch, E:13ch, J:14ch, 0:no ch) */
+        if(*c!=0x41 && *c!=0x45 && *c!=0x4A && *c!=0x30)
+                return 0;
+        c++;
+	/* [5]factory: 0~9 & A~Z, except I(aye) & O(oh) */
+        if(!((*c>0x2F && *c<0x3A) || (*c>0x40 && *c<0x5B)) || *c==0x49 || *c==0x4F )
+                return 0;
+        c++;
+	/* [6]model: 0~9 & A~Z */
+        if(!((*c>0x2F && *c<0x3A) || (*c>0x40 && *c<0x5B)))
+                return 0;
+        c++;
+	/* [7~12]serial: 0~9 */
+	i=7;
+	while(i<13) {
+        	if (*c<0x30 || *c>0x39)
+                	return 0;
+        	c++;
+		i++;
+	}	
+
+	return 1;
+}
+
 int asus_ate_command(const char *command, const char *value, const char *value2){
 	_dprintf("===[ATE %s %s]===\n", command, value);
 	if(!strcmp(command, "Set_StartATEMode")) {
@@ -211,6 +257,11 @@ int asus_ate_command(const char *command, const char *value, const char *value2)
                 return 0;
         }
 #endif
+	else if (!strcmp(command, "Set_SerialNumber")) {
+		if(!setSN(value))
+			puts("ATE_ERROR_INCORRECT_PARAMETER");
+		return 0;
+ 	}
         else if (!strcmp(command, "Set_PINCode")) {
                 if (!setPIN(value))
 			puts("ATE_ERROR_INCORRECT_PARAMETER");
@@ -330,6 +381,10 @@ int asus_ate_command(const char *command, const char *value, const char *value2)
                 return 0;
         }
 #endif
+	else if (!strcmp(command, "Get_SerialNumber")) {
+		getSN();
+		return 0;
+	}
         else if (!strcmp(command, "Get_PINCode")) {
                 getPIN();
                 return 0;
@@ -389,6 +444,18 @@ int asus_ate_command(const char *command, const char *value, const char *value2)
                 puts("Not support"); //Need to implement
                 return 0;
         }
+        else if (!strcmp(command, "Get_fail_ret")) {
+                Get_fail_ret();
+                return 0;
+	}
+        else if (!strcmp(command, "Get_fail_reboot_log")) {
+                Get_fail_reboot_log();
+                return 0;
+	}
+        else if (!strcmp(command, "Get_fail_dev_log")) {
+                Get_fail_dev_log();
+                return 0;
+	}
 #ifdef RTCONFIG_RALINK
 	else if (!strcmp(command, "Ra_FWRITE")) {
 		return FWRITE(value, value2);
@@ -408,7 +475,6 @@ int asus_ate_command(const char *command, const char *value, const char *value2)
 	}
 }
 
-#ifdef CONFIG_BCMWL5
 int ate_dev_status(void)
 {
         int ret = 1, wl_band=1;;
@@ -419,7 +485,9 @@ int ate_dev_status(void)
                 sprintf(dev_chk_buf, "switch=O");
         else {
                 sprintf(dev_chk_buf, "switch=X");
+#ifdef CONFIG_BCMWL5	//broadcom platform need to shift the interface name
                 sprintf(wl_dev_name, "eth0 eth1");
+#endif
                 ret = 0;
         }
 
@@ -439,7 +507,6 @@ int ate_dev_status(void)
                 }
                         wl_band++;
         }
-        nvram_set("ate_dev_status",dev_chk_buf);
+        nvram_set("Ate_dev_status",dev_chk_buf);
         return ret;
 }
-#endif

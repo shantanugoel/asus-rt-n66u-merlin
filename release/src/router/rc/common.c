@@ -344,24 +344,25 @@ void wanmessage(char *fmt, ...)
 
 int pppstatus(void)
 {
-   FILE *fp;
-   char sline[128], buf[128], *p;
+	FILE *fp;
+	char sline[128], buf[128], *p;
 
-   if ((fp=fopen("/tmp/wanstatus.log", "r")) && fgets(sline, sizeof(sline), fp))
-   {
-	p = strstr(sline, ",");
-	strcpy(buf, p+1);
-   }
-   else
-   {
-	strcpy(buf, "unknown reason");
-   }
+	if ((fp=fopen("/tmp/wanstatus.log", "r")) && fgets(sline, sizeof(sline), fp))
+	{
+		p = strstr(sline, ",");
+		strcpy(buf, p+1);
+	}
+	else
+	{
+		strcpy(buf, "unknown reason");
+	}
 
-   if(fp) fclose(fp);
+	if(fp) fclose(fp);
 
-   if(strstr(buf, "No response from ISP.")) return WAN_STOPPED_REASON_PPP_NO_ACTIVITY;
-   else if(strstr(buf, "Failed to authenticate ourselves to peer")) return WAN_STOPPED_REASON_PPP_AUTH_FAIL;
-   else return WAN_STOPPED_REASON_NONE;
+	if(strstr(buf, "No response from ISP.")) return WAN_STOPPED_REASON_PPP_NO_ACTIVITY;
+	else if(strstr(buf, "Failed to authenticate ourselves to peer")) return WAN_STOPPED_REASON_PPP_AUTH_FAIL;
+	else if(strstr(buf, "Terminating connection due to lack of activity")) return WAN_STOPPED_REASON_PPP_LACK_ACTIVITY;
+	else return WAN_STOPPED_REASON_NONE;
 }
 
 void logmessage(char *logheader, char *fmt, ...)
@@ -377,37 +378,6 @@ void logmessage(char *logheader, char *fmt, ...)
   closelog();
   va_end(args);
 }
-
-/* Transfer Char to ASCII */
-void char_to_ascii(char *output, char *input)
-{
-	int i;
-	char *ptr;
-
-	ptr = output;
-
-	for ( i=0; i<strlen(input); i++ )
-	{
-		if ( input[i]=='"' || input[i] == '[' || input[i] == ']' ) {
-			*ptr = '\\';
-			ptr ++;
-			*ptr = input[i];
-			ptr ++;
-		}
-		else if ( input[i] >= '!' && input[i] <='~' )
-		{
-			*ptr = input[i];
-			ptr ++;
-		}
-		else
-		{
-			sprintf(ptr, "%%%.02X", input[i]);
-			ptr += strlen(ptr);
-		}
-	}
-	*(ptr) = '\0';
-}
-
 
 void usage_exit(const char *cmd, const char *help)
 {
@@ -1259,6 +1229,8 @@ setup_timezone(void)
 	gmtime_r(&now, &gm);
 	localtime_r(&now, &local);
 	tz.tz_minuteswest = (mktime(&gm) - mktime(&local)) / 60;
+	if(local.tm_isdst)
+		tz.tz_minuteswest -= 60;
 	settimeofday(tvp, &tz);
 
 #ifndef RC_BUILDTIME
@@ -1266,14 +1238,12 @@ setup_timezone(void)
 #endif
 #include <sys/sysinfo.h>
 
-	time(&now);
-
 	if (now < RC_BUILDTIME)
 	{
 		struct sysinfo info;
 		sysinfo(&info);
 		struct timeval tv = {RC_BUILDTIME + info.uptime, 0};
-		settimeofday(&tv, &tz);
+		settimeofday(&tv, NULL);
 	}
 }
 

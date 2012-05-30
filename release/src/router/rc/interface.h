@@ -50,7 +50,11 @@ enum {
 	SWCFG_STB12,		/* 5 STB on LAN1&2 */
 	SWCFG_STB34,		/* 6 STB on LAN3&4 */
 	SWCFG_BRIDGE,		/* 7 Bridge */
-	SWCFG_COUNT,
+	WAN1PORT1,
+	WAN1PORT2,
+	WAN1PORT3,
+	WAN1PORT4,
+	SWCFG_COUNT
 };
 
 /* Phy port logical mask */
@@ -85,5 +89,7 @@ extern void _switch_gen_config(char *buf, const int ports[SWPORT_COUNT], int swm
  *		  PSTR: return config string including CPU port, tagged with PSTR, eg. 8|8t|8*
  */
 extern void switch_gen_config(char *buf, const int ports[SWPORT_COUNT], int index, int wan, char *cputag);
+
+extern void gen_lan_ports(char *buf, const int sample[SWPORT_COUNT], int index, int index1, char *cputag);
 
 #endif

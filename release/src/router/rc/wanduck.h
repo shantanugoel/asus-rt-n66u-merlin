@@ -42,7 +42,7 @@
 
 #include "rc.h"
 #ifdef RTCONFIG_USB
-#include "disk_io_tools.h"
+#include <disk_io_tools.h>
 #endif
 
 #define SCAN_INTERVAL 5
@@ -50,11 +50,12 @@
 #define PING_RESULT_FILE "/tmp/ping_success"
 #define RX_THRESHOLD 40
 
-#define MAX_DISCONN_COUNT 10
 
-#define MAX_WAIT_TIME MAX_DISCONN_COUNT*6
-#define MAX_WAIT_COUNT MAX_WAIT_TIME/SCAN_INTERVAL
+#define MAX_WAIT_TIME 60
+#define MAX_DISCONN_COUNT MAX_WAIT_TIME/SCAN_INTERVAL
 
+int max_wait_time = MAX_WAIT_TIME;
+int max_disconn_count = MAX_DISCONN_COUNT;
 
 #define PROC_NET_DEV "/proc/net/dev"
 #define WANDUCK_PID_FILE "/var/run/wanduck.pid"
@@ -153,7 +154,9 @@ typedef struct REQCLIENT{
 #define DUT_DOMAIN_NAME "www.asusnetwork.net"
 char router_name[PATHLEN];
 int sw_mode, isFirstUse;
+#ifdef RTCONFIG_DUALWAN
 char dualwan_mode[8];
+#endif
 
 int http_sock, dns_sock, maxfd;
 clients client[MAX_USER];
@@ -170,10 +173,7 @@ int cross_state = 0;
 int disconn_case_old[WAN_UNIT_MAX], disconn_case[WAN_UNIT_MAX];
 int ppp_fail_state;
 int rule_setup;
-int link_setup;
-#ifdef RTCONFIG_USB_MODEM
-int link_modem = 0;
-#endif
+int link_setup[WAN_UNIT_MAX], link_wan[WAN_UNIT_MAX];
 
 char prefix_lan[8];
 int current_lan_unit = 0;
@@ -186,17 +186,13 @@ char current_lan_dns[256];
 char current_lan_subnet[11];
 
 int current_wan_unit = WAN_UNIT_FIRST;
+int other_wan_unit = WAN_UNIT_SECOND;
 int current_state[WAN_UNIT_MAX];
 
 char nvram_state[WAN_UNIT_MAX][16], nvram_sbstate[WAN_UNIT_MAX][16], nvram_auxstate[WAN_UNIT_MAX][16];
 
 #ifdef RTCONFIG_WIRELESSREPEATER
 int setAP, wlc_state = 0;
-#endif
-
-#ifdef RTCONFIG_TRAFFIC_METER
-int TM_limit, TM_wan_tx, TM_wan_rx;
-int TM_calc_base_tx = 0, TM_calc_base_rx = 0;
 #endif
 
 // func

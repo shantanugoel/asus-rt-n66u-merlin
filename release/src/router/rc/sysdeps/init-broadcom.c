@@ -56,7 +56,10 @@ void generate_switch_para(void)
 		cfg = nvram_get_int("switch_stb_x");
 		if (cfg < SWCFG_DEFAULT || cfg > SWCFG_STB34)
 			cfg = SWCFG_DEFAULT;
-	} else	cfg = SWCFG_BRIDGE;
+	} 
+	else if (nvram_get_int("sw_mode") == SW_MODE_AP)
+		cfg = SWCFG_BRIDGE;
+	else	cfg = SWCFG_DEFAULT; // keep wan port, but get ip from bridge 
 
 	switch(model) {
 		case MODEL_RTN12:
@@ -72,6 +75,10 @@ void generate_switch_para(void)
 			switch_gen_config(wan, ports, cfg, 1, "u");
 			nvram_set("vlan0ports", lan);
 			nvram_set("vlan1ports", wan);
+#ifdef RTCONFIG_LANWAN_LED
+			// for led, always keep original port map
+			cfg = SWCFG_DEFAULT;
+#endif
 			switch_gen_config(lan, ports, cfg, 0, NULL);
 			switch_gen_config(wan, ports, cfg, 1, NULL);
 			nvram_set("lanports", lan);
@@ -89,6 +96,10 @@ void generate_switch_para(void)
 			switch_gen_config(wan, ports, cfg, 1, "u");
 			nvram_set("vlan2ports", lan);
 			nvram_set("vlan1ports", wan);
+#ifdef RTCONFIG_LANWAN_LED
+			// for led display, always keep default port map
+			cfg = SWCFG_DEFAULT;
+#endif
 			switch_gen_config(lan, ports, cfg, 0, NULL);
 			switch_gen_config(wan, ports, cfg, 1, NULL);
 			nvram_set("lanports", lan);
@@ -115,8 +126,74 @@ void generate_switch_para(void)
 		case MODEL_RTN16:
 		{	                              /* WAN L1 L2 L3 L4 CPU */
 			const int ports[SWPORT_COUNT] = { 0, 4, 3, 2, 1, 8 };
-			int wancfg = nvram_invmatch("switch_wantag", "none") ? SWCFG_DEFAULT : cfg;
+			int wancfg = (!nvram_match("switch_wantag", "none")&&!nvram_match("switch_wantag", "")) ? SWCFG_DEFAULT : cfg;
 
+#ifdef RTCONFIG_DUALWAN
+			int wan1cfg = nvram_get_int("wans_lanport");
+
+			nvram_unset("vlan2ports");
+			nvram_unset("vlan2hwname");
+			nvram_unset("vlan3ports");
+			nvram_unset("vlan3hwname");
+
+			// The first WAN port.
+			if(get_wans_dualwan()&WANSCAP_WAN){
+				switch_gen_config(wan, ports, wancfg, 1, (get_wans_dualwan()&WANSCAP_LAN && wan1cfg >= 1 && wan1cfg <= 4)?"":"u");
+				nvram_set("vlan2ports", wan);
+				if(get_wans_dualwan()&WANSCAP_LAN && wan1cfg >= 1 && wan1cfg <= 4)
+					nvram_set("vlan2hwname", "et0");
+			}
+
+			// The second WAN port.
+			if(get_wans_dualwan()&WANSCAP_LAN && wan1cfg >= 1 && wan1cfg <= 4){
+				wan1cfg += WAN1PORT1-1;
+				if(wancfg != SWCFG_DEFAULT){
+					gen_lan_ports(lan, ports, wancfg, wan1cfg, "*");
+					nvram_set("vlan1ports", lan);
+					gen_lan_ports(lan, ports, wancfg, wan1cfg, NULL);
+					nvram_set("lanports", lan);
+				}
+				else{
+					switch_gen_config(lan, ports, wan1cfg, 0, "*");
+					nvram_set("vlan1ports", lan);
+					switch_gen_config(lan, ports, wan1cfg, 0, NULL);
+					nvram_set("lanports", lan);
+				}
+
+				switch_gen_config(wan, ports, wan1cfg, 1, (get_wans_dualwan()&WANSCAP_WAN)?"":"u");
+				nvram_set("vlan3ports", wan);
+				if(get_wans_dualwan()&WANSCAP_WAN)
+					nvram_set("vlan3hwname", "et0");
+			}
+			else{
+				switch_gen_config(lan, ports, cfg, 0, "*");
+				nvram_set("vlan1ports", lan);
+				switch_gen_config(lan, ports, cfg, 0, NULL);
+				nvram_set("lanports", lan);
+			}
+
+			int unit;
+			char prefix[8], nvram_ports[16];
+
+			for(unit = WAN_UNIT_FIRST; unit < WAN_UNIT_MAX; ++unit){
+				memset(prefix, 0, 8);
+				sprintf(prefix, "%d", unit);
+
+				memset(nvram_ports, 0, 16);
+				sprintf(nvram_ports, "wan%sports", (unit == WAN_UNIT_FIRST)?"":prefix);
+
+				if(get_dualwan_by_unit(unit) == WANS_DUALWAN_IF_WAN){
+					switch_gen_config(wan, ports, wancfg, 1, NULL);
+					nvram_set(nvram_ports, wan);
+				}
+				else if(get_dualwan_by_unit(unit) == WANS_DUALWAN_IF_LAN){
+					switch_gen_config(wan, ports, wan1cfg, 1, NULL);
+					nvram_set(nvram_ports, wan);
+				}
+				else
+					nvram_unset(nvram_ports);
+			}
+#else
 			switch_gen_config(lan, ports, cfg, 0, "*");
 			switch_gen_config(wan, ports, wancfg, 1, "u");
 			nvram_set("vlan1ports", lan);
@@ -125,14 +202,81 @@ void generate_switch_para(void)
 			switch_gen_config(wan, ports, wancfg, 1, NULL);
 			nvram_set("lanports", lan);
 			nvram_set("wanports", wan);
+#endif
 			break;
 		}
 
 		case MODEL_RTN66U:
 		{	                              /* WAN L1 L2 L3 L4 CPU */
 			const int ports[SWPORT_COUNT] = { 0, 1, 2, 3, 4, 8 };
-			int wancfg = nvram_invmatch("switch_wantag", "none") ? SWCFG_DEFAULT : cfg;
+			int wancfg = (!nvram_match("switch_wantag", "none")&&!nvram_match("switch_wantag", "")) ? SWCFG_DEFAULT : cfg;
 
+#ifdef RTCONFIG_DUALWAN
+			int wan1cfg = nvram_get_int("wans_lanport");
+
+			nvram_unset("vlan2ports");
+			nvram_unset("vlan2hwname");
+			nvram_unset("vlan3ports");
+			nvram_unset("vlan3hwname");
+
+			// The first WAN port.
+			if(get_wans_dualwan()&WANSCAP_WAN){
+				switch_gen_config(wan, ports, wancfg, 1, (get_wans_dualwan()&WANSCAP_LAN && wan1cfg >= 1 && wan1cfg <= 4)?"":"u");
+				nvram_set("vlan2ports", wan);
+				if(get_wans_dualwan()&WANSCAP_LAN && wan1cfg >= 1 && wan1cfg <= 4)
+					nvram_set("vlan2hwname", "et0");
+			}
+
+			// The second WAN port.
+			if(get_wans_dualwan()&WANSCAP_LAN && wan1cfg >= 1 && wan1cfg <= 4){
+				wan1cfg += WAN1PORT1-1;
+				if(wancfg != SWCFG_DEFAULT){
+					gen_lan_ports(lan, ports, wancfg, wan1cfg, "*");
+					nvram_set("vlan1ports", lan);
+					gen_lan_ports(lan, ports, wancfg, wan1cfg, NULL);
+					nvram_set("lanports", lan);
+				}
+				else{
+					switch_gen_config(lan, ports, wan1cfg, 0, "*");
+					nvram_set("vlan1ports", lan);
+					switch_gen_config(lan, ports, wan1cfg, 0, NULL);
+					nvram_set("lanports", lan);
+				}
+
+				switch_gen_config(wan, ports, wan1cfg, 1, (get_wans_dualwan()&WANSCAP_WAN)?"":"u");
+				nvram_set("vlan3ports", wan);
+				if(get_wans_dualwan()&WANSCAP_WAN)
+					nvram_set("vlan3hwname", "et0");
+			}
+			else{
+				switch_gen_config(lan, ports, cfg, 0, "*");
+				nvram_set("vlan1ports", lan);
+				switch_gen_config(lan, ports, cfg, 0, NULL);
+				nvram_set("lanports", lan);
+			}
+
+			int unit;
+			char prefix[8], nvram_ports[16];
+
+			for(unit = WAN_UNIT_FIRST; unit < WAN_UNIT_MAX; ++unit){
+				memset(prefix, 0, 8);
+				sprintf(prefix, "%d", unit);
+
+				memset(nvram_ports, 0, 16);
+				sprintf(nvram_ports, "wan%sports", (unit == WAN_UNIT_FIRST)?"":prefix);
+
+				if(get_dualwan_by_unit(unit) == WANS_DUALWAN_IF_WAN){
+					switch_gen_config(wan, ports, wancfg, 1, NULL);
+					nvram_set(nvram_ports, wan);
+				}
+				else if(get_dualwan_by_unit(unit) == WANS_DUALWAN_IF_LAN){
+					switch_gen_config(wan, ports, wan1cfg, 1, NULL);
+					nvram_set(nvram_ports, wan);
+				}
+				else
+					nvram_unset(nvram_ports);
+			}
+#else
 			switch_gen_config(lan, ports, cfg, 0, "*");
 			switch_gen_config(wan, ports, wancfg, 1, "u");
 			nvram_set("vlan1ports", lan);
@@ -141,6 +285,7 @@ void generate_switch_para(void)
 			switch_gen_config(wan, ports, wancfg, 1, NULL);
 			nvram_set("lanports", lan);
 			nvram_set("wanports", wan);
+#endif
 			break;
 		}
 
@@ -176,21 +321,35 @@ void enable_jumbo_frame()
 
 void init_switch()
 {
+	int model;
+
 	generate_switch_para();
 
+	// disable ctf in rt-n53 temporarily
+	model = get_model();
+	if(model==MODEL_RTN53) nvram_set("ctf_disable_force", "1");
+	
 #ifdef CONFIG_BCMWL5
 	// ctf should be disabled when some functions are enabled
-	if(nvram_get_int("qos_enable") || nvram_get_int("vts_enable_x") || nvram_get_int("url_enable_x") || nvram_get_int("ctf_disable_force")
+	if(nvram_get_int("qos_enable") || nvram_get_int("vts_enable_x") || nvram_get_int("url_enable_x") || nvram_get_int("keyword_enable_x") || nvram_get_int("ctf_disable_force")
 #ifdef RTCONFIG_WIRELESSREPEATER
 	|| nvram_get_int("sw_mode") == SW_MODE_REPEATER
 #endif
-	)
+	) {
 		nvram_set("ctf_disable", "1");
+	}
 	else nvram_set("ctf_disable", "0");
 
         // ctf must be loaded prior to any other modules 
 	if (nvram_get_int("ctf_disable") == 0)
 		modprobe("ctf");
+
+	if(nvram_get_int("sw_mode") == SW_MODE_ROUTER && nvram_get_int("qos_enable")) {
+		// enable netfilter bridge only when phydev is used
+		f_write_string("/proc/sys/net/bridge/bridge-nf-call-iptables", "1", 0, 0);
+		f_write_string("/proc/sys/net/bridge/bridge-nf-call-ip6tables", "1", 0, 0);
+		f_write_string("/proc/sys/net/bridge/bridge-nf-filter-vlan-tagged", "1", 0, 0);
+	}
 #endif
 
 #ifdef RTCONFIG_SHP
@@ -250,79 +409,76 @@ void init_wl(void)
 	modprobe("wl");
 
 #ifdef RTCONFIG_BRCM_USBAP
-		/* We have to load USB modules after loading PCI wl driver so
-		 * USB driver can decide its instance number based on PCI wl
-		 * instance numbers (in hotplug_usb())
+	/* We have to load USB modules after loading PCI wl driver so
+	 * USB driver can decide its instance number based on PCI wl
+	 * instance numbers (in hotplug_usb())
+	 */
+	modprobe("usbcore");
+
+#ifdef LINUX26
+	mount("usbfs", "/proc/bus/usb", "usbfs", MS_MGC_VAL, NULL);
+#else
+	mount("usbdevfs", "/proc/bus/usb", "usbdevfs", MS_MGC_VAL, NULL);
+#endif /* LINUX26 */
+
+	{
+		char	insmod_arg[128];
+		int	i = 0, maxwl_eth = 0, maxunit = -1;
+		char	ifname[16] = {0};
+		int	unit = -1;
+		char arg1[20] = {0};
+		char arg2[20] = {0};
+		char arg3[20] = {0};
+		char arg4[20] = {0};
+		char arg5[20] = {0};
+		char arg6[20] = {0};
+		char arg7[20] = {0};
+		const int wl_wait = 3;	/* max wait time for wl_high to up */
+
+		/* Save QTD cache params in nvram */
+		sprintf(arg1, "log2_irq_thresh=%d", nvram_get_int("ehciirqt"));
+		sprintf(arg2, "qtdc_pid=%d", nvram_get_int("qtdc_pid"));
+		sprintf(arg3, "qtdc_vid=%d", nvram_get_int("qtdc_vid"));
+		sprintf(arg4, "qtdc0_ep=%d", nvram_get_int("qtdc0_ep"));
+		sprintf(arg5, "qtdc0_sz=%d", nvram_get_int("qtdc0_sz"));
+		sprintf(arg6, "qtdc1_ep=%d", nvram_get_int("qtdc1_ep"));
+		sprintf(arg7, "qtdc1_sz=%d", nvram_get_int("qtdc1_sz"));
+
+		modprobe("ehci-hcd", arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+
+		/* Search for existing PCI wl devices and the max unit number used.
+		 * Note that PCI driver has to be loaded before USB hotplug event.
+		 * This is enforced in rc.c
 		 */
-		modprobe("usbcore");
-		modprobe("usb-storage");
-
-		{
-			char	insmod_arg[128];
-			int	i = 0, maxwl_eth = 0, maxunit = -1;
-			char	ifname[16] = {0};
-			int	unit = -1;
-			char arg1[20] = {0};
-			char arg2[20] = {0};
-			char arg3[20] = {0};
-			char arg4[20] = {0};
-			char arg5[20] = {0};
-			char arg6[20] = {0};
-			char arg7[20] = {0};
-			const int wl_wait = 3;	/* max wait time for wl_high to up */
-
-			/* Save QTD cache params in nvram */
-			sprintf(arg1, "log2_irq_thresh=%d", atoi(nvram_safe_get("ehciirqt")));
-			sprintf(arg2, "qtdc_pid=%d", atoi(nvram_safe_get("qtdc_pid")));
-			sprintf(arg3, "qtdc_vid=%d", atoi(nvram_safe_get("qtdc_vid")));
-			sprintf(arg4, "qtdc0_ep=%d", atoi(nvram_safe_get("qtdc0_ep")));
-			sprintf(arg5, "qtdc0_sz=%d", atoi(nvram_safe_get("qtdc0_sz")));
-			sprintf(arg6, "qtdc1_ep=%d", atoi(nvram_safe_get("qtdc1_ep")));
-			sprintf(arg7, "qtdc1_sz=%d", atoi(nvram_safe_get("qtdc1_sz")));
-
-			eval("insmod", "ehci-hcd", arg1, arg2, arg3, arg4, arg5,
-				arg6, arg7);
-
-			/* Search for existing PCI wl devices and the max unit number used.
-			 * Note that PCI driver has to be loaded before USB hotplug event.
-			 * This is enforced in rc.c
-			 */
-			#define DEV_NUMIFS 8
-			for (i = 1; i <= DEV_NUMIFS; i++) {
-				sprintf(ifname, "eth%d", i);
-				if (!wl_probe(ifname)) {
-					if (!wl_ioctl(ifname, WLC_GET_INSTANCE, &unit,
-						sizeof(unit))) {
-						maxwl_eth = i;
-						maxunit = (unit > maxunit) ? unit : maxunit;
-					}
+		#define DEV_NUMIFS 8
+		for (i = 1; i <= DEV_NUMIFS; i++) {
+			sprintf(ifname, "eth%d", i);
+			if (!wl_probe(ifname)) {
+				if (!wl_ioctl(ifname, WLC_GET_INSTANCE, &unit,
+					sizeof(unit))) {
+					maxwl_eth = i;
+					maxunit = (unit > maxunit) ? unit : maxunit;
 				}
 			}
-
-			/* Set instance base (starting unit number) for USB device */
-			sprintf(insmod_arg, "instance_base=%d", maxunit + 1);
-			eval("insmod", "wl_high", insmod_arg);
-
-			/* Hold until the USB/HSIC interface is up (up to wl_wait sec) */
-			sprintf(ifname, "eth%d", maxwl_eth + 1);
-			i = wl_wait;
-			while (wl_probe(ifname) && i--) {
-				sleep(1);
-			}
-			if (!wl_ioctl(ifname, WLC_GET_INSTANCE, &unit, sizeof(unit)))
-				cprintf("wl%d is up in %d sec\n", unit, wl_wait - i);
-			else
-				cprintf("wl%d not up in %d sec\n", unit, wl_wait);
 		}
-#ifdef LINUX26
-		mount("usbdeffs", "/proc/bus/usb", "usbfs", MS_MGC_VAL, NULL);
-#else
-		mount("none", "/proc/bus/usb", "usbdevfs", MS_MGC_VAL, NULL);
-#endif /* LINUX26 */
+
+		/* Set instance base (starting unit number) for USB device */
+		sprintf(insmod_arg, "instance_base=%d", maxunit + 1);
+		modprobe("wl_high", insmod_arg);
+
+		/* Hold until the USB/HSIC interface is up (up to wl_wait sec) */
+		sprintf(ifname, "eth%d", maxwl_eth + 1);
+		i = wl_wait;
+		while (wl_probe(ifname) && i--) {
+			sleep(1);
+		}
+		if (!wl_ioctl(ifname, WLC_GET_INSTANCE, &unit, sizeof(unit)))
+			cprintf("wl%d is up in %d sec\n", unit, wl_wait - i);
+		else
+			cprintf("wl%d not up in %d sec\n", unit, wl_wait);
+	}
 #endif /* __CONFIG_USBAP__ */
-
 }
-
 
 void init_syspara(void)
 {
@@ -337,55 +493,60 @@ void init_syspara(void)
 
 	model = get_model();
 	switch(model) {
+		case MODEL_RTN12:
+		case MODEL_RTN12B1:
+		case MODEL_RTN12C1:
 		case MODEL_RTN53:
 		case MODEL_RTN15U:
 		case MODEL_RTN10U:
-                        if (!nvram_get("sb/1/macaddr")) //eth2(5G)
-                                nvram_set("sb/1/macaddr", "00:22:15:A5:03:04");
-                        if (!nvram_get("0:macaddr")) //eth2(5G)
-                                nvram_set("0:macaddr", "00:22:15:A5:03:04");
+		case MODEL_RTN16:
 			if (!nvram_get("et0macaddr")) //eth0, eth1
 				nvram_set("et0macaddr", "00:22:15:A5:03:00");
-                        if (!nvram_get("pci/2/1/macaddr")) //eth2(5G)
-                                nvram_set("pci/2/1/macaddr", "00:22:15:A5:03:04");
-		        if(nvram_get("regulation_domain_5g")) {
-                		nvram_set("wl1_country_code", nvram_get("regulation_domain_5g"));
-				nvram_set("pci/2/1/ccode", nvram_get("regulation_domain_5g"));
+			if (!nvram_get("0:macaddr")) //eth2(5G)
+				nvram_set("0:macaddr", "00:22:15:A5:03:04");
+			if(nvram_get("regulation_domain_5g")) {
+				nvram_set("wl1_country_code",
+									nvram_get("regulation_domain_5g"));
+				nvram_set("0:ccode", nvram_get("regulation_domain_5g"));
+			}else {
+				nvram_set("wl1_country_code", "US");
+				nvram_set("0:ccode", "US");
 			}
-		        else {
-                		nvram_set("wl1_country_code", "US");
-				nvram_set("pci/2/1/ccode", "US");
+			nvram_set("sb/1/macaddr", nvram_safe_get("et0macaddr"));
+			if(nvram_get("regulation_domain")) {
+				nvram_set("wl0_country_code", nvram_get("regulation_domain"));
+				nvram_set("sb/1/ccode", nvram_get("regulation_domain"));
+			}else {
+				nvram_set("wl0_country_code", "US");
+				nvram_set("sb/1/ccode", "US");
 			}
 			break;	
 		case MODEL_RTN66U:
 			if (!nvram_get("et0macaddr")) //eth0, eth1
 				nvram_set("et0macaddr", "00:22:15:A5:03:00");
-                        if (!nvram_get("pci/2/1/macaddr")) //eth2(5G)
-                                nvram_set("pci/2/1/macaddr", "00:22:15:A5:03:04");
-		        if(nvram_get("regulation_domain_5G")) {
-                		nvram_set("wl1_country_code", nvram_get("regulation_domain_5G"));
+			if (!nvram_get("pci/2/1/macaddr")) //eth2(5G)
+				nvram_set("pci/2/1/macaddr", "00:22:15:A5:03:04");
+			if(nvram_get("regulation_domain_5G")) {
+				nvram_set("wl1_country_code",
+									nvram_get("regulation_domain_5G"));
 				nvram_set("pci/2/1/ccode", nvram_get("regulation_domain_5G"));
-			}
-		        else {
-                		nvram_set("wl1_country_code", "US");
+			}else {
+				nvram_set("wl1_country_code", "US");
 				nvram_set("pci/2/1/ccode", "US");
+			}
+			nvram_set("pci/1/1/macaddr", nvram_safe_get("et0macaddr"));
+			if(nvram_get("regulation_domain")) {
+				nvram_set("wl0_country_code", nvram_get("regulation_domain"));
+				nvram_set("pci/1/1/ccode", nvram_get("regulation_domain"));
+			}else {
+				nvram_set("wl0_country_code", "US");
+				nvram_set("pci/1/1/ccode", "US");
 			}
 			break;
 		default:
 			if (!nvram_get("et0macaddr")) 
 				nvram_set("et0macaddr", "00:22:15:A5:03:00");
 			break;
-	}
-
-	nvram_set("pci/1/1/macaddr", nvram_safe_get("et0macaddr"));
-
-        if(nvram_get("regulation_domain")) {
-                nvram_set("wl0_country_code", nvram_get("regulation_domain"));
-		nvram_set("pci/1/1/ccode", nvram_get("regulation_domain"));
-	}
-	else {
-		nvram_set("wl0_country_code", "US");
-		nvram_set("pci/1/1/ccode", "US");
 	}
 
 	if (nvram_get("secret_code"))
@@ -428,6 +589,10 @@ int set_wltxpower()
 	double offset = 0.000;
 	int commit_needed = 0;
 	char blver1, blver2, blver3, blver4;
+	int model;
+
+	// generate nvram nvram according to system setting
+	model = get_model();
 
 	sscanf(nvram_safe_get("bl_version"), "%c.%c.%c.%c", &blver1, &blver2, &blver3, &blver4);
 	snprintf(ifnames, sizeof(ifnames), "%s %s",
@@ -454,7 +619,29 @@ int set_wltxpower()
 			continue;
 
 		snprintf(prefix, sizeof(prefix), "wl%d_", unit);
-		snprintf(prefix2, sizeof(prefix2), "pci/%d/1/", unit + 1);
+		switch(model) {
+			case MODEL_RTN12:
+			case MODEL_RTN12B1:
+			case MODEL_RTN12C1:
+			case MODEL_RTN53:
+			case MODEL_RTN15U:
+			case MODEL_RTN10U:
+			case MODEL_RTN16:
+			{
+				if(unit == 0){	/* 2.4G */
+					snprintf(prefix2, sizeof(prefix2), "sb/1/");
+				}else{	/* 5G */
+					snprintf(prefix2, sizeof(prefix2), "0:");
+				}
+				break;
+			}
+
+			case MODEL_RTN66U:
+			{
+				snprintf(prefix2, sizeof(prefix2), "pci/%d/1/", unit + 1);
+				break;
+			}
+		}
 		txpower = nvram_get_int(wl_nvname("TxPower", unit, 0));
 
 		dbG("unit: %d, txpower: %d\n", unit, txpower);
@@ -1364,5 +1551,14 @@ wl_exist(char *ifname, int band)
                 system("rm -rf /tmp/wl_check");
         }
         return ret;
+}
+
+void ate_commit_bootloader(char *err_code) {
+        nvram_set("Ate_power_on_off_enable", err_code);
+        nvram_commit();
+        nvram_set("asuscfeAte_power_on_off_ret", err_code);
+        nvram_set("asuscfeAte_fail_reboot_log", nvram_get("Ate_reboot_log"));
+        nvram_set("asuscfeAte_fail_dev_log", nvram_get("Ate_dev_log"));
+        nvram_set("asuscfecommit=", "1");
 }
 

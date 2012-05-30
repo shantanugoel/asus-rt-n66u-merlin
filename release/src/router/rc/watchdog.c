@@ -92,6 +92,12 @@ int btn_count_setup_second = 0;
 int btn_pressed_toggle_radio = 0;
 #endif
 
+#ifdef RTCONFIG_WIRELESS_SWITCH
+// for WLAN sw init, only for slide switch
+static int wlan_sw_init = 0;
+#endif
+
+
 extern int g_wsc_configured;
 extern int g_isEnrollee;
 
@@ -180,7 +186,7 @@ void btn_check(void)
 				{
 				/* 0123456789 */
 				/* 0011100111 */
-					if ((btn_count % 10) < 1 || ((btn_count % 10) > 4 && (btn_count % 10) < 7))
+					if ((btn_count % 10) < 2 || ((btn_count % 10) > 4 && (btn_count % 10) < 7))
 						led_control(LED_POWER, LED_OFF);
 					else
 						led_control(LED_POWER, LED_ON);
@@ -188,6 +194,56 @@ void btn_check(void)
 			}
 		} // end BTN_RST MFG test
 	}
+#ifdef RTCONFIG_WIRELESS_SWITCH
+	else if (button_pressed(BTN_WIFI_SW))
+	{
+		//TRACE_PT("button BTN_WIFI_SW pressed\n");	
+		if (nvram_match("asus_mfg", "1"))
+		{
+			nvram_set("btn_wifi_sw", "1");
+		}
+		else
+		{	
+			if(wlan_sw_init == 0)
+			{
+				wlan_sw_init = 1;							
+				
+				eval("iwpriv", "ra0", "set", "RadioOn=1");
+				eval("iwpriv", "rai0", "set", "RadioOn=1");
+				TRACE_PT("Radio On\n");	
+				nvram_set("wl0_radio", "1");
+				nvram_set("wl1_radio", "1");
+				nvram_commit(); 			
+			}
+			else
+			{
+				// if wlan switch on , btn reset routine goes here
+				if (btn_pressed==2)
+				{
+					// IT MUST BE SAME AS BELOW CODE
+					led_control(LED_POWER, LED_OFF);
+					alarmtimer(0, 0);
+					eval("mtd-erase","-d","nvram");
+					/* FIXME: all stop-wan, umount logic will not be called
+					 * prevous sys_exit (kill(1, SIGTERM) was ok
+					 * since nvram isn't valid stop_wan should just kill possible daemons,
+					 * nothing else, maybe with flag */
+					sync();
+					reboot(RB_AUTOBOOT);					
+				}
+			
+				if(nvram_match("wl0_radio", "0") || nvram_match("wl1_radio", "0")){
+					eval("iwpriv", "ra0", "set", "RadioOn=1");
+					eval("iwpriv", "rai0", "set", "RadioOn=1");
+					TRACE_PT("Radio On\n"); 
+					nvram_set("wl0_radio", "1");
+					nvram_set("wl1_radio", "1");
+					nvram_commit(); 
+				}
+			}	
+		}
+	}
+#endif	
 	else
 	{
 		if (btn_pressed == 1)
@@ -209,21 +265,47 @@ void btn_check(void)
 			sync();
 			reboot(RB_AUTOBOOT);
 		}
+#ifdef RTCONFIG_WIRELESS_SWITCH
+		else
+		{
+			// no button is pressed or released
+			if(wlan_sw_init == 0)
+			{
+				wlan_sw_init = 1;
+				eval("iwpriv", "ra0", "set", "RadioOn=0");
+				eval("iwpriv", "rai0", "set", "RadioOn=0");
+				TRACE_PT("Radio Off\n");	
+				nvram_set("wl0_radio", "0");
+				nvram_set("wl1_radio", "0");
+				nvram_commit(); 	
+			}
+			else
+			{
+				if(nvram_match("wl0_radio", "1") || nvram_match("wl1_radio", "1")){
+					eval("iwpriv", "ra0", "set", "RadioOn=0");
+					eval("iwpriv", "rai0", "set", "RadioOn=0");
+					TRACE_PT("Radio Off\n");
+					nvram_set("wl0_radio", "0");
+					nvram_set("wl1_radio", "0");
+				}
+			}		
+		}
+#endif
 	}
 
 #ifdef BTN_SETUP
 	}
 	if (btn_pressed != 0) return;
 
-  	if (button_pressed(BTN_WPS) && nvram_match("btn_ez_radiotoggle", "1"))
+	if (button_pressed(BTN_WPS) && nvram_match("btn_ez_radiotoggle", "1"))
 	{
 		if (btn_pressed_toggle_radio == 0  )
-	        {
-		        eval("radio","toggle");
+		{
+			eval("radio","toggle");
 			btn_pressed_toggle_radio = 1;
 			return;
 		}
-        }
+	}
 	else
 	{
 		btn_pressed_toggle_radio = 0;
@@ -460,7 +542,10 @@ void timecheck(void)
 					nvram_set(nv, "0");
 					if (!need_commit) need_commit = 1;
 #ifdef CONFIG_BCMWL5
-	 				eval("wlconf", word, "down");
+					eval("wl", "-i", word, "closed", "1");
+					eval("wl", "-i", word, "maxassoc", "0");
+					eval("wl", "-i", word, "bss", "down");
+//	 				eval("wlconf", word, "down");
 #endif
 	                        	ifconfig(word, 0, NULL, NULL);
 	                        	eval("brctl", "delif", lan_ifname, word);
@@ -606,9 +691,14 @@ void fake_wl_led_5g(void)
 	}
 
 	if(blink_5g) {
-		for(i=0;i<1000;i++) {
-			if(i%30==0) led_control(LED_5G, LED_OFF);
-			else led_control(LED_5G, LED_ON);
+		for(i=0;i<10;i++) {
+			usleep(50*1000);
+			if(i%2==0) {
+				led_control(LED_5G, LED_OFF);
+			}
+			else {
+				led_control(LED_5G, LED_ON);
+			}
 		}
 		led_control(LED_5G, LED_ON);
 	}
@@ -675,6 +765,33 @@ void swmode_check()
 }
 #endif
 
+void ddns_check(void)
+{
+	char ddns_return[16];
+
+        if( nvram_match("ddns_enable_x", "1") &&
+           (nvram_match("wan0_state_t", "2") && nvram_match("wan0_auxstate_t", "0")) )
+        {
+		if (pids("ez-ipupdate")) //ez-ipupdate is running!
+			return;
+
+		if( nvram_match("ddns_server_x", "WWW.ASUS.COM") ){
+			if((strcmp(nvram_safe_get("ddns_return_code_chk"),"Time-out") != 0) &&
+		     	   (strcmp(nvram_safe_get("ddns_return_code_chk"),"connect_fail") != 0) ) {
+				return;
+			}
+		}
+		else{ //non asusddns service
+			 if( nvram_match("ddns_updated", "1") )
+				return;
+		}
+                logmessage("watchdog", "start ddns.");
+		eval("rm", "-rf", "/tmp/ddns.cache");
+                notify_rc("start_ddns");
+        }
+	return;
+}
+
 /* wathchdog is runned in NORMAL_PERIOD, 1 seconds
  * check in each NORMAL_PERIOD
  *	1. button
@@ -711,6 +828,8 @@ void watchdog(int sig)
 #if 0
 	cpu_usage_monitor();
 #endif
+	ddns_check();
+
 	return;
 }
 

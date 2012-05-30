@@ -56,6 +56,10 @@ typedef u_int8_t u8;
 #include <ralink.h>
 #endif
 
+#ifdef RTCONFIG_USB_MODEM
+#include <usb_info.h>
+#endif
+
 #define sin_addr(s) (((struct sockaddr_in *)(s))->sin_addr)
 
 void update_lan_state(int state, int reason)
@@ -696,14 +700,73 @@ wlconf_ra(const char* wif)
 #endif
 
 #ifdef RTCONFIG_IPV6
-void enable_ipv6(int enable, int forceup)
+void set_default_accept_ra(int flag)
 {
-#if 0
-	return;
-#else
+	if (flag)
+	{
+		system("echo 2 > /proc/sys/net/ipv6/conf/all/accept_ra");
+		system("echo 2 > /proc/sys/net/ipv6/conf/default/accept_ra");
+        }
+	else
+	{
+		system("echo 0 > /proc/sys/net/ipv6/conf/all/accept_ra");
+		system("echo 0 > /proc/sys/net/ipv6/conf/default/accept_ra");
+	}
+}
+
+void set_intf_ipv6_accept_ra(const char *ifname, int flag)
+{
+	char s[256];
+
+	if (flag)
+	{
+	        sprintf(s, "/proc/sys/net/ipv6/conf/%s/accept_ra", ifname);
+        	f_write_string(s, "2", 0, 0);
+
+		sprintf(s, "/proc/sys/net/ipv6/conf/%s/forwarding", ifname);
+		if (!strncmp(ifname, "ppp", 3))
+			f_write_string(s, "0", 0, 0);
+		else
+			f_write_string(s, "2", 0, 0);
+	}
+	else
+	{
+		sprintf(s, "/proc/sys/net/ipv6/conf/%s/accept_ra", ifname);
+		f_write_string(s, "0", 0, 0);
+
+		sprintf(s, "/proc/sys/net/ipv6/conf/%s/forwarding", ifname);
+		f_write_string(s, "0", 0, 0);
+	}
+}
+
+void set_intf_ipv6_dad(const char *ifname, int bridge, int flag)
+{
+	char s[256];
+
+	if (flag)
+	{
+		sprintf(s, "/proc/sys/net/ipv6/conf/%s/accept_dad", ifname);
+		f_write_string(s, "1", 0, 0);
+
+		sprintf(s, "/proc/sys/net/ipv6/conf/%s/dad_transmits", ifname);
+		if (bridge)
+			f_write_string(s, "2", 0, 0);
+		else
+			f_write_string(s, "1", 0, 0);
+	}
+	else
+	{
+		sprintf(s, "/proc/sys/net/ipv6/conf/%s/accept_dad", ifname);
+		f_write_string(s, "0", 0, 0);
+	}
+}
+
+void enable_ipv6(int enable/*, int forceup*/)
+{
 	DIR *dir;
 	struct dirent *dirent;
 	char s[256];
+	int service;
 #if 0
 	struct ifreq ifr;
 	int sfd;
@@ -733,57 +796,30 @@ void enable_ipv6(int enable, int forceup)
 #if 0
 	close(sfd);
 #endif
+	service = get_ipv6_service();
+
+	if (is_routing_enabled())
+	{
+		switch (service) {
+		case IPV6_NATIVE:
+		case IPV6_NATIVE_DHCP:
+			if ((nvram_get_int("ipv6_accept_ra") & 1) != 0)
+			{
+				set_default_accept_ra(1);
+				break;
+			}
+#if 0
+		case IPV6_6IN4:
+		case IPV6_6TO4:
+		case IPV6_6RD:
+		case IPV6_MANUAL:
+		default:
+			set_default_accept_ra(0);
+			break;
 #endif
-}
-
-void enable_accept_ra(const char *ifname)
-{
-	char s[256];
-
-	sprintf(s, "/proc/sys/net/ipv6/conf/%s/accept_ra", ifname);
-	f_write_string(s, "2", 0, 0);
-
-	sprintf(s, "/proc/sys/net/ipv6/conf/%s/autoconf", ifname);
-	f_write_string(s, "1", 0, 0);
-
-	sprintf(s, "/proc/sys/net/ipv6/conf/%s/forwarding", ifname);
-	f_write_string(s, "2", 0, 0);
-}
-
-void disable_accept_ra(const char *ifname)
-{
-	char s[256];
-
-	sprintf(s, "/proc/sys/net/ipv6/conf/%s/accept_ra", ifname);
-	f_write_string(s, "0", 0, 0);
-
-	sprintf(s, "/proc/sys/net/ipv6/conf/%s/autoconf", ifname);
-	f_write_string(s, "0", 0, 0);
-
-	sprintf(s, "/proc/sys/net/ipv6/conf/%s/forwarding", ifname);
-	f_write_string(s, "0", 0, 0);
-}
-
-void enableIPv6dad(const char *ifname, int bridge)
-{
-	char s[256];
-
-	sprintf(s, "/proc/sys/net/ipv6/conf/%s/accept_dad", ifname);
-	f_write_string(s, "1", 0, 0);
-
-	sprintf(s, "/proc/sys/net/ipv6/conf/%s/dad_transmits", ifname);
-	if (bridge)
-		f_write_string(s, "2", 0, 0);
-	else
-		f_write_string(s, "1", 0, 0);
-}
-
-void disableIPv6dad(const char *ifname)
-{
-	char s[256];
-
-	sprintf(s, "/proc/sys/net/ipv6/conf/%s/accept_dad", ifname);
-	f_write_string(s, "0", 0, 0);
+		}
+	}
+	else set_default_accept_ra(0);
 }
 #endif
 
@@ -823,10 +859,6 @@ void start_lan(void)
 
 	if ((sfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0) return;
 
-#ifdef RTCONFIG_IPV6
-	enable_ipv6(ipv6_enabled(), 0);
-#endif
-
 #ifdef RTCONFIG_WIRELESSREPEATER
 	if(nvram_get_int("sw_mode") == SW_MODE_REPEATER && nvram_match("lan_proto", "dhcp"))
 		nvram_set("lan_ipaddr", nvram_default_get("lan_ipaddr"));
@@ -840,7 +872,10 @@ void start_lan(void)
 		eval("brctl", "setfd", lan_ifname, "0");
 		eval("brctl", "stp", lan_ifname, nvram_safe_get("lan_stp"));
 #ifdef RTCONFIG_IPV6
-		enableIPv6dad(lan_ifname, 1);
+		if ((get_ipv6_service() != IPV6_DISABLED) &&
+			(!((nvram_get_int("ipv6_accept_ra") & 2) != 0 && !nvram_get_int("ipv6_radvd"))))
+		set_intf_ipv6_accept_ra(nvram_safe_get("lan_ifname"), 0);
+		set_intf_ipv6_dad(lan_ifname, 1, 1);
 #endif
 #ifdef RTCONFIG_EMF
 		if (nvram_get_int("emf_enable")) {
@@ -871,7 +906,10 @@ void start_lan(void)
 				}
                                 
 				if (!match && !next)
-					enableIPv6dad(ifname, 0);
+				{
+					set_intf_ipv6_accept_ra(ifname, 0);
+					set_intf_ipv6_dad(ifname, 0, 1);
+				}
 #endif
 				unit = -1; subunit = -1;
 
@@ -1238,6 +1276,206 @@ void hotplug_net(void)
 			notify_nas(interface);
 		}
 	}
+	else if(!strncmp(interface, "ppp", 3)){
+		char pid_file[256], *value;
+		int unit, ppp_pid, unit_pid, retry;
+		char tmp[100], prefix[] = "wanXXXXXXXXXX_";
+
+		if(!strcmp(action, "add")){
+			memset(pid_file, 0, 256);
+			snprintf(pid_file, 256, "/var/run/%s.pid", interface);
+
+			retry = 5;
+			while((value = file2str(pid_file)) == NULL && retry-- > 0){
+				_dprintf("%s %s: wait the pid file of %s at %d seconds...\n", __FUNCTION__, action, interface, retry);
+				sleep(1);
+			}
+
+			if(value == NULL){
+				_dprintf("%s %s: Could not get the pid file of %s!\n", __FUNCTION__, action, interface);
+				return;
+			}
+
+			ppp_pid = atoi(value);
+			free(value);
+			if(ppp_pid <= 1){
+				_dprintf("%s %s: Could not get the pid of %s!\n", __FUNCTION__, action, interface);
+				return;
+			}
+
+			for(unit = WAN_UNIT_FIRST; unit < WAN_UNIT_MAX; ++unit){
+				memset(pid_file, 0, 256);
+				snprintf(pid_file, 256, "/var/run/ppp-wan%d.pid", unit);
+
+				if((value = file2str(pid_file)) == NULL)
+					continue;
+
+				unit_pid = atoi(value);
+				free(value);
+				if(unit_pid <= 1)
+					continue;
+
+				if(unit_pid != ppp_pid)
+					continue;
+
+				snprintf(prefix, sizeof(prefix), "wan%d_", unit);
+
+				// fix the wrong filter table which would let the dialing on demand be failed.
+				if(nvram_match(strcat_r(prefix, "pppoe_demand", tmp), "1"))
+					nvram_set(strcat_r(prefix, "pppoe_ifname", tmp), interface);
+
+				break;
+			}
+		}
+		else{
+			for(unit = WAN_UNIT_FIRST; unit < WAN_UNIT_MAX; ++unit){
+				snprintf(prefix, sizeof(prefix), "wan%d_", unit);
+				if(nvram_match(strcat_r(prefix, "pppoe_ifname", tmp), interface)){
+					nvram_set(tmp, "");
+				}
+			}
+		}
+	}
+#ifdef RTCONFIG_USB_MODEM
+	// RNDIS interface.
+	else if(!strncmp(interface, "usb", 3)){
+		int unit;
+		char tmp[100], prefix[] = "wanXXXXXXXXXX_";
+
+		if(nvram_get_int("sw_mode") != SW_MODE_ROUTER)
+			return;
+
+#ifdef RTCONFIG_DUALWAN
+		for(unit = WAN_UNIT_FIRST; unit < WAN_UNIT_MAX; ++unit)
+			if(get_dualwan_by_unit(unit) == WANS_DUALWAN_IF_USB)
+				break;
+		if(unit == WAN_UNIT_MAX)
+			return;
+#else
+		unit = WAN_UNIT_SECOND;
+#endif
+
+		snprintf(prefix, sizeof(prefix), "wan%d_", unit);
+
+		if(!strcmp(action, "add")){
+			char device_path[128], usb_path[PATH_MAX], usb_port[8];
+			int port_num;
+			char nvram_name[32];
+
+			memset(device_path, 0, 128);
+			sprintf(device_path, "%s/%s/device", SYS_NET, interface);
+
+			memset(usb_path, 0, PATH_MAX);
+			if(realpath(device_path, usb_path) == NULL)
+				return;
+
+			if(get_usb_port_by_string(usb_path, usb_port, sizeof(usb_port)) == NULL)
+				return;
+
+			port_num = get_usb_port_number(usb_port);
+			if(!port_num)
+				return;
+
+			memset(nvram_name, 0, 32);
+			sprintf(nvram_name, "usb_path%d_act", port_num);
+
+			if(strcmp(nvram_safe_get(nvram_name), "") != 0)
+				return;
+
+			nvram_set(nvram_name, interface);
+
+			nvram_set(strcat_r(prefix, "ifname", tmp), interface);
+
+			_dprintf("hotplug net INTERFACE=%s ACTION=%s: wait 2 seconds...\n", interface, action);
+			sleep(2);
+
+#ifdef RTCONFIG_DUALWAN
+			if(!strcmp(nvram_safe_get("success_start_service"), "1"))
+#endif
+				start_wan_if(unit);
+		}
+		else{
+			if(!strcmp(interface, nvram_safe_get("usb_path1_act")))
+				nvram_set("usb_path1_act", "");
+			else if(!strcmp(interface, nvram_safe_get("usb_path2_act")))
+				nvram_set("usb_path2_act", "");
+			else if(!strcmp(interface, nvram_safe_get("usb_path3_act")))
+				nvram_set("usb_path3_act", "");
+			else
+				return;
+
+			nvram_set(strcat_r(prefix, "ifname", tmp), "");
+
+			char dhcp_pid_file[1024];
+
+			memset(dhcp_pid_file, 0, 1024);
+			sprintf(dhcp_pid_file, "/var/run/udhcpc%d.pid", unit);
+
+			kill_pidfile_s(dhcp_pid_file, SIGUSR2);
+			kill_pidfile_s(dhcp_pid_file, SIGTERM);
+		}
+
+		// Notify wanduck to switch the wan line to WAN port.
+		kill_pidfile_s("/var/run/wanduck.pid", SIGUSR2);
+	}
+#ifdef RTCONFIG_USB_BECEEM
+	else if(!strncmp(interface, "eth", 3)){
+		int unit;
+		char tmp[100], prefix[] = "wanXXXXXXXXXX_";
+		char word[256], *next;
+
+		if(nvram_get_int("sw_mode") != SW_MODE_ROUTER)
+			return;
+
+		// Not wired ethernet.
+		foreach(word, nvram_safe_get("wan_ifnames"), next)
+			if(!strcmp(interface, word))
+				return;
+
+		// Not wireless ethernet.
+		foreach(word, nvram_safe_get("wl_ifnames"), next)
+			if(!strcmp(interface, word))
+				return;
+
+#ifdef RTCONFIG_DUALWAN
+		for(unit = WAN_UNIT_FIRST; unit < WAN_UNIT_MAX; ++unit)
+			if(get_dualwan_by_unit(unit) == WANS_DUALWAN_IF_USB)
+				break;
+		if(unit == WAN_UNIT_MAX)
+			return;
+#else
+		unit = WAN_UNIT_SECOND;
+#endif
+
+		snprintf(prefix, sizeof(prefix), "wan%d_", unit);
+
+		if(!strcmp(action, "add")){
+			nvram_set(strcat_r(prefix, "ifname", tmp), interface);
+
+			_dprintf("hotplug net INTERFACE=%s ACTION=%s: wait 2 seconds...\n", interface, action);
+			sleep(2);
+
+#ifdef RTCONFIG_DUALWAN
+			if(!strcmp(nvram_safe_get("success_start_service"), "1"))
+#endif
+			{
+				_dprintf("%s: start_wan_if(%d)!\n", __FUNCTION__, unit);
+				start_wan_if(unit);
+			}
+		}
+		else{
+			nvram_set(strcat_r(prefix, "ifname", tmp), "");
+
+			stop_wan_if(unit);
+
+			system("asus_usbbcm usbbcm remove");
+		}
+
+		// Notify wanduck to switch the wan line to WAN port.
+		kill_pidfile_s("/var/run/wanduck.pid", SIGUSR2);
+	}
+#endif
+#endif
 }
 
 
@@ -1992,7 +2230,7 @@ net_dev_exist(const char *ifname)
 	DIR *dir_to_open = NULL;
 	char tmpstr[128];
 
-	sprintf(tmpstr, "sys/class/net/%s", ifname);
+	sprintf(tmpstr, "/sys/class/net/%s", ifname);
 	dir_to_open = opendir(tmpstr);
 	if (dir_to_open)
 	{

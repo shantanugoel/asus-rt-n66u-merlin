@@ -6,6 +6,8 @@
 */
 
 #include "rc.h"
+#include "interface.h"
+#include <sys/time.h>
 
 #ifdef DEBUG_RCTEST
 // used for various testing
@@ -40,6 +42,18 @@ static int rctest_main(int argc, char *argv[])
 	}
 	else if(strcmp(argv[1], "check_action")==0) {
 		_dprintf("check: %d\n", check_action());
+	}
+	else if(strcmp(argv[1], "nvramhex")==0) {
+		int i;
+		char *nv;
+
+		nv = nvram_safe_get(argv[2]);
+
+		_dprintf("nvram %s(%d): ", nv, strlen(nv));
+		for(i=0;i<strlen(nv);i++) {
+			_dprintf(" %x", (unsigned char)*(nv+i));
+		}
+		_dprintf("\n");
 	}
 	else {
 		on = atoi(argv[2]);
@@ -210,6 +224,7 @@ static const applets_t applets[] = {
 	{ "ots",			ots_main			},
 	{ "udhcpc",			udhcpc_wan			},
 	{ "udhcpc_lan",			udhcpc_lan			},
+	{ "zcip",			zcip_wan			},
 #ifdef RTCONFIG_IPV6
 	{ "dhcp6c-state",		dhcp6c_state_main		},
 #endif
@@ -363,6 +378,14 @@ int main(int argc, char **argv)
 
 		return asus_tty(argv[1], argv[2]);
 	}
+	else if(!strcmp(base, "asus_usbbcm")){
+		if(argc != 3){
+			printf("Usage: asus_usbbcm [device_name] [action]\n");
+			return 0;
+		}
+
+		return asus_usbbcm(argv[1], argv[2]);
+	}
 	else if(!strcmp(base, "asus_usb_interface")){
 		if(argc != 3){
 			printf("Usage: asus_usb_interface [device_name] [action]\n");
@@ -432,6 +455,87 @@ int main(int argc, char **argv)
 		return del_ns(argv[1]);
 	}
 #endif
+	else if (!strcmp(base, "test_hour")) {
+		time_t now, gm_sec, local_sec;
+		struct tm gm, local;
+
+		time(&now);
+		gmtime_r(&now, &gm);
+		localtime_r(&now, &local);
+cprintf("%s: now=%d,    gm.sec=%d,    gm.isdst=%d.\n", __FUNCTION__, now, gm.tm_sec, gm.tm_isdst);
+cprintf("%s: now=%d, local.sec=%d, local.isdst=%d.\n", __FUNCTION__, now, local.tm_sec, local.tm_isdst);
+
+		gm_sec = mktime(&gm);
+		local_sec = mktime(&local);
+cprintf("%s:    gm_sec=%d.\n", __FUNCTION__, gm_sec);
+cprintf("%s: local_sec=%d.\n", __FUNCTION__, local_sec);
+
+		struct timeval tv;
+		struct timezone tz;
+		gettimeofday(&tv, &tz);
+cprintf("%s:  tv=%d, minuteswest=%d, dst=%d.\n", __FUNCTION__, tv.tv_sec, tz.tz_minuteswest, tz.tz_dsttime);
+
+		return 0;
+	}
+	else if (!strcmp(base, "free_caches")) {
+		int c;
+		unsigned int test_num;
+		char *set_value = NULL;
+		int clean_time = 1;
+		int threshold = 0;
+
+		if(argc){
+			while((c = getopt(argc, argv, "c:w:t:")) != -1){
+				switch(c){
+					case 'c': // set the clean-cache mode: 0~3.
+						test_num = strtol(optarg, NULL, 10);
+        		if(test_num == LONG_MIN || test_num == LONG_MAX){
+        			_dprintf("ERROR: unknown value %s...\n", optarg);
+							return 0;
+						}
+
+						if(test_num < 0 || test_num > 3){
+							_dprintf("ERROR: the value %s was over the range...\n", optarg);
+							return 0;
+						}
+
+						set_value = optarg;
+
+						break;
+					case 'w': // set the waited time for cleaning.
+						test_num = strtol(optarg, NULL, 10);
+        		if(test_num <= 0 || test_num == LONG_MIN || test_num == LONG_MAX){
+        			_dprintf("ERROR: unknown value %s...\n", optarg);
+							return 0;
+						}
+
+						clean_time = test_num;
+
+						break;
+					case 't': // set the waited time for cleaning.
+						test_num = strtol(optarg, NULL, 10);
+        		if(test_num < 0 || test_num == LONG_MIN || test_num == LONG_MAX){
+        			_dprintf("ERROR: unknown value %s...\n", optarg);
+							return 0;
+						}
+
+						threshold = test_num;
+
+						break;
+					default:
+						fprintf(stderr, "Usage: free_caches [ -c clean_mode ] [ -w clean_time ] [ -t threshold ]\n");
+						break;
+				}
+			}
+		}
+
+		if(!set_value)
+			set_value = FREE_MEM_PAGE;
+
+		free_caches(set_value, clean_time, threshold);
+
+		return 0;
+	}
 	printf("Unknown applet: %s\n", base);
 	return 0;
 }

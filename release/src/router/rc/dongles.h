@@ -167,5 +167,7 @@
 #define SN_ZTE_AC581				0x0270
 #define SN_UTStarcom_UM185E			0x0271
 #define SN_AVM_Fritz				0x0272
+#define SN_Beceem_BCSM250_ASUS			0x0273
+#define SN_ZTEAX320			0x0274
 
 #endif

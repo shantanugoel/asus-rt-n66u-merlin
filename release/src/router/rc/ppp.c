@@ -70,13 +70,10 @@ ipup_main(int argc, char **argv)
 {
 	FILE *fp;
 	char *wan_ifname = safe_getenv("IFNAME");
-	char *value;
+	char *value = NULL;
 	char buf[256];
 	int unit, i;
 	char tmp[100], prefix[] = "wanXXXXXXXXXX_";
-
-	_dprintf("%s():: %s\n", __FUNCTION__, argv[0]);
-
 	char *pppd_pid = safe_getenv("PPPD_PID");
 	char *DEVICE = safe_getenv("DEVICE");
 	char *PPPLOGNAME = safe_getenv("PPPLOGNAME");
@@ -84,6 +81,8 @@ ipup_main(int argc, char **argv)
 	char *BUNDLE = safe_getenv("BUNDLE");
 	char *MACREMOTE = safe_getenv("MACREMOTE");
 	char *PEERNAME = safe_getenv("PEERNAME");
+
+	_dprintf("%s():: %s\n", __FUNCTION__, argv[0]);
 
 	_dprintf("%s: argc=%d.\n", __FUNCTION__, argc);
 	for(i = 1; i < argc; ++i)
@@ -96,25 +95,11 @@ ipup_main(int argc, char **argv)
 	_dprintf("%s: MACREMOTE=%s.\n", __FUNCTION__, MACREMOTE);
 	_dprintf("%s: PEERNAME=%s.\n", __FUNCTION__, PEERNAME);
 
-	if(!nvram_match("wans_mode", "off")){
-#ifdef RTCONFIG_USB_MODEM
-		if(isSerialNode(DEVICE) || isACMNode(DEVICE)){
-			for(i = WAN_UNIT_FIRST; i < WAN_UNIT_MAX; ++i){
-				if(get_dualwan_by_unit(i) == WANS_DUALWAN_IF_USB)
-					break;
-			}
+	if(LINKNAME == NULL || strlen(LINKNAME) <= 0)
+		return 0;
 
-			if(i != WAN_UNIT_MAX)
-				unit = i;
-			else
-				unit = WAN_UNIT_FIRST;
-		}
-		else
-#endif
-		unit = WAN_UNIT_FIRST;
-	}
-	else
-		unit = wan_primary_ifunit();
+	unit = atoi(LINKNAME+3);
+_dprintf("%s: unit=%d.\n", __FUNCTION__, unit);
 
 	snprintf(prefix, sizeof(prefix), "wan%d_", unit);
 
@@ -123,7 +108,9 @@ ipup_main(int argc, char **argv)
 	if(isSerialNode(DEVICE) || isACMNode(DEVICE))
 		nvram_set(strcat_r(prefix, "ifname", tmp), DEVICE);
 #endif
-	nvram_set(strcat_r(prefix, "pppoe_ifname", tmp), wan_ifname);
+
+	if(nvram_invmatch(strcat_r(prefix, "pppoe_demand", tmp), "1"))
+		nvram_set(strcat_r(prefix, "pppoe_ifname", tmp), wan_ifname);
 
 	/* Touch connection file */
 	if (!(fp = fopen(strcat_r("/tmp/ppp/link.", wan_ifname, tmp), "a"))) {
@@ -164,40 +151,27 @@ int
 ipdown_main(int argc, char **argv)
 {
 	char *wan_ifname = safe_getenv("IFNAME");
-	char *DEVICE = safe_getenv("DEVICE");
-	int unit, i;
+	int unit;
 	char tmp[100], prefix[] = "wanXXXXXXXXXX_";
+	char *value = NULL;
+	char buf[256];
+	int pid, orig_pid;
+	char *LINKNAME = safe_getenv("LINKNAME");
 
 	_dprintf("%s():: %s\n", __FUNCTION__, argv[0]);
 
-	if(!nvram_match("wans_mode", "off")){
-#ifdef RTCONFIG_USB_MODEM
-		if(isSerialNode(DEVICE) || isACMNode(DEVICE)){
-			for(i = WAN_UNIT_FIRST; i < WAN_UNIT_MAX; ++i){
-				if(get_dualwan_by_unit(i) == WANS_DUALWAN_IF_USB)
-					break;
-			}
+	if(LINKNAME == NULL || strlen(LINKNAME) <= 0)
+		return 0;
 
-			if(i != WAN_UNIT_MAX)
-				unit = i;
-			else
-				unit = WAN_UNIT_FIRST;
-		}
-		else
-#endif
-		unit = WAN_UNIT_FIRST;
-	}
-	else
-		unit = wan_primary_ifunit();
+	unit = atoi(LINKNAME+3);
+_dprintf("%s: unit=%d.\n", __FUNCTION__, unit);
 
 	snprintf(prefix, sizeof(prefix), "wan%d_", unit);
 
 	wan_down(wan_ifname);
 
-_dprintf("%s(2):: prefix=%s.\n", __FUNCTION__, prefix);
 	// override wan_state to get real reason
 	update_wan_state(prefix, WAN_STATE_STOPPED, pppstatus());
-_dprintf("%s(3):: prefix=%s.\n", __FUNCTION__, prefix);
 
 	unlink(strcat_r("/tmp/ppp/link.", wan_ifname, tmp));
 
@@ -210,11 +184,21 @@ _dprintf("%s(3):: prefix=%s.\n", __FUNCTION__, prefix);
 #ifdef RTCONFIG_IPV6
 int ip6up_main(int argc, char **argv)
 {
+	char *wan_ifname = safe_getenv("IFNAME");
+
+	wan6_up(wan_ifname);
+	
+	start_firewall(0, 0);
+
 	return 0;
 }
 
 int ip6down_main(int argc, char **argv)
 {
+	char *wan_ifname = safe_getenv("IFNAME");
+
+	wan6_down(wan_ifname);
+
 	return 0;
 }
 #endif  // IPV6
@@ -225,34 +209,18 @@ int ip6down_main(int argc, char **argv)
 int
 authup_main(int argc, char **argv)
 {
-	char *wan_ifname = safe_getenv("IFNAME");
-	char *DEVICE = safe_getenv("DEVICE");
-	int unit, i;
-	char tmp[100], prefix[] = "wanXXXXXXXXXX_";
+	int unit;
+	char *value = NULL;
+	char buf[256];
+	char *LINKNAME = safe_getenv("LINKNAME");
 
 	_dprintf("%s():: %s\n", __FUNCTION__, argv[0]);
 
-	if(!nvram_match("wans_mode", "off")){
-#ifdef RTCONFIG_USB_MODEM
-		if(isSerialNode(DEVICE) || isACMNode(DEVICE)){
-			for(i = WAN_UNIT_FIRST; i < WAN_UNIT_MAX; ++i){
-				if(get_dualwan_by_unit(i) == WANS_DUALWAN_IF_USB)
-					break;
-			}
+	if(LINKNAME == NULL || strlen(LINKNAME) <= 0)
+		return 0;
 
-			if(i != WAN_UNIT_MAX)
-				unit = i;
-			else
-				unit = WAN_UNIT_FIRST;
-		}
-		else
-#endif
-		unit = WAN_UNIT_FIRST;
-	}
-	else
-		unit = wan_primary_ifunit();
-
-	snprintf(prefix, sizeof(prefix), "wan%d_", unit);
+	unit = atoi(LINKNAME+3);
+_dprintf("%s: unit=%d.\n", __FUNCTION__, unit);
 
 	_dprintf("authup_main:: done\n");
 	return 0;
@@ -264,32 +232,19 @@ authup_main(int argc, char **argv)
 int
 authdown_main(int argc, char **argv)
 {
-	char *wan_ifname = safe_getenv("IFNAME");
-	char *DEVICE = safe_getenv("DEVICE");
-	int unit, i;
-	char tmp[100], prefix[] = "wanXXXXXXXXXX_";
+	int unit;
+	char prefix[] = "wanXXXXXXXXXX_";
+	char *value = NULL;
+	char buf[256];
+	char *LINKNAME = safe_getenv("LINKNAME");
 
 	_dprintf("%s():: %s\n", __FUNCTION__, argv[0]);
 
-	if(!nvram_match("wans_mode", "off")){
-#ifdef RTCONFIG_USB_MODEM
-		if(isSerialNode(DEVICE) || isACMNode(DEVICE)){
-			for(i = WAN_UNIT_FIRST; i < WAN_UNIT_MAX; ++i){
-				if(get_dualwan_by_unit(i) == WANS_DUALWAN_IF_USB)
-					break;
-			}
+	if(LINKNAME == NULL || strlen(LINKNAME) <= 0)
+		return 0;
 
-			if(i != WAN_UNIT_MAX)
-				unit = i;
-			else
-				unit = WAN_UNIT_FIRST;
-		}
-		else
-#endif
-		unit = WAN_UNIT_FIRST;
-	}
-	else
-		unit = wan_primary_ifunit();
+	unit = atoi(LINKNAME+3);
+_dprintf("%s: unit=%d.\n", __FUNCTION__, unit);
 
 	snprintf(prefix, sizeof(prefix), "wan%d_", unit);
 

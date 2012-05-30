@@ -179,6 +179,30 @@ setMAC_2G(const char *mac)
 	return 1;
 }
 
+#ifdef RTCONFIG_DSL
+// used by rc
+void get_country_code_from_rc(char* country_code)
+{
+	unsigned char CC[3];
+	memset(CC, 0, sizeof(CC));
+	FRead(CC, OFFSET_COUNTRY_CODE, 2);
+
+	if (CC[0] == 0xff && CC[1] == 0xff)
+	{
+		*country_code++ = 'T';
+		*country_code++ = 'W';
+		*country_code = 0;	
+	}
+	else
+	{
+		*country_code++ = CC[0];
+		*country_code++ = CC[1];
+		*country_code = 0;	
+	}
+}
+#endif
+
+
 int
 getCountryCode_2G()
 {
@@ -388,6 +412,33 @@ FWRITE(char *da, char* str_hex)
 	return 0;
 }
 
+int getSN(void)
+{
+	char sn[SERIAL_NUMBER_LENGTH +1];
+
+	if(FRead(sn, OFFSET_SERIAL_NUMBER, SERIAL_NUMBER_LENGTH) < 0)
+		dbg("READ Serial Number: Out of scope\n");
+	else
+	{
+		sn[SERIAL_NUMBER_LENGTH] = '\0';
+		puts(sn);
+	}
+	return 1;
+}
+
+int setSN(const char *SN)
+{
+	if(SN==NULL || !isValidSN(SN))
+		return 0;
+
+	if(FWrite(SN, OFFSET_SERIAL_NUMBER, SERIAL_NUMBER_LENGTH) < 0)
+		return 0;
+
+	getSN();
+	return 1;
+}
+
+
 int
 setPIN(const char *pin)
 {
@@ -406,10 +457,11 @@ setPIN(const char *pin)
 getBootVer()
 {
 	unsigned char btv[5];
-	char output_buf[8];
+	char output_buf[32];
 	memset(btv, 0, sizeof(btv));
+	memset(output_buf, 0, sizeof(output_buf));
 	FRead(btv, OFFSET_BOOT_VER, 4);
-	sprintf(output_buf, "%c.%c.%c.%c", btv[0], btv[1], btv[2], btv[3]);
+	sprintf(output_buf, "%s-%c.%c.%c.%c", nvram_safe_get("productid"),btv[0], btv[1], btv[2], btv[3]);
 	puts(output_buf);
 
 	return 0;
@@ -429,6 +481,9 @@ getPIN()
 int
 GetPhyStatus(void)
 {
+#ifdef RTCONFIG_DSL // TODO: is it needed by ATE?
+	return 1;
+#else
         int fd;
         char buf[32];
 
@@ -461,25 +516,42 @@ GetPhyStatus(void)
 
         puts(buf);
 	return 1;
+#endif
 }
 
 int
 setAllLedOn(void)
 {
+#ifdef RTCONFIG_DSL
         LED_CONTROL(RA_LED_POWER, RA_LED_ON);
         LED_CONTROL(RA_LED_WAN, RA_LED_ON);
-        LED_CONTROL(RA_LED_LAN, RA_LED_ON);
-        LED_CONTROL(RA_LED_USB, RA_LED_ON);
+#else
+	LED_CONTROL(RA_LED_POWER, RA_LED_ON);
+	LED_CONTROL(RA_LED_WAN, RA_LED_ON);
+	LED_CONTROL(RA_LED_LAN, RA_LED_ON);
+	LED_CONTROL(RA_LED_USB, RA_LED_ON);
+#endif
 	puts("1");
 	return 0;
 }
 
+#if 0
 int
 setAllLedOff(void)
 {
 	puts("Not support");
 	return 0;
 }
+#else
+setAllLedOff(void)
+{
+        LED_CONTROL(RA_LED_POWER, RA_LED_OFF);
+        LED_CONTROL(RA_LED_WAN, RA_LED_OFF);
+        LED_CONTROL(RA_LED_LAN, RA_LED_OFF);
+        LED_CONTROL(RA_LED_USB, RA_LED_OFF);
+        return 0;
+}
+#endif
 
 int 
 ResetDefault(void)
@@ -4432,4 +4504,110 @@ wl_WscConfigured(int unit)
 	else
 		return 0;
 }
+
+#define FAIL_LOG_MAX 100
+
+struct FAIL_LOG
+{
+	unsigned char num;
+	unsigned char bits[15];
+};
+
+void
+Get_fail_log(char *buf, int size, unsigned int offset)
+{
+	struct FAIL_LOG fail_log, *log = &fail_log;
+	char *p = buf;
+	int x, y;
+
+	memset(buf, 0, size);
+	FRead(&fail_log, offset, sizeof(fail_log));
+	if(log->num == 0 || log->num > FAIL_LOG_MAX)
+	{
+		return;
+	}
+	for(x = 0; x < (FAIL_LOG_MAX >> 3); x++)
+	{
+		for(y = 0; log->bits[x] != 0 && y < 7; y++)
+		{
+			if(log->bits[x] & (1 << y))
+			{
+				p += snprintf(p, size - (p - buf), "%d,", (x << 3) + y);
+			}
+		}
+	}
+}
+
+void
+Gen_fail_log(const char *logStr, int max, struct FAIL_LOG *log)
+{
+	char *p = logStr, *next;
+	int num;
+	int x,y;
+
+	memset(log, 0, sizeof(struct FAIL_LOG));
+	while(*p != '\0')
+	{
+		while(*p != '\0' && !isdigit(*p))
+			p++;
+		if(*p == '\0')
+			break;
+		num = strtoul(p, &next, 0);
+		if(num > FAIL_LOG_MAX)
+			break;
+		x = num >> 3;
+		y = num & 0x7;
+		log->bits[x] |= (1 << y);
+		p = next;
+	}
+	if(max > FAIL_LOG_MAX)
+		log->num = FAIL_LOG_MAX;
+	else
+		log->num = max;
+}
+
+void
+Get_fail_ret(void)
+{
+	unsigned char str[ OFFSET_FAIL_BOOT_LOG - OFFSET_FAIL_RET ];
+	FRead(str, OFFSET_FAIL_RET, sizeof(str));
+	if(str[0] == 0 || str[0] == 0xff)
+		return;
+	str[sizeof(str) -1] = '\0';
+	puts(str);
+}
+
+void
+Get_fail_reboot_log(void)
+{
+	char str[512];
+	Get_fail_log(str, sizeof(str), OFFSET_FAIL_BOOT_LOG);
+	puts(str);
+}
+
+void
+Get_fail_dev_log(void)
+{
+	char str[512];
+	Get_fail_log(str, sizeof(str), OFFSET_FAIL_DEV_LOG);
+	puts(str);
+}
+
+void
+ate_commit_bootlog(char *err_code)
+{
+	unsigned char fail_buffer[ OFFSET_SERIAL_NUMBER - OFFSET_FAIL_RET ];
+	struct FAIL_LOG *fail_log;
+
+	nvram_set("Ate_power_on_off_enable", err_code);
+	nvram_commit();
+
+	memset(fail_buffer, 0, sizeof(fail_buffer));
+	strncpy(fail_buffer, err_code, OFFSET_FAIL_BOOT_LOG - OFFSET_FAIL_RET -1);
+	Gen_fail_log(nvram_get("Ate_reboot_log"), nvram_get_int("Ate_boot_check"), (struct FAIL_LOG *) &fail_buffer[ OFFSET_FAIL_BOOT_LOG - OFFSET_FAIL_RET ]);
+	Gen_fail_log(nvram_get("Ate_dev_log"),    nvram_get_int("Ate_boot_check"), (struct FAIL_LOG *) &fail_buffer[ OFFSET_FAIL_DEV_LOG  - OFFSET_FAIL_RET ]);
+
+	FWrite(fail_buffer, OFFSET_FAIL_RET, sizeof(fail_buffer));
+}
+
 #endif

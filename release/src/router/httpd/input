@@ -1,0 +1,20 @@
+ej.c:	for (handler = &ej_handlers[0]; handler->pattern; handler++) {
+ej.c:		if (strncmp(handler->pattern, func, strlen(handler->pattern)) == 0)
+ej.c:			handler->output(0, stream, argc, argv);
+httpd.c:	for (exhandler = &except_mime_handlers[0]; exhandler->pattern; exhandler++) {
+httpd.c:		if(match(exhandler->pattern, url)) 
+httpd.c:			mime_exception = exhandler->flag;
+httpd.c:	for (handler = &mime_handlers[0]; handler->pattern; handler++) {
+httpd.c:		if (match(handler->pattern, url))
+httpd.c:			if (handler->auth) {
+httpd.c:					handler->auth(auth_userid, auth_passwd, auth_realm);
+httpd.c:			if (strcasecmp(method, "post") == 0 && !handler->input) {
+httpd.c:			if (handler->input) {
+httpd.c:				handler->input(file, conn_fp, cl, boundary);
+httpd.c:			send_headers( 200, "Ok", handler->extra_header, handler->mime_type );
+httpd.c:			if (strcasecmp(method, "head") != 0 && handler->output) {
+httpd.c:				handler->output(file, conn_fp);
+httpd.c:	if (!handler->pattern) 
+web.c:                for (handler = &ej_handlers[0]; handler->pattern; handler++) {
+web.c:                        if (strcmp(handler->pattern, pattern) == 0) {
+web.c:                                handler->output(0, stream, argc, argv);

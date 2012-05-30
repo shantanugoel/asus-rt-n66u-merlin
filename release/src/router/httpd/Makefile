@@ -31,6 +31,11 @@ else
 OBJS += web-broadcom.o
 endif
 
+ifeq ($(RTCONFIG_DSL),y)
+OBJS += web-dsl.o
+OBJS += web-dsl-upg.o
+endif
+
 LIBS = -L$(TOP)/nvram -lnvram -L$(TOP)/shared -lshared
 
 ifeq ($(RTCONFIG_USB),y)

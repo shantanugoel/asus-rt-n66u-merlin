@@ -1000,7 +1000,11 @@ load_dictionary (char *lang, pkw_t pkw)
 
 	do      {
 //		 printf("Open (%s) dictionary file.\n", dfn);
-		dfp = fopen (dfn, "r");
+//
+// Now DICT files all use UTF-8, it is no longer a text file
+// it need to use open as binary
+//
+		dfp = fopen (dfn, "rb");
 		if (dfp != NULL)	{
 #ifndef RELOAD_DICT
 			snprintf (loaded_dict, sizeof (loaded_dict), "%s", dfn);
@@ -1043,11 +1047,13 @@ load_dictionary (char *lang, pkw_t pkw)
 			tmp_ptr++;
 			remain_dict--;
 		}
-		if (*tmp_ptr == 0) {
+		else if (*tmp_ptr == 0) {
 			break;
 		}
-		tmp_ptr++;
-		remain_dict--;
+		else {
+			tmp_ptr++;
+			remain_dict--;
+		}
 	}
 	// allocate memory according dict_item
 	pkw->idx = malloc (dict_item * sizeof(unsigned char*));
@@ -1308,6 +1314,8 @@ void reapchild()	// 0527 add
 	wait(NULL);
 }
 
+int do_ssl = 0; 	// use Global for HTTPS upgrade judgment in web.c
+int ssl_stream_fd; 	// use Global for HTTPS stream fd in web.c
 int main(int argc, char **argv)
 {
 	usockaddr usa;
@@ -1317,8 +1325,9 @@ int main(int argc, char **argv)
 	fd_set active_rfds;
 	conn_list_t pool;
         int c;
-        int do_ssl = 0;
+        //int do_ssl = 0;
 
+	do_ssl = 0; // default
 	// usage : httpd -s -p [port]
 	if(argc) {
         	while ((c = getopt(argc, argv, "sp:")) != -1) {
@@ -1442,6 +1451,8 @@ int main(int argc, char **argv)
 			if (count) {
 #ifdef RTCONFIG_HTTPS
 				if (do_ssl) {
+					ssl_stream_fd = item->fd;
+					//_dprintf("[httpd] item->fd : %d\n", item->fd); // tmp test
 					conn_fp = ssl_server_fopen(item->fd);
 					if(conn_fp == NULL) {
 						perror("fdopen(ssl)");

@@ -106,10 +106,14 @@ ej_nat_table(int eid, webs_t wp, int argc, char_t **argv)
 //	netconf_nat_t **plist, *cur;
 #endif
 	char line[256], tstr[32];
+	// value need to init
+	ret = 0;
 
 	if (nvram_match("wan_nat_x", "1"))
 	{
+#ifndef RTCONFIG_DSL
 		ret += websWrite(wp, "Hardware NAT: %s\n", is_hwnat_loaded() ? "Enabled": "Disabled");
+#endif		
 		ret += websWrite(wp, "Software QoS: %s\n", nvram_match("qos_enable", "1") ? "Enabled": "Disabled");
 	}
 
@@ -833,7 +837,8 @@ char *getWscStatusStr(int status)
 	case 33:
 		return "WPS_ERROR_DEV_PWD_AUTH_FAIL";
 	case 34:
-		return "Configured";
+//		return "Configured";
+		return "Success";
 	case 35:
 		return "SCAN AP";
 	case 36:

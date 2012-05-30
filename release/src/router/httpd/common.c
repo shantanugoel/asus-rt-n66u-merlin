@@ -44,7 +44,7 @@
 #include <bcmnvram_f.h>
 #include <common.h>
 
-#define sys_upgrade(url) (1) 
+/* #define sys_upgrade(url) (1) */
 #define sys_stats(url)   (1)
 
 #define MAX_LINE_SIZE 512

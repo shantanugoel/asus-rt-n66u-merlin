@@ -14,6 +14,11 @@
 #define FIELD_HELPPATH "HelpPath: "
 #define FIELD_FILENAME "Filename: "
 
+#define APP_OWNER_ALL "all"
+#define APP_OWNER_ASUS "asus"
+#define APP_OWNER_OLEG "oleg"
+#define APP_OWNER_OTHERS "others"
+
 #define FIELD_YES "yes"
 #define FIELD_NO "no"
 
@@ -34,6 +39,7 @@ struct apps_info{
 	char *new_optional_utility;
 	char *help_path;
 	char *new_file_name;
+	char *from_owner;
 	apps_info_t *next;
 } ;
 #pragma pack() // End.
@@ -54,5 +60,5 @@ struct apps_info{
 char *get_status_field(const char *target, const char *field);
 apps_info_t *initial_apps_data();
 void free_apps_list(apps_info_t **apps_info_list);
-apps_info_t *get_apps_list();
+apps_info_t *get_apps_list(char *argv);
 int printf_apps_info();

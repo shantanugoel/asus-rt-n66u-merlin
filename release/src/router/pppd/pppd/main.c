@@ -1310,7 +1310,7 @@ static void check_time(void)
 	struct timeval t;
 	struct sysinfo i;
     struct callout *p;
-	
+
 	if(nochecktime)
 		return;
 
@@ -1328,7 +1328,6 @@ static void check_time(void)
 		/* system time has changed, update counters and timeouts */
 		info("System time change detected.");
 		start_time.tv_sec += new_diff - uptime_diff;
-		
     	for (p = callout; p != NULL; p = p->c_next)
 			p->c_time.tv_sec += new_diff - uptime_diff;
 	}
@@ -1433,7 +1432,7 @@ timeleft(tvp)
 {
     if (callout == NULL)
 	return NULL;
-	
+
 	check_time();
 
     gettimeofday(&timenow, NULL);

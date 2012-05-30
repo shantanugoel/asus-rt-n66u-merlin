@@ -6,6 +6,10 @@ ifeq ($(STATIC),1)
 CFLAGS += -static
 endif
 
+ifeq ($(RTCONFIG_DSL),y)
+CFLAGS += -DRTCONFIG_DSL
+endif
+
 all: libnvram.so libnvram.a nvram
 
 libnvram.so: nvram_linux.o nvram_convert.o

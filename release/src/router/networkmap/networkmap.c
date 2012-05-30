@@ -145,6 +145,7 @@ static void refresh_sig(int sig)
         refresh_exist_table = 0;
 	scan_count = 0;	
 	nvram_set("networkmap_status", "1");
+	eval("rm", "/var/client*");
 #if 0
 	//reset exixt ip table
         memset(&client_detail_info_tab, 0x00, sizeof(client_detail_info_tabLE));
@@ -173,9 +174,11 @@ int main()
                 fprintf(fp, "%d", getpid());
                 fclose(fp);
         }
+	#ifdef DEBUG
+		eval("rm", "/var/client*");
+	#endif
 
 	//Initial client tables
-printf("=== Networkmap try to lock and get shared memory...\n");
         spinlock_lock(SPINLOCK_Networkmap);
 	shm_client_detail_info_id = shmget((key_t)1001, sizeof(CLIENT_DETAIL_INFO_TABLE), 0666|IPC_CREAT);
         if (shm_client_detail_info_id == -1){
@@ -238,6 +241,7 @@ printf("=== Networkmap try to lock and get shared memory...\n");
 		    }
 		    scan_count++;
 		    scan_ipaddr[3]++;
+
 		    if( scan_count<255 && memcmp(scan_ipaddr, my_ipaddr, 4) ) {
                         sent_arppacket(arp_sockfd, scan_ipaddr);
 		    }         
@@ -255,7 +259,6 @@ printf("=== Networkmap try to lock and get shared memory...\n");
 		arp_getlen=recvfrom(arp_sockfd, buffer, 512, 0, NULL, NULL);
 
 	   	if(arp_getlen == -1) {
-                        NMP_DEBUG_M("* Recvfrom ARP Socket timeout\n");
 			if( scan_count<255)
 				goto fullscan;
 			else
@@ -263,9 +266,10 @@ printf("=== Networkmap try to lock and get shared memory...\n");
 		}
 		else {
 		    arp_ptr = (ARP_HEADER*)(buffer);
-                    NMP_DEBUG("*Receive an ARP Packet from: %d.%d.%d.%d\n",
+                    NMP_DEBUG("*Receive an ARP Packet from: %d.%d.%d.%d, len:%d\n",
 				(int *)arp_ptr->source_ipaddr[0],(int *)arp_ptr->source_ipaddr[1],
-				(int *)arp_ptr->source_ipaddr[2],(int *)arp_ptr->source_ipaddr[3]);
+				(int *)arp_ptr->source_ipaddr[2],(int *)arp_ptr->source_ipaddr[3],
+				arp_getlen);
 
 		    //Check ARP packet if source ip and router ip at the same network
                     if( !memcmp(my_ipaddr, arp_ptr->source_ipaddr, 3) ) {
@@ -277,7 +281,7 @@ printf("=== Networkmap try to lock and get shared memory...\n");
                        	    memcmp(arp_ptr->dest_ipaddr, my_ipaddr, 4) == 0 && 	// dest IP
                        	    memcmp(arp_ptr->dest_hwaddr, my_hwaddr, 6) == 0) 	// dest MAC
 			{
-			    NMP_DEBUG("   It's an ARP Response to Router!\n");
+			    //NMP_DEBUG("   It's an ARP Response to Router!\n");
                             for(i=0; i<p_client_detail_info_tab->ip_mac_num; i++) {
                             	if( !memcmp(p_client_detail_info_tab->ip_addr[i], arp_ptr->source_ipaddr, 4) ) 
                                     break;
@@ -293,7 +297,7 @@ printf("=== Networkmap try to lock and get shared memory...\n");
                                 p_client_detail_info_tab->ip_mac_num++;
 				spinlock_unlock(SPINLOCK_Networkmap);
 
-			    #if 1 //Write client info to file
+			    #ifdef DEBUG  //Write client info to file
                 		fp_ip=fopen("/var/client_ip_mac.txt", "a");
                 		if (fp_ip==NULL) {
                     		printf("File Open Error!\n");
@@ -334,16 +338,14 @@ printf("=== Networkmap try to lock and get shared memory...\n");
 	    } // End of while for flush buffer
 
 	    //Find All Application of clients
-	    printf("Find All Application...\n");
 	    if(p_client_detail_info_tab->detail_info_num < p_client_detail_info_tab->ip_mac_num) {
 		FindAllApp(my_ipaddr, p_client_detail_info_tab);
-		//Fill client detail info table
+		#ifdef DEBUG //Fill client detail info table
                 fp_ip=fopen("/var/client_detail_info.txt", "a");
                 if (fp_ip==NULL) {
                         printf("File Open Error!\n");
                 }
                 else {
-			printf("Write to detail file\n");
                         fprintf(fp_ip, "%s,%d,%d,%d,%d\n",
                                 p_client_detail_info_tab->device_name[p_client_detail_info_tab->detail_info_num], 
 				p_client_detail_info_tab->type[p_client_detail_info_tab->detail_info_num], 
@@ -352,6 +354,7 @@ printf("=== Networkmap try to lock and get shared memory...\n");
 				p_client_detail_info_tab->itune[p_client_detail_info_tab->detail_info_num]);
                         fclose(fp_ip);
                 }
+		#endif
 		p_client_detail_info_tab->detail_info_num++;
 	    }
 

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 use IO::File;
 
@@ -23,7 +23,7 @@ sub strip_comments($)
 $data =~ s{
     (<SCRIPT .*?</SCRIPT>)|
     (<STYLE .*?</STYLE>)|
-    <!--                   # comments begin with a `<!--'
+    <!--[^[<]              # comments begin with a `<!--'
                         # followed by 0 or more comments;
     [^\#]*?                # and includes all text up to and including
     -->                    # the *next* occurrence of `-->'

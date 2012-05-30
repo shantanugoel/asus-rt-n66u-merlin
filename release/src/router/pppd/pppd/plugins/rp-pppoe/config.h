@@ -73,7 +73,7 @@
 #define HAVE_LINUX_IF_PPPOX_H 1
 
 /* Define if you have the <net/bpf.h> header file.  */
-/* undef HAVE_NET_BPF_H */
+/* #undef HAVE_NET_BPF_H */
 
 /* Define if you have the <net/if_arp.h> header file.  */
 #define HAVE_NET_IF_ARP_H 1
@@ -130,7 +130,7 @@
 #define HAVE_UNISTD_H 1
 
 /* Define if you have the N_HDLC line discipline in linux/termios.h */
-#define HAVE_N_HDLC 1
+/* #undef HAVE_N_HDLC */
 
 /* Define if bitfields are packed in reverse order */
 #define PACK_BITFIELDS_REVERSED 1

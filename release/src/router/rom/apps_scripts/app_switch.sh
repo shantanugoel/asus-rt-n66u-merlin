@@ -84,6 +84,10 @@ fi
 
 if [ -d "$APPS_INSTALL_PATH" ]; then
 	app_base_link.sh
+	if [ "$?" != "0" ]; then
+		# apps_state_error was already set by app_base_link.sh.
+		exit 1
+	fi
 fi
 
 if [ -f "$APPS_INSTALL_PATH/$nonautorun_file" ]; then

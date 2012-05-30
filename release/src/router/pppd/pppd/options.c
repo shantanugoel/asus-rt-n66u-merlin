@@ -384,6 +384,7 @@ parse_args(argc, argv)
 	    usage();
 	    return 0;
 	}
+
 	n = n_arguments(opt);
 	if (argc < n) {
 	    option_error("too few parameters for option %s", arg);

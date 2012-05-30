@@ -29,14 +29,33 @@ exit;
 
 
 #
+# add include list for HTML prep
+#
+sub includelist_htmlprep {
+	my $fn = shift;
+# Case exact	
+	if ($fn eq "Advanced_ADSL_Content.asp") { return 1; }
+	if ($fn eq "Advanced_IPTV_Content.asp") { return 1; }
+	if ($fn eq "Advanced_FirmwareUpgrade_Content.asp") { return 1; }
+	return 0;
+}
+
+#
 # add exclude list here
 #
 sub excludelist {
 	my $fn = shift;
-	$fn = lc($fn);
+# Case exact	
 	if ($fn eq "jquery.js") { return 1; }
 	if ($fn eq "svg.js") { return 1; }
 	if ($fn eq "tablesorter.js") { return 1; }
+	if ($fn eq "jstz.min.js") { return 1; }	
+	if ($fn eq "ASUS_DDNS_TOS.asp") { return 1; }
+	if ($fn eq "ext-all.js") { return 1; }
+	if ($fn eq "ext-base.js") { return 1; }
+	if ($fn eq "coda-slider.1.1.1.pack.js") { return 1; }
+	if ($fn eq "jquery-easing-compatibility.1.2.pack.js") { return 1; }
+	if ($fn eq "jquery-easing.1.2.pack.js") { return 1; }
 	return 0;
 }
 
@@ -58,7 +77,12 @@ sub ext_filter {
 sub addcommand {
 	my $fn = shift;
 	$ModelName = uc($ModelName);
-	 printf $FH $ToolHelp."/LnxHtmlPrep"." ".$fn." ".$ModelName." ".$HtmlPrepOutput."\n";
+	 my ($includelist_htmlprep)=&includelist_htmlprep(basename( $fn ));
+	 if ($includelist_htmlprep)
+	 {
+	 # process files that need to do preprocessor
+		printf $FH $ToolHelp."/LnxHtmlPrep"." ".$fn." ".$ModelName." ".$HtmlPrepOutput." ".$ToolHelp."/DefaultModels.txt\n";
+	 }
 	 printf $FH $ToolHelp."/rmvcomments.pl"." ".$fn."\n";
 	 printf $FH $ToolHelp."/LnxRmvTabs"." ".$fn."\n";
 	 printf $FH $ToolHelp."/LnxHtmlEnumDict"." ".$fn." ".$DictEnum." ".$DictNoFound."\n";

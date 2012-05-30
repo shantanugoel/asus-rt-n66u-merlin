@@ -42,6 +42,7 @@ endif
 CFLAGS += -DBCMINTERNAL -DBCMDBG
 
 #UTILS := mii-tool robocfg ttcp
+UTILS := robocfg
 #ifneq ($(CONFIG_LINUX26),y)
 #CFLAGS += -U CONFIG_NVRAM_SIZE
 #endif

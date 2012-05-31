@@ -36,6 +36,7 @@ PATH := $(RELEASEDIR)/tools:$(PATH)
 include ./target.mak
 include ./platform.mak
 include ./version.conf
+include ./dsl.mak
 
 export PLATFORM := mipsel-uclibc
 export PLATFORMDIR := $(SRCBASE)/router/$(PLATFORM)
@@ -48,9 +49,10 @@ uppercase_N = $(shell echo $(N) | tr a-z  A-Z)
 lowercase_N = $(shell echo $(N) | tr A-Z a-z)
 uppercase_B = $(shell echo $(B) | tr a-z  A-Z)
 lowercase_B = $(shell echo $(B) | tr A-Z a-z)
-BUILD_TIME=$(shell LC_ALL=C date -u)
-BUILD_USER=$(shell whoami)
-BUILD_INFO=$(shell git log --pretty="%h" -n 1)
+BUILD_TIME := $(shell LC_ALL=C date -u)
+#BUILD_USER=$(shell whoami)
+BUILD_USER ?= $(shell whoami)
+BUILD_INFO := $(shell git log --pretty="%h" -n 1)
 
 ifeq ($(CONFIG_LINUX26),y)
 mips_rev = $(if $(filter $(MIPS32),r2),MIPSR2,MIPSR1)
@@ -323,9 +325,22 @@ define RouterOptions
 			sed -i "/RTCONFIG_MEDIA_SERVER/d" $(1); \
 			echo "RTCONFIG_MEDIA_SERVER=y" >>$(1); \
 		fi; \
+		if [ "$(CLOUDSYNC)" = "y" ]; then \
+			sed -i "/RTCONFIG_CLOUDSYNC/d" $(1); \
+			echo "RTCONFIG_CLOUDSYNC=y" >>$(1); \
+		fi; \
 		if [ "$(MODEM)" = "y" ]; then \
 			sed -i "/RTCONFIG_USB_MODEM/d" $(1); \
 			echo "RTCONFIG_USB_MODEM=y" >>$(1); \
+			if [ "$(MODEMPIN)" = "y" ]; then \
+				echo "RTCONFIG_USB_MODEM_PIN=y" >>$(1); \
+			else \
+				echo "# RTCONFIG_USB_MODEM_PIN is not set" >>$(1); \
+			fi; \
+			if [ "$(BECEEM)" = "y" ]; then \
+				sed -i "/RTCONFIG_USB_BECEEM/d" $(1); \
+				echo "RTCONFIG_USB_BECEEM=y" >>$(1); \
+			fi; \
 		fi; \
 		if [ "$(PRINTER)" = "y" ]; then \
 			sed -i "/RTCONFIG_USB_PRINTER/d" $(1); \
@@ -334,10 +349,6 @@ define RouterOptions
 		if [ "$(WEBDAV)" = "y" ]; then \
 			sed -i "/RTCONFIG_WEBDAV/d" $(1); \
 			echo "RTCONFIG_WEBDAV=y" >>$(1); \
-		fi; \
-		if [ "$(CLOUDSYNC)" = "y" ]; then \
-			sed -i "/RTCONFIG_CLOUDSYNC/d" $(1); \
-			echo "RTCONFIG_CLOUDSYNC=y" >>$(1); \
 		fi; \
 		if [ "$(HTTPS)" = "y" ]; then \
 			sed -i "/RTCONFIG_HTTPS/d" $(1); \
@@ -358,6 +369,12 @@ define RouterOptions
 	if [ "$(NO_SAMBA)" = "y" ]; then \
 		sed -i "/RTCONFIG_SAMBASRV/d" $(1); \
 		echo "# RTCONFIG_SAMBASRV is not set" >>$(1); \
+	fi; \
+	if [ "$(NO_USBSTORAGE)" = "y" ]; then \
+		sed -i "/RTCONFIG_SAMBASRV/d" $(1); \
+		echo "# RTCONFIG_SAMBASRV is not set" >>$(1); \
+		sed -i "/RTCONFIG_FTP/d" $(1); \
+		echo "# RTCONFIG_FTP is not set" >>$(1); \
 	fi; \
 	if [ "$(ZEBRA)" = "y" ]; then \
 		sed -i "/RTCONFIG_ZEBRA/d" $(1); \
@@ -415,9 +432,9 @@ define RouterOptions
                 sed -i "/RTCONFIG_DNSMASQ/d" $(1); \
                 echo "RTCONFIG_DNSMASQ=y" >>$(1); \
         fi; \
-        if [ "$(TRAFFIC_METER)" = "y" ]; then \
-                sed -i "/RTCONFIG_TRAFFIC_METER/d" $(1); \
-                echo "RTCONFIG_TRAFFIC_METER=y" >>$(1); \
+        if [ "$(ISP_METER)" = "y" ]; then \
+                sed -i "/RTCONFIG_ISP_METER/d" $(1); \
+                echo "RTCONFIG_ISP_METER=y" >>$(1); \
         fi; \
 	)
 	$(call platformRouterOptions, $(1))
@@ -446,6 +463,22 @@ define BusyboxOptions
 		echo "CONFIG_FEATURE_SORT_BIG=y" >>$(1); \
 		sed -i "/CONFIG_FTPPUT/d" $(1); \
 		echo "CONFIG_FTPPUT=y" >>$(1); \
+		sed -i "/CONFIG_FTPGET/d" $(1); \
+		echo "CONFIG_FTPGET=y" >>$(1); \
+		sed -i "/CONFIG_TFTP/d" $(1); \
+		echo "CONFIG_TFTP=y" >>$(1); \
+		sed -i "/CONFIG_TFTPD/d" $(1); \
+		echo "# CONFIG_TFTPD is not set" >>$(1); \
+		sed -i "/CONFIG_FEATURE_TFTP_GET/d" $(1); \
+		echo "# CONFIG_FEATURE_TFTP_GET is not set" >>$(1); \
+		sed -i "/CONFIG_FEATURE_TFTP_PUT/d" $(1); \
+		echo "CONFIG_FEATURE_TFTP_PUT=y" >>$(1); \
+		sed -i "/CONFIG_FEATURE_TFTP_BLOCKSIZE/d" $(1); \
+		echo "# CONFIG_FEATURE_TFTP_BLOCKSIZE is not set" >>$(1); \
+		sed -i "/CONFIG_FEATURE_TFTP_PROGRESS_BAR/d" $(1); \
+		echo "# CONFIG_FEATURE_TFTP_PROGRESS_BAR is not set" >>$(1); \
+		sed -i "/CONFIG_TFTP_DEBUG/d" $(1); \
+		echo "# CONFIG_TFTP_DEBUG is not set" >>$(1); \
 		sed -i "/CONFIG_CLEAR/d" $(1); \
 		echo "CONFIG_CLEAR=y" >>$(1); \
 		sed -i "/CONFIG_SETCONSOLE/d" $(1); \
@@ -585,6 +618,11 @@ define KernelConfig
 		echo "# CONFIG_MSDOS_PARTITION is not set" >>$(1); \
 		sed -i "/CONFIG_EFI_PARTITION/d" $(1); \
 		echo "# CONFIG_EFI_PARTITION is not set" >>$(1); \
+	elif [ "$(MODEM)" = "y" ]; then \
+		if [ "$(BECEEM)" = "y" ]; then \
+			sed -i "/CONFIG_USB_BECEEM/d" $(1); \
+			echo "CONFIG_USB_BECEEM=m" >>$(1); \
+		fi; \
 	fi; \
 	if [ "$(SHP)" = "y" ] || [ "$(LFP)" = "y" ]; then \
 		sed -i "/CONFIG_IP_NF_LFP/d" $(1); \
@@ -707,10 +745,14 @@ RT-%:
 	@$(MAKE) bin $($@)
 
 dsl-%:
+	$(call dsl_genbintrx_prolog)
 	@$(MAKE) bin $($(shell echo $@ | tr a-z A-Z))
+	$(call dsl_genbintrx_epilog)
 
 DSL-%:
+	$(call dsl_genbintrx_prolog)
 	@$(MAKE) bin $($@)
+	$(call dsl_genbintrx_epilog)
 
 setprofile:
 	@echo ""

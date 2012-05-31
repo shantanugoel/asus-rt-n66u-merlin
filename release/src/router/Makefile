@@ -61,7 +61,6 @@ obj-y += dproxy
 endif
 obj-y += etc
 # obj-y += vlan # use Busybox vconfig
-# obj-y += ppp # replace to use rp-pppoe
 #obj-y += utils
 obj-y += ntpclient
 obj-y += rstats
@@ -106,10 +105,12 @@ obj-$(RTCONFIG_USB_MODEM) += usbmodeswitch
 obj-$(RTCONFIG_USB_MODEM) += comgt-0.32
 
 obj-$(RTCONFIG_USB_MODEM) += madwimax-0.1.1 # for Samsung WiMAX
+obj-$(RTCONFIG_USB_BECEEM) += openssl # Beceem need it.
+obj-$(RTCONFIG_USB_BECEEM) += Beceem_BCMS250 # for Beceem WiMAX
 
 obj-y += libdisk
 
-obj-y += dosfstools-3.0.11
+obj-y += dosfstools
 obj-$(RTCONFIG_FTP) += vsftpd
 
 ifeq ($(CONFIG_LINUX26),y)
@@ -169,14 +170,22 @@ MEDIA_SERVER_STATIC=y
 obj-y += miniupnpd
 #	obj-y += upnp
 
+#add by gauss for cloudsync
+obj-$(RTCONFIG_CLOUDSYNC) += openssl
+obj-$(RTCONFIG_CLOUDSYNC) += libxml2
+obj-$(RTCONFIG_CLOUDSYNC) += curl-7.21.7
+obj-$(RTCONFIG_CLOUDSYNC) += asuswebstorage
+obj-$(RTCONFIG_CLOUDSYNC) += inotify
+
 
 #
 # configurable packages
 #
+RTCONFIG_PPP_BASE = y
+obj-$(RTCONFIG_PPP_BASE) += pppd rp-pppoe
 obj-$(RTCONFIG_L2TP) += rp-l2tp
 obj-$(RTCONFIG_PPTP) += accel-pptp
 obj-$(RTCONFIG_EAPOL) += wpa_supplicant
-obj-$(RTCONFIG_PPTPD) += pptpd
 obj-$(RTCONFIG_HTTPS) += openssl
 obj-$(RTCONFIG_SSH) += dropbear
 #obj-$(RTCONFIG_ZEBRA) += zebra
@@ -184,19 +193,12 @@ obj-$(RTCONFIG_SSH) += dropbear
 obj-$(RTCONFIG_LZO) += lzo
 obj-$(RTCONFIG_OPENVPN) += openvpn
 
-ifeq ($(RTCONFIG_L2TP),y)
-NEED_PPPD = y
-endif
-ifeq ($(RTCONFIG_PPTP),y)
-NEED_PPPD = y
-endif
-obj-$(NEED_PPPD) += pppd
-obj-$(NEED_PPPD) += rp-pppoe
-
 obj-$(CONFIG_LINUX26) += hotplug2
 obj-$(CONFIG_LINUX26) += udev
 
 obj-$(RTCONFIG_ACCEL_PPTPD) += accel-pptpd
+obj-$(RTCONFIG_PPTPD) += pptpd
+
 obj-$(RTCONFIG_WEBDAV) += sqlite
 obj-$(RTCONFIG_WEBDAV) += libxml2
 obj-$(RTCONFIG_WEBDAV) += pcre-8.12
@@ -217,7 +219,6 @@ obj-y += ez-ipupdate
 # Merlin addons
 obj-y += wol
 obj-y += netstat-nat
-
 
 #obj-y += lighttpd-1.4.28
 #obj-$(RTCONFIG_USB_WEBDAV) += lighttpd-1.4.29
@@ -494,7 +495,7 @@ endif
 
 	@mv $(TARGETDIR)/usr/sbin/ttcp $(PLATFORMDIR)/extras/apps/ || true
 	@cp -f $(TARGETDIR)/usr/sbin/mii-tool $(PLATFORMDIR)/extras/apps/ || true
-	@mv $(TARGETDIR)/usr/sbin/robocfg $(PLATFORMDIR)/extras/apps/ || true
+	$(if $(RTCONFIG_RALINK),@mv,@cp -f)  $(TARGETDIR)/usr/sbin/robocfg $(PLATFORMDIR)/extras/apps/ || true
 
 	$(if $(NEED_EX_USB),@cp -f,@mv) $(TARGETDIR)/usr/lib/libusb* $(PLATFORMDIR)/extras/lib/ || true
 	$(if $(NEED_EX_USB),@cp -f,@mv) $(TARGETDIR)/usr/sbin/usb_modeswitch $(PLATFORMDIR)/extras/apps/ || true
@@ -789,36 +790,6 @@ endif
 iptables-clean:
 	-$(MAKE) -C iptables KERNEL_DIR=$(LINUXDIR) clean
 
-ppp:
-	@$(SEP)
-	$(MAKE) -C ppp/pppoecd $* INSTALLDIR=$(INSTALLDIR)/ppp $(if $(RTCONFIG_IPV6),HAVE_INET6=y,)
-#	$(MAKE) -C ppp/pppoecd $* INSTALLDIR=$(INSTALLDIR)/ppp 
-#	$(MAKE) -C ppp/pppoecd $* INSTALLDIR=$(INSTALLDIR)/ppp DFLAGS="-DDEBUG -DDEBUGALL"
-
-ppp-%:
-	$(MAKE) -C ppp/pppoecd $* INSTALLDIR=$(INSTALLDIR)/ppp $(if $(RTCONFIG_IPV6),HAVE_INET6=y,)
-#	$(MAKE) -C ppp/pppoecd $* INSTALLDIR=$(INSTALLDIR)/ppp 
-
-rp-pppoe/src/stamp-h1: rp-pppoe/src/Makefile.in
-	cd rp-pppoe/src && CFLAGS="-g -O2 $(EXTRACFLAGS)" \
-	$(CONFIGURE) --prefix=/usr --enable-plugin=$(TOP)/pppd \
-	ac_cv_linux_kernel_pppoe=yes rpppoe_cv_pack_bitfields=rev
-	@touch rp-pppoe/src/stamp-h1
-
-rp-pppoe: pppd rp-pppoe/src/stamp-h1
-	$(MAKE) -C rp-pppoe/src pppoe-relay rp-pppoe.so
-
-rp-pppoe-clean:
-	-$(MAKE) -C rp-pppoe/src clean
-	@rm -f rp-pppoe/src/pppoe-relay
-	@rm -f rp-pppoe/src/stamp-h1
-
-rp-pppoe-install: rp-pppoe
-	install -D rp-pppoe/src/rp-pppoe.so $(INSTALLDIR)/rp-pppoe/usr/lib/pppd/rp-pppoe.so
-	$(STRIP) $(INSTALLDIR)/rp-pppoe/usr/lib/pppd/*.so
-	install -D rp-pppoe/src/pppoe-relay $(INSTALLDIR)/rp-pppoe/usr/sbin/pppoe-relay
-	$(STRIP) $(INSTALLDIR)/rp-pppoe/usr/sbin/pppoe-relay
-
 upnp: nvram shared iptables
 
 miniupnpd: iptables
@@ -975,17 +946,8 @@ radvd-install: radvd
 	install -D radvd/radvd $(INSTALLDIR)/radvd/usr/sbin/radvd
 	$(STRIP) $(INSTALLDIR)/radvd/usr/sbin/radvd
 
-dhcpv6/stamp-h1:
-	@cd dhcpv6 && \
-	CFLAGS="-Os -Wall $(EXTRACFLAGS) -D_GNU_SOURCE -ffunction-sections -fdata-sections -DUSE_DHCP6SRV" \
-	LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections -fPIC" \
-	ac_cv_func_setpgrp_void=yes \
-	$(CONFIGURE) --prefix= --with-localdbdir=/var
-	@$(MAKE) -C dhcpv6 clean
-	@touch dhcpv6/stamp-h1
-
 wol/stamp-h1:
-	cd $(TOP)/wol && jm_cv_func_working_malloc=yes $(CONFIGURE) --host=mips --prefix=$(INSTALLDIR)/wol CC=mipsel-uclibc-gcc STRIP=mipsel-uclibc-strip AR=mipsel-uclibc-ar LD=mipsel-uclibc-ld NM=mipsel-uclibc-nm RANLIB=mipsel-uclibc-ranlib
+	cd $(TOP)/wol && jm_cv_func_working_malloc=yes $(CONFIGURE) --host=mips --prefix=$(INSTALLDIR)/wol CC=mipsel-uclibc-gcc STR$
 	touch wol/stamp-h1
 
 wol: wol/stamp-h1
@@ -1013,14 +975,23 @@ netstat-nat-install: netstat-nat
 netstat-nat/stamp-h1:
 	cd netstat-nat && \
 	CC=$(CC) CFLAGS="-Os -Wall $(EXTRACFLAGS) -ffunction-sections -fdata-sections" \
-	        LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections -fPIC" \
-	        $(CONFIGURE)
+		LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections -fPIC" \
+		$(CONFIGURE)
 	touch netstat-nat/stamp-h1
 
 netstat-nat: netstat-nat/stamp-h1
 
 netstat-nat: netstat-nat/Makefile
 	$(MAKE) -C netstat-nat
+
+dhcpv6/stamp-h1:
+	@cd dhcpv6 && \
+	CFLAGS="-Os -Wall $(EXTRACFLAGS) -D_GNU_SOURCE -ffunction-sections -fdata-sections -DUSE_DHCP6SRV" \
+	LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections -fPIC" \
+	ac_cv_func_setpgrp_void=yes \
+	$(CONFIGURE) --prefix= --with-localdbdir=/var
+	@$(MAKE) -C dhcpv6 clean
+	@touch dhcpv6/stamp-h1
 
 dhcpv6: dhcpv6/stamp-h1
 	@$(SEP)
@@ -1060,27 +1031,88 @@ vlan-install:
 	$(MAKE) -C vlan CROSS=$(CROSS_COMPILE) INSTALLDIR=$(INSTALLDIR) install	# STRIPTOOL=$(STRIP)
 	$(STRIP) $(INSTALLDIR)/vlan/usr/sbin/vconfig
 
+accel-pptpd: pppd
+	@$(MAKE) -C accel-pptpd server KDIR=$(LINUXDIR)
+
+accel-pptpd-clean:
+	-@$(MAKE) -C accel-pptpd clean
+	@rm -rf accel-pptpd/pptpd-1.3.3/Makefile
+
+accel-pptpd-install: accel-pptpd
+	$(MAKE) -C accel-pptpd server_install
+
+pptpd/stamp-h1:
+	cd $(TOP)/pptpd && $(CONFIGURE) --prefix=$(INSTALLDIR)/pptpd --enable-bcrelay CC=mipsel-uclibc-gcc STRIP=mipsel-uclibc-strip AR=mipsel-uclibc-ar LD=mipsel-uclibc-ld NM=mipsel-uclibc-nm RANLIB=mipsel-uclibc-ranlib
+	touch pptpd/stamp-h1
+
+pptpd: pptpd/stamp-h1
+
+pptpd-install: pptpd
+	@echo pptpd
+	@install -D pptpd/pptpd $(INSTALLDIR)/pptpd/usr/sbin/pptpd
+	@install -D pptpd/bcrelay $(INSTALLDIR)/pptpd/usr/sbin/bcrelay
+	@install -D pptpd/pptpctrl $(INSTALLDIR)/pptpd/usr/sbin/pptpctrl
+	@$(STRIP) $(INSTALLDIR)/pptpd/usr/sbin/pptpd
+	@$(STRIP) $(INSTALLDIR)/pptpd/usr/sbin/bcrelay
+	@$(STRIP) $(INSTALLDIR)/pptpd/usr/sbin/pptpctrl
+
+pptpd-clean:
+	cd $(TOP)/pptpd && make clean && rm -rf stamp-h1 .deps
+
+rp-pppoe/src/Makefile: rp-pppoe/src/Makefile.in
+	cd rp-pppoe/src && CFLAGS="-g -O2 $(EXTRACFLAGS)" \
+	$(CONFIGURE) --prefix=/usr --enable-plugin=$(TOP)/pppd \
+	ac_cv_linux_kernel_pppoe=yes rpppoe_cv_pack_bitfields=rev --disable-debugging
+
+rp-pppoe: pppd rp-pppoe/src/Makefile
+	@$(MAKE) -C rp-pppoe/src pppoe-relay rp-pppoe.so
+
+rp-pppoe-clean:
+	-@$(MAKE) -C rp-pppoe/src clean
+	@rm -f rp-pppoe/src/Makefile
+
+rp-pppoe-install: rp-pppoe
+	install -D rp-pppoe/src/rp-pppoe.so $(INSTALLDIR)/rp-pppoe/usr/lib/pppd/rp-pppoe.so
+	$(STRIP) $(INSTALLDIR)/rp-pppoe/usr/lib/pppd/*.so
+	install -D rp-pppoe/src/pppoe-relay $(INSTALLDIR)/rp-pppoe/usr/sbin/pppoe-relay
+	$(STRIP) $(INSTALLDIR)/rp-pppoe/usr/sbin/pppoe-relay
+
+rp-l2tp/Makefile: rp-l2tp/Makefile.in
+	cd rp-l2tp && $(CONFIGURE) --prefix=/usr --sysconfdir=/tmp
+
+rp-l2tp: pppd rp-l2tp/Makefile
+	@CFLAGS="-g $(EXTRACFLAGS)" $(MAKE) -C $@ PREFIX=/usr SYSCONFDIR=/tmp
+
+rp-l2tp-clean:
+	-@$(MAKE) -C rp-l2tp clean
+	@rm -f rp-l2tp/Makefile
+
+rp-l2tp-install:
+	install -d $(INSTALLDIR)/rp-l2tp/usr/lib/l2tp
+	install rp-l2tp/handlers/*.so $(INSTALLDIR)/rp-l2tp/usr/lib/l2tp
+	$(STRIP) $(INSTALLDIR)/rp-l2tp/usr/lib/l2tp/*.so
+	install -D rp-l2tp/handlers/l2tp-control $(INSTALLDIR)/rp-l2tp/usr/sbin/l2tp-control
+	$(STRIP) $(INSTALLDIR)/rp-l2tp/usr/sbin/l2tp-control
+	install -D rp-l2tp/l2tpd $(INSTALLDIR)/rp-l2tp/usr/sbin/l2tpd
+	$(STRIP) $(INSTALLDIR)/rp-l2tp/usr/sbin/l2tpd
+
+xl2tpd: pppd
+	CFLAGS="-g $(EXTRACFLAGS)" $(MAKE) -C $@ PREFIX=/usr xl2tpd
+
+xl2tpd-install: xl2tpd
+	install -D xl2tpd/xl2tpd $(INSTALLDIR)/xl2tpd/usr/sbin/xl2tpd
+	$(STRIP) $(INSTALLDIR)/xl2tpd/usr/sbin/xl2tpd
 
 pptp-client-install:
 	install -D pptp-client/pptp $(INSTALLDIR)/pptp-client/usr/sbin/pptp
 	$(STRIP) $(INSTALLDIR)/pptp-client/usr/sbin/pptp
 
-accel-pptpd: pppd
-	$(MAKE) -C accel-pptpd server KDIR=$(LINUXDIR)
-
-accel-pptpd-install: accel-pptpd
-	$(MAKE) -C accel-pptpd server_install
-
-accel-pptpd-clean:
-	$(MAKE) -C accel-pptpd clean
-	rm -rf accel-pptpd/pptpd-1.3.3/Makefile
-
-accel-pptp: pppd accel-pptp/Makefile
-	@$(MAKE) -C accel-pptp
-
 accel-pptp/Makefile: accel-pptp/Makefile.in $(LINUXDIR)/include/linux/version.h
 	cd accel-pptp && CFLAGS="-g -O2 $(EXTRACFLAGS)" \
 	$(CONFIGURE) --prefix=/usr KDIR=$(LINUXDIR) PPPDIR=$(TOP)/pppd
+
+accel-pptp: pppd accel-pptp/Makefile
+	@$(MAKE) -C accel-pptp
 
 accel-pptp-clean:
 	-@$(MAKE) -C accel-pptp clean
@@ -1090,14 +1122,12 @@ accel-pptp-install: accel-pptp
 	install -D accel-pptp/src/.libs/pptp.so $(INSTALLDIR)/accel-pptp/usr/lib/pppd/pptp.so
 	$(STRIP) $(INSTALLDIR)/accel-pptp/usr/lib/pppd/pptp.so
 
-
 pppd/Makefile: pppd/linux/Makefile.top
 	cd pppd && $(CONFIGURE) --prefix=/usr --sysconfdir=/tmp
 
 pppd: pppd/Makefile
 	@$(SEP)
 	@$(MAKE) -C pppd MFLAGS='$(if $(RTCONFIG_IPV6),HAVE_INET6=y,) EXTRACFLAGS="$(EXTRACFLAGS)"'
-#	@$(MAKE) -C pppd MFLAGS='EXTRACTFLAG="$(EXTRACFLAGS)"'
 
 pppd-clean:
 	-$(MAKE) -C pppd clean
@@ -1141,28 +1171,6 @@ zebra-install: zebra
 	$(STRIP) $(INSTALLDIR)/zebra/usr/sbin/zebra
 	$(STRIP) $(INSTALLDIR)/zebra/usr/sbin/ripd
 	$(STRIP) $(INSTALLDIR)/zebra/usr/lib/libzebra.so
-
-rp-l2tp/Makefile: rp-l2tp/Makefile.in
-	cd rp-l2tp && $(CONFIGURE) --prefix=/usr --sysconfdir=/tmp
-
-rp-l2tp: ppp rp-l2tp/Makefile
-	CFLAGS="-g $(EXTRACFLAGS)" $(MAKE) -C $@ PREFIX=/usr SYSCONFDIR=/tmp
-
-rp-l2tp-install:
-	install -d $(INSTALLDIR)/rp-l2tp/usr/lib/l2tp
-	install rp-l2tp/handlers/*.so $(INSTALLDIR)/rp-l2tp/usr/lib/l2tp
-	$(STRIP) $(INSTALLDIR)/rp-l2tp/usr/lib/l2tp/*.so
-	install -D rp-l2tp/handlers/l2tp-control $(INSTALLDIR)/rp-l2tp/usr/sbin/l2tp-control
-	$(STRIP) $(INSTALLDIR)/rp-l2tp/usr/sbin/l2tp-control
-	install -D rp-l2tp/l2tpd $(INSTALLDIR)/rp-l2tp/usr/sbin/l2tpd
-	$(STRIP) $(INSTALLDIR)/rp-l2tp/usr/sbin/l2tpd
-
-xl2tpd: pppd
-	CFLAGS="-g $(EXTRACFLAGS)" $(MAKE) -C $@ PREFIX=/usr xl2tpd
-
-xl2tpd-install: xl2tpd
-	install -D xl2tpd/xl2tpd $(INSTALLDIR)/xl2tpd/usr/sbin/xl2tpd
-	$(STRIP) $(INSTALLDIR)/xl2tpd/usr/sbin/xl2tpd
 
 bpalogin-install:
 	install -D bpalogin/bpalogin $(INSTALLDIR)/bpalogin/usr/sbin/bpalogin
@@ -1687,36 +1695,18 @@ sdparm-1.02-install: sdparm-1.02
 	@[ ! -d sdparm-1.02 ] || $(MAKE) -C sdparm-1.02 install INSTALLDIR=$(INSTALLDIR)/sdparm-1.02
 	@$(STRIP) $(INSTALLDIR)/sdparm-1.02/bin/sdparm
 
-sdparm-1.02-clean: sdparm-1.02/stamp-h1
-	cd $(TOP)/sdparm-1.02 && make clean && rm -rf stamp-h1 src/.deps
+sdparm-1.02-clean:
+	-cd $(TOP)/sdparm-1.02 && make clean && rm -rf stamp-h1 src/.deps
 
 nas: nvram shared
 
 eapd-clean:
 	cd eapd/linux && make clean
 
-pptpd/stamp-h1:
-	cd $(TOP)/pptpd && $(CONFIGURE) --prefix=$(INSTALLDIR)/pptpd --enable-bcrelay CC=mipsel-uclibc-gcc STRIP=mipsel-uclibc-strip AR=mipsel-uclibc-ar LD=mipsel-uclibc-ld NM=mipsel-uclibc-nm RANLIB=mipsel-uclibc-ranlib
-	touch pptpd/stamp-h1
-
-pptpd: pptpd/stamp-h1
-
-pptpd-install: pptpd
-	@echo pptpd
-	@install -D pptpd/pptpd $(INSTALLDIR)/pptpd/usr/sbin/pptpd
-	@install -D pptpd/bcrelay $(INSTALLDIR)/pptpd/usr/sbin/bcrelay
-	@install -D pptpd/pptpctrl $(INSTALLDIR)/pptpd/usr/sbin/pptpctrl
-	@$(STRIP) $(INSTALLDIR)/pptpd/usr/sbin/pptpd
-	@$(STRIP) $(INSTALLDIR)/pptpd/usr/sbin/bcrelay
-	@$(STRIP) $(INSTALLDIR)/pptpd/usr/sbin/pptpctrl
-
-pptpd-clean: pptpd/stamp-h1
-	cd $(TOP)/pptpd && make clean && rm -rf stamp-h1 .deps
-
 lighttpd-1.4.29/stamp-h1:
 	cd lighttpd-1.4.29 && \
 	   ./preconfigure-script \
-	touch stamp-h1
+	touch lighttpd-1.4.29/stamp-h1
 
 lighttpd-1.4.29: shared nvram libdisk samba-3.5.8 pcre-8.12 libxml2 sqlite openssl lighttpd-1.4.29/stamp-h1
 
@@ -1750,7 +1740,7 @@ pcre-8.12/stamp-h1:
 	cd pcre-8.12 && \
 	CC=$(CC) CXX=mipsel-uclibc-g++ AR=$(AR) RANLIB=$(RANLIB) LD=$(LD) CFLAGS="-Os -Wall $(EXTRACFLAGS)" \
 	./configure --prefix=/usr --host=mips-linux
-	touch stamp-h1
+	touch pcre-8.12/stamp-h1
 
 pcre-8.12: pcre-8.12/stamp-h1
 
@@ -1771,7 +1761,7 @@ libxml2/stamp-h1:
 	cd libxml2 && \
 	CC=$(CC) AR=$(AR) RANLIB=$(RANLIB) LD=$(LD) CFLAGS="-Os -Wall $(EXTRACFLAGS)" \
 	./configure --prefix=/usr --host=mips-linux --without-python
-	touch stamp-h1
+	touch libxml2/stamp-h1
 
 libxml2: libxml2/stamp-h1
 	@$(MAKE) -C libxml2 all
@@ -1779,11 +1769,57 @@ libxml2: libxml2/stamp-h1
 libxml2-install: libxml2
 	@$(SEP)
 	install -D libxml2/.libs/libxml2.so.2 $(INSTALLDIR)/libxml2/usr/lib/libxml2.so.2
-	$(STRIP) $(INSTALLDIR)/libxml2/usr/lib/libxml2.so.2
+	$(STRIP) $(INSTALLDIR)/libxml2/usr/lib/libxml2.so.2 
+	cd $(INSTALLDIR)/libxml2/usr/lib && ln -sf libxml2.so.2 libxml2.so
 	
 libxml2-clean:
 	-@$(MAKE) -C libxml2 clean
 	@rm -f libxml2/stamp-h1
+
+#add by gauss
+#add install libcurl
+curl-7.21.7/stamp-h1:
+	cd curl-7.21.7 && \
+	./configure CC=$(CC) --build=i686-linux --host=mipsel-linux --enable-http --with-ssl=$(TOP)/openssl
+	touch curl-7.21.7/stamp-h1
+
+curl-7.21.7: curl-7.21.7/stamp-h1
+	@$(MAKE) -C curl-7.21.7
+
+curl-7.21.7-install: curl-7.21.7
+	@$(SEP)
+	install -D curl-7.21.7/lib/.libs/libcurl.so.4.2.0 $(INSTALLDIR)/curl-7.21.7/usr/lib/libcurl.so.4.2.0
+	$(STRIP) $(INSTALLDIR)/curl-7.21.7/usr/lib/libcurl.so.4.2.0
+	cd $(INSTALLDIR)/curl-7.21.7/usr/lib && ln -sf libcurl.so.4.2.0 libcurl.so && ln -sf libcurl.so.4.2.0 libcurl.so.4
+	
+curl-7.21.7-clean:
+	-@$(MAKE) -C curl-7.21.7 clean
+	@rm -f curl-7.21.7/stamp-h1
+
+#asuswebstorage
+asuswebstorage: 
+	@$(MAKE) -C asuswebstorage
+
+asuswebstorage-install: asuswebstorage
+	@$(SEP)
+	install -D asuswebstorage/asuswebstorage $(INSTALLDIR)/asuswebstorage/usr/sbin/asuswebstorage
+	$(STRIP) $(INSTALLDIR)/asuswebstorage/usr/sbin/asuswebstorage
+
+asuswebstorage-clean:
+	-@$(MAKE) -C asuswebstorage clean
+
+#inotify
+inotify: 
+	@$(MAKE) -C inotify
+
+inotify-install: inotify
+	@$(SEP)
+	install -D inotify/inotify $(INSTALLDIR)/inotify/usr/sbin/inotify
+	$(STRIP) $(INSTALLDIR)/inotify/usr/sbin/inotify
+
+inotify-clean:
+	-@$(MAKE) -C inotify clean
+
 
 madwimax-0.1.1/stamp-h1:
 	cd $(TOP)/madwimax-0.1.1 && \
@@ -1799,12 +1835,12 @@ madwimax-0.1.1-install: madwimax-0.1.1
 	@install -D madwimax-0.1.1/src/madwimax $(INSTALLDIR)/madwimax-0.1.1/usr/sbin/madwimax
 	@$(STRIP) $(INSTALLDIR)/madwimax-0.1.1/usr/sbin/madwimax
 
-madwimax-0.1.1-clean: madwimax-0.1.1/stamp-h1
-	@$(MAKE) -C madwimax-0.1.1 clean
-	cd $(TOP)/madwimax-0.1.1 && rm -f `find -name stamp-h1`
-	cd $(TOP)/madwimax-0.1.1 && rm -f config.log config.status
-	cd $(TOP)/madwimax-0.1.1 && rm -f `find -name Makefile`
-	cd $(TOP)/madwimax-0.1.1 && rm -rf include/config.h scripts/udev/z60_madwimax.rules src/.deps
+madwimax-0.1.1-clean:
+	-@$(MAKE) -C madwimax-0.1.1 clean
+	-cd $(TOP)/madwimax-0.1.1 && rm -f `find -name stamp-h1`
+	-cd $(TOP)/madwimax-0.1.1 && rm -f config.log config.status
+	-cd $(TOP)/madwimax-0.1.1 && rm -f `find -name Makefile`
+	-cd $(TOP)/madwimax-0.1.1 && rm -rf include/config.h scripts/udev/z60_madwimax.rules src/.deps
 
 
 #

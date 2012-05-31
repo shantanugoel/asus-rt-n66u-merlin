@@ -25,7 +25,7 @@
 #define LCNCONF		0		/* No LCN-Phy */
 #define LCN40CONF	0		/* No LCN40-Phy */
 
-#define CTFPOOLSZ       384	/* max buffers in ctfpool */
+#define CTFPOOLSZ       128	/* max buffers in ctfpool */
 #define NTXD		64	/* THIS HAS TO MATCH with HIGH driver tunable, AMPDU/rpc_agg */
 #define NRXD		32
 #define NRXBUFPOST	16

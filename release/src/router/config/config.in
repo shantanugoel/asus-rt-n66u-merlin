@@ -122,6 +122,11 @@ config RTCONFIG_MEDIA_SERVER
 	depends on RTCONFIG_USB
 	default n
 
+config RTCONFIG_CLOUDSYNC
+	bool "Cloudsync (Cloud Client)"
+	depends on RTCONFIG_USB
+	default n
+
 config RTCONFIG_FTP
 	bool "  FTP Server"
 	depends on RTCONFIG_USB
@@ -135,11 +140,6 @@ config RTCONFIG_FTP_SSL
 config RTCONFIG_WEBDAV
 	bool "	  WebDav Support"
 	depends on RTCONFIG_USB
-	default n
-
-config RTCONFIG_CLOUDSYNC
-	bool "	  CLOUDSYNC Support"
-	depends on RTCONFIG_CLOUDSYNC
 	default n
 
 config RTCONFIG_SAMBASRV
@@ -175,6 +175,16 @@ config RTCONFIG_USB_PRINTER
 config RTCONFIG_USB_MODEM
 	bool "  USB Modem Support"
 	depends on RTCONFIG_USB
+	default n
+
+config RTCONFIG_USB_MODEM_PIN
+	bool "  USB Modem pin code Support"
+	depends on RTCONFIG_USB_MODEM
+	default n
+
+config RTCONFIG_USB_BECEEM
+	bool "  BECEEM USB dongle Support"
+	depends on RTCONFIG_USB_MODEM
 	default n
 
 config RTCONFIG_BRCM_USBAP
@@ -254,7 +264,7 @@ config RTCONFIG_AUTODICT
 	bool "AUTO DICTIONARY TOOLS"
 	default n
 
-config RTCONFIG_TRAFFIC_METER
-        bool "TRAFFIC_METER"
+config RTCONFIG_ISP_METER
+        bool "ISP_METER"
         default n
 

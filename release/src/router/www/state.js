@@ -197,7 +197,7 @@ menuL2_link  = new Array("", tablink[0][1], tablink[1][1], tablink[2][1], tablin
 
 //Level 1 Menu
 menuL1_title = new Array("", "<#menu1#>", "<#Guest_Network#>", "<#Menu_TrafficManager#>", "<#Parental_Control#>", "<#Menu_usb_application#>", "AiCloud", "Tools", "<#menu5#>");
-menuL1_link = new Array("", "index.asp", "Guest_network.asp", "QoS_EZQoS.asp", "ParentalControl.asp", "APP_Installation.asp", "cloud_main.asp", "");
+menuL1_link = new Array("", "index.asp", "Guest_network.asp", "QoS_EZQoS.asp", "ParentalControl.asp", "APP_Installation.asp", "cloud_main.asp", tablink[10][1], "");
 
 var rc_support = "<% nvram_get("rc_support"); %>"; 
 var wl_vifnames = "<% nvram_get("wl_vifnames"); %>";

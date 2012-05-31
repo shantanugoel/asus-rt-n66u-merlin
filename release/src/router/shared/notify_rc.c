@@ -53,6 +53,11 @@ extern void notify_rc_after_wait(const char *event_name)
 	notify_rc_internal(event_name, FALSE, 30);
 }
 
+extern void notify_rc_after_period_wait(const char *event_name, int wait)
+{
+	notify_rc_internal(event_name, FALSE, wait);
+}
+
 extern void notify_rc_and_wait(const char *event_name)
 {
 	notify_rc_internal(event_name, TRUE, 10);

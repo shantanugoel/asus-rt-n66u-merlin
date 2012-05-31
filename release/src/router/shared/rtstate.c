@@ -5,8 +5,8 @@
 #include <bcmnvram.h>
 #include <bcmdevs.h>
 #include <shutils.h>
-#include <rtstate.h>
 #include <shared.h>
+#include <rtstate.h>
 
 /* keyword for rc_support 	*/
 /* ipv6 mssid update parental 	*/
@@ -108,8 +108,17 @@ char *get_wan_ifname(int unit)
 	//_dprintf("wan_proto: %s\n", wan_proto);
 
 #ifdef RTCONFIG_USB_MODEM
+#ifdef RTCONFIG_DUALWAN
 	if(get_dualwan_by_unit(unit) == WANS_DUALWAN_IF_USB)
-		wan_ifname = nvram_safe_get(strcat_r(prefix, "pppoe_ifname", tmp));
+#else
+	if(unit == WAN_UNIT_SECOND)
+#endif
+	{
+		if(!strcmp(wan_proto, "dhcp"))
+			wan_ifname = nvram_safe_get(strcat_r(prefix, "ifname", tmp));
+		else
+			wan_ifname = nvram_safe_get(strcat_r(prefix, "pppoe_ifname", tmp));
+	}
 	else
 #endif
 	if(strcmp(wan_proto, "pppoe") == 0 ||
@@ -142,8 +151,17 @@ char *get_wan6_ifname(int unit)
 	}
 
 #ifdef RTCONFIG_USB_MODEM
+#ifdef RTCONFIG_DUALWAN
 	if(get_dualwan_by_unit(unit) == WANS_DUALWAN_IF_USB)
-		wan_ifname = nvram_safe_get(strcat_r(prefix, "pppoe_ifname", tmp));
+#else
+	if(unit == WAN_UNIT_SECOND)
+#endif
+	{
+		if(!strcmp(wan_proto, "dhcp"))
+			wan_ifname = nvram_safe_get(strcat_r(prefix, "ifname", tmp));
+		else
+			wan_ifname = nvram_safe_get(strcat_r(prefix, "pppoe_ifname", tmp));
+	}
 	else
 #endif
 	if(strcmp(wan_proto, "pppoe") == 0 ||
@@ -165,9 +183,32 @@ int get_lanports_status()
 }
 
 // OR all wan port status
-int get_wanports_status()
+int get_wanports_status(int wan_unit)
 {
-	return wanport_status();
+// 1. PHY type, 2. factory owner, 3. model.
+#ifdef RTCONFIG_DSL
+#ifdef RTCONFIG_DUALWAN
+	if(get_dualwan_by_unit(wan_unit) == WANS_DUALWAN_IF_DSL)
+#endif
+	{
+		if (nvram_match("dsltmp_adslsyncsts","up")) return 1;
+		return 0;
+	}
+#ifdef RTCONFIG_DUALWAN
+	if(get_dualwan_by_unit(wan_unit) == WANS_DUALWAN_IF_LAN)
+	{
+		return dsl_wanPort_phyStatus();		
+	}
+#endif
+	// TO CHENI:
+	// HOW TO HANDLE USB?	
+#else // RJ-45
+#ifdef RTCONFIG_RALINK
+	return rtl8367m_wanPort_phyStatus();
+#else
+	return wanport_status(wan_unit);
+#endif
+#endif
 }
 
 int get_usb_modem_state(){
@@ -303,6 +344,7 @@ int get_usb_port_number(const char *usb_port){
 }
 #endif
 
+#ifdef RTCONFIG_DUALWAN
 void set_wanscap_support(char *feature)
 {
 	nvram_set("wans_cap", feature);
@@ -336,13 +378,11 @@ int get_wans_dualwan(void)
 	return caps;
 }
 
-
 int get_dualwan_by_unit(int unit) 
 {
 	int i;
 	char word[80], *next;
 
-#ifdef RTCONFIG_DUALWAN
 	i = 0;
 	foreach(word, nvram_safe_get("wans_dualwan"), next) {
 		if(i==unit) {
@@ -356,16 +396,8 @@ int get_dualwan_by_unit(int unit)
 		}
 		i++;
 	}
+
 	return WANS_DUALWAN_IF_NONE;
-#else
-// to backward compatibe with none dualwan mode
-#ifdef RTCONFIG_DSL
-	if(unit==WAN_UNIT_FIRST) return WANS_DUALWAN_IF_DSL;
-#else
-	if(unit==WAN_UNIT_FIRST) return WANS_DUALWAN_IF_WAN;
-#endif	
-	if(unit==WAN_UNIT_SECOND) return WANS_DUALWAN_IF_USB;
-#endif
 }
 
 // imply: unit 0: primary, unit 1: secondary
@@ -378,7 +410,10 @@ int get_dualwan_secondary(void)
 {
 	return get_dualwan_by_unit(1);
 }
+#endif
 
+// no more to use
+/*
 void set_dualwan_type(char *type)
 {
 	nvram_set("wans_dualwan", type);
@@ -396,6 +431,7 @@ void add_dualwan_type(char *type)
 		nvram_set("wans_dualwan", types);
 	}
 }
+*/
 
 void set_lan_phy(char *phy)
 {

@@ -407,6 +407,7 @@ const char *get_wan6face(void)
 	switch (get_ipv6_service()) {
 	case IPV6_NATIVE:
 	case IPV6_NATIVE_DHCP:
+	case IPV6_MANUAL:
 		return get_wan6_ifname(0);
 	case IPV6_6TO4:
 		return "v6to4";
@@ -415,7 +416,8 @@ const char *get_wan6face(void)
 	case IPV6_6RD:
 		return "6rd";
 	}
-	return nvram_safe_get("ipv6_ifname");
+//	return nvram_safe_get("ipv6_ifname");
+	return "";
 }
 
 int update_6rd_info(void)
@@ -477,6 +479,24 @@ const char *getifaddr(char *ifname, int family, int linklocal)
 	return NULL;
 }
 
+int is_intf_up(const char* ifname)
+{
+	struct ifreq ifr;
+	int sfd;
+	int ret = 0;
+
+	if (!((sfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0))
+	{
+		strcpy(ifr.ifr_name, ifname);
+		if (!ioctl(sfd, SIOCGIFFLAGS, &ifr) && (ifr.ifr_flags & IFF_UP))
+			ret = 1;
+
+		close(sfd);
+	}
+
+	return ret;
+}
+
 char *wl_nvname(const char *nv, int unit, int subunit)
 {
 	static char tmp[128];
@@ -501,13 +521,14 @@ int mtd_getinfo(const char *mtdname, int *part, int *size)
 	int r;
 
 	r = 0;
-	if ((strlen(mtdname) < 128) && (strcmp(mtdname, "pmon") != 0)) {
+	if ((strlen(mtdname) < 128)) { // && (strcmp(mtdname, "pmon") != 0)) { //Yau dbg
 		sprintf(t, "\"%s\"", mtdname);
 		if ((f = fopen("/proc/mtd", "r")) != NULL) {
 			while (fgets(s, sizeof(s), f) != NULL) {
 				if ((sscanf(s, "mtd%d: %x", part, size) == 2) && (strstr(s, t) != NULL)) {
 					// don't accidentally mess with bl (0)
-					if (*part > 0) r = 1;
+					if (*part >= 0) r = 1; //Yau > -> >=
+					r =1;
 					break;
 				}
 			}
@@ -678,6 +699,17 @@ uint32 crc_calc(uint32 crc, char *buf, int len)
 }
 
 // ugly solution
+void bcmvlan_models(int model, char *vlan)
+{
+	if(model==MODEL_RTN16||model==MODEL_RTN15U||model==MODEL_RTN66U) 
+		strcpy(vlan, "vlan1");
+	else if(model==MODEL_RTN12||model==MODEL_RTN12B1||model==MODEL_RTN12C1||model==MODEL_RTN10U) 
+		strcpy(vlan, "vlan0");
+	else if(model==MODEL_RTN53)
+		strcpy(vlan, "vlan2");
+	else strcpy(vlan, "");
+}
+
 int backup_rx;
 int backup_tx;
 
@@ -686,10 +718,12 @@ uint32 netdev_calc(char *ifname, char *ifname_desc, unsigned long *rx, unsigned 
 	char word[100], word1[100], *next, *next1;
 	char prefix[32];
 	char *ssid, tmp[100];
+	char modelvlan[32];
 	int i, j, model;
 
 	strcpy(ifname_desc2, "");
 	model = get_model();
+	bcmvlan_models(model, modelvlan);
 
 	// find in LAN interface
 	if(nvram_contains_word("lan_ifnames", ifname))
@@ -721,26 +755,14 @@ uint32 netdev_calc(char *ifname, char *ifname_desc, unsigned long *rx, unsigned 
 		// special handle for non-tag wan of broadcom solution
 		// pretend vlanX is must called after ethX
 		if(nvram_match("switch_wantag", "none")) { //Don't calc if select IPTV
-		    if(model==MODEL_RTN16||model==MODEL_RTN15U||model==MODEL_RTN66U||model==MODEL_RTN53) {
-			if(strcmp(ifname, "vlan1")==0) {
-				backup_rx -= *rx;
-				backup_tx -= *tx;
+		   if(strlen(modelvlan) && strcmp(ifname, modelvlan)==0) {
+			backup_rx -= *rx;
+			backup_tx -= *tx;
 
-				*rx2 = backup_rx;
-				*tx2 = backup_tx;				
-				strcpy(ifname_desc2, "INTERNET");
-			}
+			*rx2 = backup_rx;
+			*tx2 = backup_tx;				
+			strcpy(ifname_desc2, "INTERNET");
 		    }
-		    else if(model==MODEL_RTN12||model==MODEL_RTN12B1||model==MODEL_RTN12C1||model==MODEL_RTN10U) {
-			if(strcmp(ifname, "vlan0")==0) {
-				backup_rx -= *rx;
-				backup_tx -= *tx;
-				
-				*rx2 = backup_rx;
-				*tx2 = backup_tx;				
-				strcpy(ifname_desc2, "INTERNET");
-			}
-		    }	
 		}//End of switch_wantag
 		return 1;
 	}
@@ -753,7 +775,7 @@ uint32 netdev_calc(char *ifname, char *ifname_desc, unsigned long *rx, unsigned 
 	// find in WAN interface
 	else if(nvram_contains_word("wan_ifnames", ifname))
 	{
-		if((model==MODEL_RTN16||model==MODEL_RTN15U||model==MODEL_RTN12||model==MODEL_RTN66U||model==MODEL_RTN10U)&&strcmp(ifname, "eth0")==0) {
+		if(strlen(modelvlan) && strcmp(ifname, "eth0")==0) { 
 			backup_rx = *rx;
 			backup_tx = *tx;
 		}
@@ -792,5 +814,52 @@ int is_private_subnet(const char *ip){
 		return 3;
 	else
 		return 0;
+}
+
+// clean_mode: 0~3, clean_time: 1~(LONG_MAX-1), threshold(KB): 0: always act, >0: act when lower than.
+int free_caches(const char *clean_mode, const int clean_time, const unsigned int threshold){
+	int test_num;
+	FILE *fp;
+	char memdata[256] = {0};
+	unsigned int memfree = 0;
+
+	if(!clean_mode || clean_time <= 0)
+		return -1;
+
+	test_num = strtol(clean_mode, NULL, 10);
+	if(test_num == LONG_MIN || test_num == LONG_MAX
+			|| test_num < atoi(FREE_MEM_NONE) || test_num > atoi(FREE_MEM_ALL)
+			)
+		return -1;
+
+	if(threshold > 0){
+		if((fp = fopen("/proc/meminfo", "r")) != NULL){
+			while(fgets(memdata, 255, fp) != NULL){
+				if(strstr(memdata, "MemFree") != NULL){
+					sscanf(memdata, "MemFree: %d kB", &memfree);
+_dprintf("%s: memfree=%u.\n", __FUNCTION__, memfree);
+					break;
+				}
+			}
+			fclose(fp);
+
+			if(memfree > threshold){
+_dprintf("%s: memfree > threshold.\n", __FUNCTION__);
+				return 0;
+			}
+		}
+	}
+
+_dprintf("%s: Start syncing...\n", __FUNCTION__);
+	sync();
+
+_dprintf("%s: Start cleaning...\n", __FUNCTION__);
+	f_write_string("/proc/sys/vm/drop_caches", clean_mode, 0, 0);
+_dprintf("%s: waiting %d second...\n", __FUNCTION__, clean_time);
+	sleep(clean_time);
+_dprintf("%s: Finish.\n", __FUNCTION__);
+	f_write_string("/proc/sys/vm/drop_caches", FREE_MEM_NONE, 0, 0);
+
+	return 0;
 }
 

@@ -1,10 +1,16 @@
 ﻿var Untranslated = {
-	deviceDiscorvy : '<span style="color:#FC0"><% nvram_get("productid"); %> IP will be different after changing to Access Point mode. To help find the wireless router\'s IP, please download the <a href="http://dlcdnet.asus.com/pub/ASUS/wireless/ASUSWRT/Discovery.zip" style="font-family:Lucida Console;text-decoration:underline;color:#FC0;">Device Discovery</a> first.</span>',
-	ContinuedPrevWLKey : 'Continuation of the previous wireless security setting?',
-	dhcp_conflict_vpn : 'There is a conflict with VPN clients: ',
-	vpn_conflict_LANip : '* It is a conflict with router\'s LAN ip:',
-	vpn_conflict_DHCPpool : '* It is a conflict with router\'s DHCP pool:',
-	vpn_conflict_DHCPstatic : '* It is a conflict with router\'s DHCP static ip:'
+	appInstall_partition : 'Please select the partition you want to install.',
+	DNS_blank : 'DNS server not set! Please setup the DNS server on the client device.',
+	conflict_LAN_subnet : 'It is not allow to set the same subnet with router\'s LAN.',
+	VPNAdv : 'VPN Details',
+	end : 'end',
+	illegal_MAC : 'It\'s an illegal MAC address!',
+	vpn_clients_max : 'VPN server only allows max 10 clients!',
+	vpn_clients_over : 'This value should be higher than ',
+	QKSet_detect_timeout : 'Detect time out! Do you want to restart internet detector?',
+	QoS_invalid_bandwidth : 'Invalid bandwidth period!',
+	wireless_psk_fillin : 'Please type password',
+	reboot_manually : 'Firmware upgrade is done. Please manually reboot <Router>.'
 };
 
 var helptitle = new Array(19);
@@ -506,7 +512,7 @@ function overHint(itemNum){
 	if(itemNum == 6){
 		statusmenu = "<div class='StatusHint'><#Printing_button_item#></div>";
 		if(monoClient == "monoClient=")
-			monoClient = "monoClient=Disabled"
+			monoClient = "monoClient=<#CTL_Disabled#>"
 		statusmenu += "<span>" + monoClient.substring(11, monoClient.length) + "</span>";
 	}
 	if(itemNum == 5){
@@ -521,7 +527,21 @@ function overHint(itemNum){
 					statusmenu += "<div class='StatusHint'>2.4GHz Network:</div>";
 					title2 = 1;
 				}
-				statusmenu += "<span>" + gn_array_2g[i][1] + "</span><br>";
+
+				statusmenu += "<span>" + gn_array_2g[i][1] + " (";
+
+				if(gn_array_2g[i][11] == 0)
+					statusmenu += '<#Limitless#>';
+				else{
+					var expire_hr = Math.floor(gn_array_2g[i][13]/3600);
+					var expire_min = Math.floor((gn_array_2g[i][13]%3600)/60);
+					if(expire_hr > 0)
+						statusmenu += '<b id="expire_hr_'+i+'">'+ expire_hr + '</b> Hr <b id="expire_min_'+i+'">' + expire_min +'</b> Min';
+					else
+						statusmenu += '<b id="expire_min_'+i+'">' + expire_min +'</b> Min';
+				}
+
+				statusmenu += " left)</span><br>";
 			}
 		}
 		if(band5g_support != -1){
@@ -531,19 +551,33 @@ function overHint(itemNum){
 						statusmenu += "<div class='StatusHint' style='margin-top:15px;'>5GHz Network:</div>";				
 						title5 = 1;
 					}
-					statusmenu += "<span>" + gn_array_5g[i][1] + "</span><br>";
+	
+					statusmenu += "<span>" + gn_array_5g[i][1] + " (";
+
+					if(gn_array_5g[i][11] == 0)
+						statusmenu += '<#Limitless#>';
+					else{
+						var expire_hr = Math.floor(gn_array_5g[i][13]/3600);
+						var expire_min = Math.floor((gn_array_5g[i][13]%3600)/60);
+						if(expire_hr > 0)
+							statusmenu += '<b id="expire_hr_'+i+'">'+ expire_hr + '</b> Hr <b id="expire_min_'+i+'">' + expire_min +'</b> Min';
+						else
+							statusmenu += '<b id="expire_min_'+i+'">' + expire_min +'</b> Min';
+					}
+
+					statusmenu += " left)</span><br>";
 				}
 			}
 		}
 		if(title2 == 0 && title5 == 0)
-			statusmenu += "<div class='StatusHint'>Guest Network:</div><span>Disabled</span>";
+			statusmenu += "<div class='StatusHint'><#Guest_Network#>:</div><span><#CTL_Disabled#></span>";
 	}
 
 	// internet
 	if(itemNum == 3){
 		if((link_status == "2" && link_auxstatus == "0") || (link_status == "2" && link_auxstatus == "2")){
-			statusmenu = "<div class='StatusHint'>Internet:</div>";
-			statusmenu += "<span>Connected</span>";
+			statusmenu = "<div class='StatusHint'><#statusTitle_Internet#>:</div>";
+			statusmenu += "<span><#Connected#></span>";
 		}
 		else{
 			if(sw_mode == 1){

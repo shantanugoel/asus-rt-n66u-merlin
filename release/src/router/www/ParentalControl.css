@@ -14,7 +14,7 @@
 }
 
 .service_btn{
- 	background: transparent url(/images/New_ui/advancesetting/accountedit.png) no-repeat;
+ 	background: transparent url(/images/New_ui/accountedit.png) no-repeat;
 	border:0;
 	height:30px;
  	width:30px;
@@ -29,7 +29,7 @@
 }
 
 .url_btn{
- 	background: transparent url(/images/New_ui/advancesetting/accountadd.png) no-repeat;
+ 	background: transparent url(/images/New_ui/accountadd.png) no-repeat;
 	border:0;
 	height:30px;
  	width:30px;
@@ -44,7 +44,7 @@
 }
 
 .remove_btn{
- 	background: transparent url(/images/New_ui/advancesetting/accountdelete.png) no-repeat;
+ 	background: transparent url(/images/New_ui/accountdelete.png) no-repeat;
 	border:0;
 	height:30px;
  	width:30px;

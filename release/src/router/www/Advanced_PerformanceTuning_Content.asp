@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -8,7 +8,7 @@
 <meta name="svg.render.forceflash" content="false" />	
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - Performance tuning</title>
+<title><#Web_Title#> - Performance tuning</title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script src='svg.js' data-path="/svghtc/" data-debug="false"></script>	
@@ -143,7 +143,7 @@ function applyRule(){
 
 	if(parseInt(document.form.wl0_TxPower.value) > parseInt(document.form.wl0_TxPower_orig.value) 
 		|| parseInt(document.form.wl1_TxPower.value) > parseInt(document.form.wl1_TxPower_orig.value))
-	  FormActions("start_apply.htm", "apply", "set_wltxpower;reboot", "30");
+	  FormActions("start_apply.htm", "apply", "set_wltxpower;reboot", "<% get_default_reboot_time(); %>");
 	else{
 		if(document.form.wl0_TxPower.value != document.form.wl0_TxPower_orig.value 
 			|| document.form.wl1_TxPower.value != document.form.wl1_TxPower_orig.value)
@@ -397,11 +397,11 @@ function getCookie(c_name)
 													</select>										
 												</td> 
 											</tr-->
-											<tr style="display:none">
+											<tr>
 												<th>Spin duty cycle</th>
 												<td> 
 													<select name="fanctrl_dutycycle" class="input_option">
-														<option class="content_input_fd" value="0" <% nvram_match("fanctrl_dutycycle", "1", "selected"); %>>Auto</option>
+														<option class="content_input_fd" value="0" <% nvram_match("fanctrl_dutycycle", "1", "selected"); %>><#Auto#></option>
 														<option class="content_input_fd" value="1" <% nvram_match("fanctrl_dutycycle", "1", "selected"); %>>50%</option>
 														<option class="content_input_fd" value="2" <% nvram_match("fanctrl_dutycycle", "2", "selected"); %>>67%</option>
 														<option class="content_input_fd" value="3" <% nvram_match("fanctrl_dutycycle", "3", "selected"); %>>75%</option>

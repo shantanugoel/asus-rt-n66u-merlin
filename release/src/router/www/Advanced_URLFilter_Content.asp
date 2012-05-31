@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_5_2#></title>
+<title><#Web_Title#> - <#menu5_5_2#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script language="JavaScript" type="text/javascript" src="/state.js"></script>
@@ -23,7 +23,7 @@ wan_proto = '<% nvram_get("wan_proto"); %>';
 
 <% login_state_hook(); %>
 var wireless = [<% wl_auth_list(); %>];	// [[MAC, associated, authorized], ...]
-var url_rulelist_array = '<% nvram_get("url_rulelist"); %>';
+var url_rulelist_array = "<% nvram_char_to_ascii("","url_rulelist"); %>";
 
 function initial(){
 	show_menu();
@@ -35,7 +35,7 @@ function initial(){
 
 
 function show_url_rulelist(){
-	var url_rulelist_row = url_rulelist_array.split('&#60');
+	var url_rulelist_row = decodeURIComponent(url_rulelist_array).split('<');
 	var code = "";
 	code +='<table width="100%" border="1" cellspacing="0" cellpadding="4" align="center" class="list_table" id="url_rulelist_table">'; 
 	if(url_rulelist_row.length == 1)
@@ -59,7 +59,7 @@ function deleteRow(r){
   
   var url_rulelist_value = "";
 	for(i=0; i<$('url_rulelist_table').rows.length; i++){
-		url_rulelist_value += "&#60";
+		url_rulelist_value += "<";
 		url_rulelist_value += $('url_rulelist_table').rows[i].cells[0].innerHTML;
 	}
 	
@@ -69,37 +69,30 @@ function deleteRow(r){
 }
 
 function addRow(obj, upper){
+	if(validForm(obj)){	
 		var rule_num = $('url_rulelist_table').rows.length;
 		var item_num = $('url_rulelist_table').rows[0].cells.length;
 		
-	if(rule_num >= upper){
-		alert("<#JS_itemlimit1#> " + upper + " <#JS_itemlimit2#>");
-		return false;	
-	}	
-	
-	if(obj.value==""){
-		alert("<#JS_fieldblank#>");
-		obj.focus();
-		obj.select();		
-	
-	}else{
+		// skip upper bound checking by jerry5
+		/*if(rule_num >= upper){
+				alert("<#JS_itemlimit1#> " + upper + " <#JS_itemlimit2#>");
+				return false;	
+		}*/	
+				//Viz check same rule
+				for(i=0; i<rule_num; i++){
+						for(j=0; j<item_num-1; j++){		//only 1 value column
+								if(obj.value == $('url_rulelist_table').rows[i].cells[j].innerHTML){
+										alert("<#JS_duplicate#>");
+										return false;
+								}	
+						}
+				}
+				
+				url_rulelist_array += "<";
+				url_rulelist_array += obj.value;
+				obj.value = "";		
+				show_url_rulelist();		
 		
-		//Viz check same rule
-		for(i=0; i<rule_num; i++){
-			for(j=0; j<item_num-1; j++){		//only 1 value column
-				if(obj.value == $('url_rulelist_table').rows[i].cells[j].innerHTML){
-					alert("<#JS_duplicate#>");
-					return false;
-				}	
-			}
-		}
-		
-		
-		
-		url_rulelist_array += "&#60";
-		url_rulelist_array += obj.value;
-		obj.value = "";		
-		show_url_rulelist();
 	}	
 }
 
@@ -108,7 +101,6 @@ function cross_midnight(){
 }
 
 function applyRule(){
-	if(validForm()){
 		var rule_num = $('url_rulelist_table').rows.length;
 		var item_num = $('url_rulelist_table').rows[0].cells.length;
 		var tmp_value = "";
@@ -127,15 +119,26 @@ function applyRule(){
 
 		updateDateTime(document.form.current_page.value);
 
-		if(document.form.url_enable_x.value != document.form.url_enable_x_orig.value)
-			FormActions("start_apply.htm", "apply", "reboot", "30");	
+		if(document.form.url_enable_x[0].checked == true && document.form.url_enable_x_orig.value != 1 ||
+				document.form.url_enable_x[1].checked == true && document.form.url_enable_x_orig.value != 0)
+			FormActions("start_apply.htm", "apply", "reboot", "<% get_default_reboot_time(); %>");	
 
 		showLoading();
 		document.form.submit();
-	}
 }
 
-function validForm(){
+function validForm(obj){
+	
+		if(obj.value==""){
+				alert("<#JS_fieldblank#>");
+				obj.focus();
+				obj.select();
+				return false;				
+		
+		}else	if(!Block_chars(obj, ["#", "%" ,"&" ,"*" ,"{" ,"}" ,"\\" ,":" ,"<" ,">" ,"?" ,"/" ,"+"])){
+				return false;		
+		}		
+	
 		return true;
 }
 
@@ -266,14 +269,14 @@ function done_validating(action){
         <tr>
           <th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(9,1);"><#FirewallConfig_URLActiveDate_itemname#></a></th>
           <td>
-		  	<input type="checkbox" name="url_date_x_Sun" class="input" onChange="return changeDate();">Sun
-			<input type="checkbox" name="url_date_x_Mon" class="input" onChange="return changeDate();">Mon			
-			<input type="checkbox" name="url_date_x_Tue" class="input" onChange="return changeDate();">Tue
-			<input type="checkbox" name="url_date_x_Wed" class="input" onChange="return changeDate();">Wed
-			<input type="checkbox" name="url_date_x_Thu" class="input" onChange="return changeDate();">Thu
-			<input type="checkbox" name="url_date_x_Fri" class="input" onChange="return changeDate();">Fri
-			<input type="checkbox" name="url_date_x_Sat" class="input" onChange="return changeDate();">Sat
-		  </td>
+		  				<input type="checkbox" name="url_date_x_Sun" class="input" onChange="return changeDate();"><#date_Sun_itemdesc#>
+							<input type="checkbox" name="url_date_x_Mon" class="input" onChange="return changeDate();"><#date_Mon_itemdesc#>
+							<input type="checkbox" name="url_date_x_Tue" class="input" onChange="return changeDate();"><#date_Tue_itemdesc#>
+							<input type="checkbox" name="url_date_x_Wed" class="input" onChange="return changeDate();"><#date_Wed_itemdesc#>
+							<input type="checkbox" name="url_date_x_Thu" class="input" onChange="return changeDate();"><#date_Thu_itemdesc#>
+							<input type="checkbox" name="url_date_x_Fri" class="input" onChange="return changeDate();"><#date_Fri_itemdesc#>
+							<input type="checkbox" name="url_date_x_Sat" class="input" onChange="return changeDate();"><#date_Sat_itemdesc#>
+		  		</td>
         </tr>
         
         <!--tr>
@@ -303,7 +306,7 @@ function done_validating(action){
 	 		<input type="text" maxlength="32" class="input_32_table" name="url_keyword_x_0" onKeyPress="return is_string(this, event)">
 	 	</td>
 	 	<td width="20%">	
-	  		<input class="add_btn" type="button" onClick="if(validForm()){addRow(document.form.url_keyword_x_0, 128);}" value="">
+	  		<input class="add_btn" type="button" onClick="addRow(document.form.url_keyword_x_0, 128);" value="">
 	 	</td>	
 	</tr>
 </table>

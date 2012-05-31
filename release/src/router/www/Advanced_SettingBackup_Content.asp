@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_6_4#></title>
+<title><#Web_Title#> - <#menu5_6_4#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="other.css">
@@ -35,8 +35,7 @@ function restoreRule(){
 	if(lan_ipaddr != "192.168.1.1")
 		alert_string += "<#Setting_factorydefault_iphint#>\n\n";			
 	alert_string += "<#Setting_factorydefault_hint2#>";
-	if(confirm(alert_string))
-	{
+	if(confirm(alert_string)){
 		document.form.action1.blur();
 		showtext($("loading_text"), "<#SAVE_restart_desc#>");
 		showLoading();

@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>                                     
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -15,7 +15,7 @@
 <% start_autodet(); %> // initial QIS detecting process.
 <% wanlink(); %>
 function QKinternettype_load_body(){
-	parent.document.title = "ASUS Wireless Router <#Web_Title#> - Welcome!";
+	parent.document.title = "<#Web_Title#> - Welcome!";
 	parent.set_step("t0");
 }
 
@@ -39,12 +39,12 @@ function detect_if_wan_plug(flag){
 			detect_if_wan_plug();		
 		},
 		success: function(response){
-			if(autodet_state == 4){
+			if(autodet_state == 4){ // ethernet did not plug
 				if(flag == null){
-					document.getElementById("wan_unplug").style.display = "block";
-					document.getElementById("wanportHint").style.display = "";
-					productDescfunc();
+					document.getElementById("producticon").style.display = "none";
+					document.getElementById("wan_unplug").style.display = "";
 					document.getElementById("loadingIcon").style.display = "none";
+					document.getElementById("ManualBtn").style.display = "";
 				}
 				setTimeout("update_wan_info(1);", 1000);
 			}
@@ -56,35 +56,6 @@ function detect_if_wan_plug(flag){
 				submitForm(1);
 		}
 	});	
-}
-
-function productDescfunc(){
-	var htmlCode = "";
-	//if(parent.repeater_support != -1){ // always show "Manual Btn"
-		htmlCode += '<span style=""><img src="/images/qis/border.png"></span>';
-		document.getElementById("producticon").innerHTML = htmlCode;
-		document.getElementById("producticon").style.marginTop = "-65px";
-		document.getElementById("wan_unplug").style.marginTop = "-245px";
-		document.getElementById("wan_unplug").style.marginLeft = "400px";
-		document.getElementById("productDesc").style.marginTop = "-245px";
-		document.getElementById("wanportHint").style.marginTop = "50px";
-		document.getElementById("wanportHint").style.height = "30px";
-		document.getElementById("wanportHint").style.marginLeft = "400px";
-		document.getElementById("applyBtn").style.marginTop = "50px";
-		document.getElementById("ManualBtn").style.display = "";
-	/*}
-	else{
-		htmlCode += '<span style="margin-top:15px;margin-left:20px;"><img src="/images/qis/border.png"></span>';
-		htmlCode += '<p class="QISGeneralFont" style="margin-top:-340px;margin-left:40px;font-style:normal;color:#66CCFF;font-size:12px;font-weight:bolder;">Or you can use</p>';
-		htmlCode += '<p class="QISGeneralFont" style="margin-left:40px;margin-top:10px;font-size:16px;font-weight:bolder;"><#OP_AP_item#></p>';
-		htmlCode += '<p class="QISGeneralFont" style="margin-left:40px;font-size:12px;margin-top:5px;line-height:20px;"><#OP_AP_desc#><br>';
-		htmlCode += '<input type="button" style="margin-left:150px;" id="apmodeSelect" value="AP mode >>" onclick="submitForm(3);" class="button_gen"></p>';
-		document.getElementById("producticon").style.display = "none";
-		document.getElementById("productDesc").innerHTML = htmlCode;
-		document.getElementById("productDesc").style.marginLeft = "360px";
-		document.getElementById("productDesc").style.marginTop = "-300px";
-		document.getElementById("applyBtn").style.marginTop = "100px";
-	}*/
 }
 
 function update_wan_info(flag){
@@ -129,24 +100,54 @@ function update_wan_info(flag){
 		</div>
 		<div style="margin:5px;"><img style="width: 720px; *width: 710px; height: 2px;" src="/images/New_ui/export/line_export.png"></div>
 <br/>
-<div style="margin-left:5px;margin-top:5px;width:700px;">
-	<p class="QISGeneralFont"><#QIS_welcome_desc1#><#QIS_welcome_desc3#></p>
-	<p id="wanportHint" class="QISGeneralFont" style="height:50px;width:280px;margin-top:25px;display:none;color:#FFCC00;font-weight:bolder"><#web_redirect_suggestion1#></p>
-</div>
-<div id="producticon" style="margin-left:395px;margin-top:20px;"><img src="/images/Model_producticon.png"></div>
-<span id="wan_unplug" style="display:none;margin-left:35px;margin-top:35px;"><img src="/images/WANunplug.png"></span>
-<div id="productDesc" style="margin-left:-40px;margin-top:-170px;width:500px;font-style:italic;height:260px;">
-	<ul><p class="QISGeneralFont" style="font-size:20px;font-weight:bolder;margin-bottom:10px;"><#statusTitle_System#></p>
-			<li class="QISGeneralFont"><#QIS_welcome_feature1#>
-			<li class="QISGeneralFont"><#QIS_welcome_feature2#>
-			<li class="QISGeneralFont"><#QIS_welcome_feature3#>
-			<li class="QISGeneralFont"><#QIS_welcome_feature4#>
-	</ul>	
-</div>
-<div class="apply_gen" style="margin-top:0px;" id="applyBtn">
-	<input class="button_gen" type="button" value="<#CTL_next#>" onclick="update_wan_info();">
-	<img id="loadingIcon" style="display:none;" src="/images/InternetScan.gif"></span>
-	<input id="ManualBtn" class="button_gen" type="button" style="display:none;" value="Manual" onclick="submitForm(0)">
-</div>
+
+<table style="margin-top:-20px;margin-left:20px;" width="98%" border=0 align="center" cellpadding="5" cellspacing="0">
+	<tr>
+		<td width="50%">
+			<div id="productDesc" style="font-style:italic;">
+				<ul>
+					<p style="font-size:20px;font-weight:bolder;margin-bottom:15px;"><#statusTitle_System#></p>
+					<li style="line-height:25px;"><#QIS_welcome_feature1#>
+					<li style="line-height:25px;"><#QIS_welcome_feature2#>
+					<li style="line-height:25px;"><#QIS_welcome_feature3#>
+					<li style="line-height:25px;"><#QIS_welcome_feature4#>
+				</ul>	
+			</div>
+		</td>
+
+		<td width="5%"></td>
+
+		<td width="45%">
+			<img id="producticon" src="/images/Model_producticon.png">
+			<div id="wan_unplug" style="display:none">
+				<br>
+				<img style="margin-top:-20px;margin-left:60px;*margin-left:70px;" src="/images/qis/border.png">
+				<span>
+					<div class="QISGeneralFont" style="color:#FC0;font-weight:bolder;margin-top:-330px;">
+						<#web_redirect_suggestion1#>
+					</div>
+					<br>
+					<img style="margin-left:65px;*margin-left:75px;" src="/images/WANunplug.png">
+				<span>
+			</div>
+		</td>
+	</tr>
+
+	<tr>
+		<td colspan="3">
+			<p class="QISGeneralFont" style="margin-top:50px;*margin-top:0px;margin-left:40px;"><#QIS_welcome_desc1#></p>
+		</td>
+	</tr>
+
+	<tr>
+		<td colspan="3">
+			<div class="apply_gen" id="applyBtn" style="margin-top:10px;*margin-top:0px;">
+				<input class="button_gen" type="button" value="<#CTL_next#>" onclick="update_wan_info();">
+				<img id="loadingIcon" style="display:none;" src="/images/InternetScan.gif"></span>
+				<input id="ManualBtn" class="button_gen" type="button" style="display:none;" value="Manual" onclick="submitForm(0)">
+			</div>
+		</td>
+	</tr>	
+</table>
 </form>
 </body> 

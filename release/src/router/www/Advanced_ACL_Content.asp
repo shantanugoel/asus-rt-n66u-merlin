@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -9,7 +9,7 @@
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
 
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_1_4#></title>
+<title><#Web_Title#> - <#menu5_1_4#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script language="JavaScript" type="text/javascript" src="/state.js"></script>
@@ -66,7 +66,7 @@ function show_wl_maclist_x(){
 	else{
 		for(var i = 1; i < wl_maclist_x_row.length; i++){
 			code +='<tr id="row'+i+'">';
-			code +='<td width="40%">'+ wl_maclist_x_row[i] +'</td>';	
+			code +='<td width="80%">'+ wl_maclist_x_row[i] +'</td>';	
 			code +='<td width="20%"><input type="button" class=\"remove_btn\" onclick=\"deleteRow(this);\" value=\"\"/></td></tr>';		
 		}
 	}	
@@ -100,14 +100,16 @@ function addRow(obj, upper){
 		return false;	
 	}	
 	
-	if(!check_hwaddr_temp(obj))
-		return false;		
-		
 	if(obj.value==""){
 		alert("<#JS_fieldblank#>");
 		obj.focus();
 		obj.select();			
-	}else if(check_hwaddr_temp(obj)){
+		return false;
+	}else if(!check_macaddr(obj, check_hwaddr_flag(obj))){
+		obj.focus();
+		obj.select();	
+		return false;	
+	}
 		
 		//Viz check same rule
 		for(i=0; i<rule_num; i++){
@@ -123,8 +125,6 @@ function addRow(obj, upper){
 		wl_maclist_x_array += obj.value;
 		obj.value = ""
 		show_wl_maclist_x();
-	}else
-		return false;			
 }
 
 function applyRule(){
@@ -170,15 +170,26 @@ function change_wl_unit(){
 }
 
 function check_macaddr(obj,flag){ //control hint of input mac address
-	if (flag){	
-		$("check_mac") ? $("check_mac").style.display="none" : true;
-	}
-	else{
+
+	if(flag == 1){
 		var childsel=document.createElement("div");
 		childsel.setAttribute("id","check_mac");
 		childsel.style.color="#FFCC00";
 		obj.parentNode.appendChild(childsel);
 		$("check_mac").innerHTML="<#LANHostConfig_ManualDHCPMacaddr_itemdesc#>";		
+		$("check_mac").style.display = "";
+		return false;
+	}else if(flag ==2){
+		var childsel=document.createElement("div");
+		childsel.setAttribute("id","check_mac");
+		childsel.style.color="#FFCC00";
+		obj.parentNode.appendChild(childsel);
+		$("check_mac").innerHTML=Untranslated.illegal_MAC;		
+		$("check_mac").style.display = "";
+		return false;		
+	}else{	
+		$("check_mac") ? $("check_mac").style.display="none" : true;
+		return true;
 	}	
 }
 </script>
@@ -273,14 +284,14 @@ function check_macaddr(obj,flag){ //control hint of input mac address
 			  </thead>
 
           		<tr>
-	          		<th width="40%"><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,10);">
+	          		<th width="80%"><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,10);">
 						<#FirewallConfig_MFList_groupitemname#>
 					</th> 
 					<th width="20%">Edit</th>
           		</tr>
           		<tr>
-            		<td width="40%">
-              			<input type="text" maxlength="17" class="input_macaddr_table" name="wl_maclist_x_0" onKeyPress="return is_hwaddr(this,event)" onblur="check_macaddr(this,check_hwaddr_temp(this))">
+            		<td width="80%">
+              			<input type="text" maxlength="17" class="input_macaddr_table" name="wl_maclist_x_0" onKeyPress="return is_hwaddr(this,event)">
               		</td>
               		<td width="20%">	
               			<input type="button" class="add_btn" onClick="addRow(document.form.wl_maclist_x_0, 32);" value="">

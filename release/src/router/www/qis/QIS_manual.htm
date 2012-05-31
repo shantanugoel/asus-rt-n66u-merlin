@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>                                     
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -29,7 +29,7 @@ function setScenerion(mode){
 	else if(mode == '2'){
 		parent.document.QKform.sw_mode.value = 2;
 		$j("#Senario").attr("src", "/images/New_ui/re.jpg");
-		$j("#mode_desc").html("<#OP_AP_desc#>");
+		$j("#mode_desc").html("<#OP_RE_desc#>");
 	}
 	else if(mode == '3'){
 		parent.document.QKform.sw_mode.value = 3;
@@ -39,13 +39,21 @@ function setScenerion(mode){
 }
 
 function submitForm(){
-	if(parent.document.QKform.sw_mode.value == "1")
+	if(parent.document.QKform.sw_mode.value == "1"){
 		document.form.action = "/qis/QIS_detect.htm";
-	else if(parent.document.QKform.sw_mode.value == "2")
+		document.form.submit();
+	}
+	else if(parent.document.QKform.sw_mode.value == "2"){
+		// 
 		document.form.action = "/qis/QIS_sitesurvey.htm";
-	else
+		document.form.submit();
+		//using domain name
+		//parent.location.href = 'http://www.asusnetwork.net/QIS_wizard.htm?flag=sitesurvey';
+	}
+	else{
 		document.form.action = "/qis/QIS_lanip.htm";
-	document.form.submit();
+		document.form.submit();
+	}
 }
 </script>
 </head>
@@ -81,7 +89,7 @@ function submitForm(){
 			&nbsp;&nbsp;
 			<input type="radio" name="sw_mode_radio" class="input" value="3" onclick="setScenerion(3);" <% nvram_match("sw_mode", "3", "checked"); %>><#OP_AP_item#>
 		</span>
-	<div id="mode_desc" style="position:relative;display:block;margin-top:10px;margin-left:5px;height:60px;z-index:90;">
+	<div id="mode_desc" style="font-family:Georgia, Arial, sans-serif;position:relative;display:block;margin-top:10px;margin-left:5px;height:60px;z-index:90;">
 			<#OP_GW_desc#>
 	</div>
 	<br/>

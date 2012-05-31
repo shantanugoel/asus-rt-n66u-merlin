@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -7,22 +7,15 @@
 <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
-<link rel="icon" href="images/favicon.png"><title>ASUS Wireless Router <#Web_Title#> - <#Menu_usb_application#></title>
+<link rel="icon" href="images/favicon.png"><title><#Web_Title#> - <#Menu_usb_application#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css">
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="usp_style.css">
 <style type="text/css"> 
-	div.wrapper { margin: 0 auto; width: 730px;}
-	td.sidenav { width:200px;}
-	body {font-family: Verdana, Tohoma, Arial, Helvetica, sans-serif;padding:0;margin:0;line-height:120%;}
-	.wrapperDesc { margin: 0 auto; width: 570px;}
-</style> 
-<script type="text/javascript" src="/state.js"></script>
-<script type="text/javascript" src="/popup.js"></script>
-<script type="text/javascript" src="/help.js"></script>
-<script type="text/javascript" src="/disk_functions.js"></script>
-<script type="text/javascript" src="/jquery.js"></script>
-<style type="text/css">
+div.wrapper { margin: 0 auto; width: 730px;}
+td.sidenav { width:200px;}
+body {font-family: Verdana, Tohoma, Arial, Helvetica, sans-serif;padding:0;margin:0;line-height:120%;}
+.wrapperDesc { margin: 0 auto; width: 570px;}
 .app_table{
 	width:750px;
 	padding:5px; 
@@ -85,22 +78,32 @@
 	color: #999;
 }
 .imdShade{
-	-moz-box-shadow: 15px 15px 10px rgba(0, 0, 0, 0.6);
-	-webkit-box-shadow: 15px 15px 10px rgba(0, 0, 0, 0.6);
+	-moz-box-shadow: 15px 15px 10px #333;
+	-webkit-box-shadow: 15px 15px 10px #333;
 	box-shadow: 15px 15px 10px #333;
 }
 .statusBar{
 	margin:auto;		
 }
 .loadingBlock{
-	margin-left: 35%;	
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	behavior: url(/PIE.htc);
+	border-radius: 10px 10px 10px 10px;
+	border: 0px;
 }
 
-.iconUSBdisk{background:url(images/New_ui/USBdisk.png) no-repeat 0% 0%;	width:89px; height:89px; cursor:pointer;}
-.iconUSBdisk:hover{background:url(images/New_ui/USBdisk.png) no-repeat 0% -102px;	width:89px; height:89px; cursor:pointer;}
-.iconUSBdisk_noquota{background:url(images/New_ui/USBdisk.png) no-repeat 0% 0%;	width:89px; height:89px; cursor:pointer;}
-.iconUSBdisk_noquota:hover{background:url(images/New_ui/USBdisk.png) no-repeat 0% 111%;	width:89px; height:89px; cursor:pointer;}
-</style>
+.iconUSBdisk{background:url(images/New_ui/USBExt/USBdisk.png) no-repeat 0% 0%;	width:89px; height:89px; cursor:pointer;}
+.iconUSBdisk:hover{background:url(images/New_ui/USBExt/USBdisk.png) no-repeat 0% -102px;	width:89px; height:89px; cursor:pointer;}
+.iconUSBdisk_noquota{background:url(images/New_ui/USBExt/USBdisk.png) no-repeat 0% 0%;	width:89px; height:89px; cursor:pointer;}
+.iconUSBdisk_noquota:hover{background:url(images/New_ui/USBExt/USBdisk.png) no-repeat 0% 111%;	width:89px; height:89px; cursor:pointer;}
+</style> 
+<script type="text/javascript" src="/state.js"></script>
+<script type="text/javascript" src="/popup.js"></script>
+<script type="text/javascript" src="/help.js"></script>
+<script type="text/javascript" src="/disk_functions.js"></script>
+<script type="text/javascript" src="/jquery.js"></script>
 <script>
 var $j = jQuery.noConflict();
 </script>
@@ -109,16 +112,20 @@ var $j = jQuery.noConflict();
 wan_route_x = '<% nvram_get("wan_route_x"); %>';
 wan_nat_x = '<% nvram_get("wan_nat_x"); %>';
 wan_proto = '<% nvram_get("wan_proto"); %>';
-var apps_array;
+
+var apps_array = <% apps_info("asus"); %>;
+var apps_state_upgrade = "<% nvram_get("apps_state_upgrade"); %>";
+var apps_state_update = "<% nvram_get("apps_state_update"); %>";
+var apps_state_remove = "<% nvram_get("apps_state_remove"); %>";
+var apps_state_enable = "<% nvram_get("apps_state_enable"); %>";
+var apps_state_switch = "<% nvram_get("apps_state_switch"); %>";
+var apps_state_autorun = "<% nvram_get("apps_state_autorun"); %>";
+var apps_state_install = "<% nvram_get("apps_state_install"); %>";
+var apps_state_error = "<% nvram_get("apps_state_error"); %>";
+var apps_dev = "<% nvram_get("apps_dev"); %>";
+
 <% apps_action(); %> //trigger apps_action.
-var apps_state_upgrade = "";
-var apps_state_autorun = "";
-var apps_state_update = "";
-var apps_state_remove = "";
-var apps_state_enable = "";
-var apps_state_install = "";
-var apps_state_error = "";
-var apps_dev = "";
+
 var curr_pool_name = "";
 var stoppullstate = 0;
 var isinstall = 0;
@@ -132,24 +139,34 @@ var dm_http_port = '<% nvram_get("dm_http_port"); %>';
 if(dm_http_port == "")
 	dm_http_port = "8081";
 
+var _apps_action = '<% get_parameter("apps_action"); %>';
+if(_apps_action == 'cancel')
+	_apps_action = '';
+
+var webs_state_update;
+var webs_state_error;
+var webs_state_info;
+var usb_path1_index;
+var usb_path2_index;
+
 <% disk_pool_mapping_info(); %>
+
 
 function initial(){
 	show_menu();
 
-	// to jerry, please change it if you want
-	if (dualWAN_support == -1) {
+	//if (dualWAN_support == -1) {
 		default_apps_array = [["AiDisk", "aidisk.asp", "<#AiDiskWelcome_desp1#>", "Aidisk.png"],
 													["Servers Center", tablink[3][1], "<#UPnPMediaServer_Help#>", "server.png"],
-													["<#Network_Printer_Server#>", "PrinterServer.asp#1", "<#Network_Printer_desc#>", "PrinterServer.png"],
+													["<#Network_Printer_Server#>", "PrinterServer.asp", "<#Network_Printer_desc#>", "PrinterServer.png"],
 													["3G/WiMax", "Advanced_Modem_Content.asp", "<#HSDPAConfig_hsdpa_enable_hint1#>", "modem.png"]];
-	}
+	/*}
 	else {
 		default_apps_array = [["AiDisk", "aidisk.asp", "<#AiDiskWelcome_desp1#>", "Aidisk.png"],
 													["Servers Center", tablink[3][1], "<#UPnPMediaServer_Help#>", "server.png"],
-													["<#Network_Printer_Server#>", "PrinterServer.asp#1", "<#Network_Printer_desc#>", "PrinterServer.png"],
+													["<#Network_Printer_Server#>", "PrinterServer.asp", "<#Network_Printer_desc#>", "PrinterServer.png"],
 													["3G/WiMax", "Advanced_WANPort_Content.asp", "<#HSDPAConfig_hsdpa_enable_hint1#>", "modem.png"]];
-	}
+	}*/
 	
 	if(sw_mode == 3){
 		default_apps_array.splice(3, 1);
@@ -160,26 +177,41 @@ function initial(){
 		default_apps_array.splice(3, 1);
 
 	trNum = default_apps_array.length;
-	//setTimeout("showMethod('','none');", 100);
 	calHeight(0);
-	setTimeout("update_appstate();", 500);
+
+	if(_apps_action == '' && 
+		(apps_state_upgrade == 3 || apps_state_upgrade == "") && 
+		(apps_state_enable == 2 || apps_state_enable == "") &&
+		(apps_state_update == 2 || apps_state_update == "") && 
+		(apps_state_remove == 2 || apps_state_remove == "") &&
+		(apps_state_switch == 5 || apps_state_switch == "") && 
+		(apps_state_autorun == 4 || apps_state_autorun == "") && 
+		(apps_state_install == 4 || apps_state_install == "")){
+		show_apps();
+	}
+	else{
+		setTimeout("update_appstate();", 2000);
+	}
+
 	addOnlineHelp($("faq"), ["ASUSWRT", "download","master"]);
 	addOnlineHelp($("faq2"), ["ASUSWRT", "download","tool"]);
 }
 
 function calHeight(_trNum){
-	var menu_height = parseInt(52*calculate_height+90);
+	$("applist_table").style.height = "auto";
+	if(_trNum != 0)
+		_trNum = document.getElementById("applist_table").clientHeight;
 
-	if(menu_height < _trNum)
-		$("applist_table").style.height = _trNum + "px";
-	else
+	menu_height = parseInt(52*calculate_height+90);
+
+	if(menu_height > _trNum)
 		$("applist_table").style.height = menu_height + "px";
 }
 
 function update_appstate(e){
   $j.ajax({
     url: '/update_appstate.asp',
-    dataType: 'script', 
+    dataType: 'script',
 	
     error: function(xhr){
       update_appstate();
@@ -191,33 +223,53 @@ function update_appstate(e){
       	setTimeout("update_appstate();", 1000);
 				calHeight(0);
 			}
+			else
+				update_applist();
+		}    
+  });
+}
+
+function update_applist(e){
+  $j.ajax({
+    url: '/update_applist.asp',
+    dataType: 'script',
+	
+    error: function(xhr){
+      update_applist();
+    },
+    success: function(response){
+			if(isinstall > 0 && getCookie_help("apps_last") == "downloadmaster"){
+				for(var i = 0; i < apps_array.length; i++){
+					if(apps_array[i][0] == "DM2_Utility")
+						$("DMUtilityLink").href = apps_array[i][5]+ "/" + apps_array[i][12];
+				}
+				$("isInstallDesc").style.display = "";
+				setTimeout('divdisplayctrl("none", "none", "none", "");', 100);
+				$("return_btn").style.display = "";
+			}
 			else{
-				if(isinstall > 0 && getCookie_help("apps_last") == "downloadmaster"){
-					for(var i = 0; i < apps_array.length; i++){
-						if(apps_array[i][0] == "DM2_Utility")
-							$("DMUtilityLink").href = apps_array[i][5]+ "/" + apps_array[i][12];
-					}
-					$("isInstallDesc").style.display = "";
-					setTimeout('divdisplayctrl("none", "none", "none", "");', 100);
-					$("return_btn").style.display = "";
-				}
-				else{
-					setTimeout('show_partition();', 100);
-					setTimeout('show_apps();', 100);
-				}
+				setTimeout('show_partition();', 100);
+				setTimeout('show_apps();', 100);
 			}
 		}    
   });
 }
 
 function check_appstate(){
-	var errorcode;
+	if(_apps_action != "" && apps_state_upgrade == "" && apps_state_enable == "" && apps_state_update == "" && 
+		 apps_state_remove == "" && apps_state_switch == "" && apps_state_autorun == "" && apps_state_install == ""){
+		return false;
+	}
+
 	if((apps_state_upgrade == 3 || apps_state_upgrade == "") && (apps_state_enable == 2 || apps_state_enable == "") &&
 		(apps_state_update == 2 || apps_state_update == "") && (apps_state_remove == 2 || apps_state_remove == "") &&
 		(apps_state_switch == 5 || apps_state_switch == "") && (apps_state_autorun == 4 || apps_state_autorun == "") && 
 		(apps_state_install == 4 || apps_state_install == "")){
 		return true;
 	}
+
+	var errorcode;
+
 	if(apps_state_upgrade != 3 && apps_state_upgrade != ""){ // upgrade error handler
 		errorcode = "apps_state_upgrade = " + apps_state_upgrade;
 		if(apps_state_error == 1)
@@ -302,13 +354,17 @@ function check_appstate(){
 		else
 			$("apps_state_desc").innerHTML = "Auto Installing...";
 	}
-	else if(apps_state_install == 3 && apps_state_error > 0){ // install error handler
+	else if(apps_state_install != 4 && apps_state_error > 0){ // install error handler
 		if(apps_state_error == 1)
 			$("apps_state_desc").innerHTML = "Input error!";
 		else if(apps_state_error == 2)
 			$("apps_state_desc").innerHTML = "Mount error!";
+		else if(apps_state_error == 3)
+			$("apps_state_desc").innerHTML = "Create Swap error!";
 		else if(apps_state_error == 4)
 			$("apps_state_desc").innerHTML = "Initiate upgrading fail!";
+		else if(apps_state_error == 5)
+			$("apps_state_desc").innerHTML = "Couldn't connect to Internet!";
 		else if(apps_state_error == 6)
 			$("apps_state_desc").innerHTML = "No response from the remote server.";
 		else if(apps_state_error == 7)
@@ -317,27 +373,14 @@ function check_appstate(){
 			$("apps_state_desc").innerHTML = "Can't remove!";
 		else if(apps_state_error == 10)
 			$("apps_state_desc").innerHTML = "USB storage device abnormal!";
+
+		isinstall = 0;
 	}
 	else if(apps_state_install != 4 && apps_state_install != ""){
 		isinstall = 1;
 		errorcode = "_apps_state_install = " + apps_state_install;
-		if(apps_state_error == 1){
-			$("apps_state_desc").innerHTML = "An error occurred!";
-			isinstall = 0;
-		}
-		else if(apps_state_error == 2){
-			$("apps_state_desc").innerHTML = "Mount error!";
-			isinstall = 0;
-		}
-		else if(apps_state_error == 3){
-			$("apps_state_desc").innerHTML = "Create Swap error!";
-			isinstall = 0;
-		}
-		else if(apps_state_error == 5){
-			$("apps_state_desc").innerHTML = "Couldn't connect to Internet!";
-			isinstall = 0;
-		}
-		else if(apps_state_install == 0)
+
+		if(apps_state_install == 0)
 			$("apps_state_desc").innerHTML = "Preparing Partition...";
 		else if(apps_state_install == 1)
 			$("apps_state_desc").innerHTML = "Checking Disk...";
@@ -364,12 +407,14 @@ function check_appstate(){
 	else
 		$("return_btn").style.display = "none";
 
-	$("apps_state_desc").innerHTML += '<span class="app_action" onclick="apps_form(\'stop\',\'\',\'\');">(<#CTL_Cancel#>)</span>';
+	$("apps_state_desc").innerHTML += '<span class="app_action" onclick="apps_form(\'cancel\',\'\',\'\');">(<#CTL_Cancel#>)</span>';
 	return false;
 }
 
 var trNum;
 function show_apps(){
+	$("usbHint").innerHTML = "<#remove_usb_hint#>";
+
 	var counter = 0;
 	appnum = 0;
 
@@ -377,15 +422,14 @@ function show_apps(){
 		dm_http_port = "8081";
 
 	if(apps_array == "" && (appnet_support != -1 || appbase_support != -1))
-		apps_array = [["downloadmaster", "", "", "no", "no", "", "", "Download tools", "downloadmaster.png", "", "", ""],["mediaserver", "", "", "no", "no", "", "", "", "mediaserver.png", "", "", ""],["cloudsync", "", "", "no", "no", "", "", "", "cloudsync.png", "", "", ""]];
+		apps_array = [["downloadmaster", "", "", "no", "no", "", "", "Download tools", "downloadmaster.png", "", "", ""],["mediaserver", "", "", "no", "no", "", "", "", "mediaserver.png", "", "", ""]];
 
 	// calculate div height
-	calHeight(parseInt(trNum*140));
 	htmlcode = '<table align="center" style="margin:auto;">';
 	
 	//show default Apps
 	for(var i = 0; i < default_apps_array.length; i++){
-		htmlcode += '<tr><td><img style="margin-top:0px;" src="/images/New_ui/'+ default_apps_array[i][3] +'" style="cursor:pointer" onclick="location.href=\''+ default_apps_array[i][1] +'\';"></td><td style="width:350px;">\n';
+		htmlcode += '<tr><td><img style="margin-top:0px;" src="/images/New_ui/USBExt/'+ default_apps_array[i][3] +'" style="cursor:pointer" onclick="location.href=\''+ default_apps_array[i][1] +'\';"></td><td style="width:350px;">\n';
 		htmlcode += '<div class="app_name"><a style="text-decoration: underline;" href="' + default_apps_array[i][1] + '">' + default_apps_array[i][0] + '</a></div>\n';
 		htmlcode += '<div class="app_desc">' + default_apps_array[i][2] + '</div>\n';
 		htmlcode += '<div style="margin-top:10px;"></div><br/><br/></td></tr>\n';
@@ -396,7 +440,7 @@ function show_apps(){
 		if(apps_array[i][0] == "DM2_Utility")
 			$("DMUtilityLink").href = apps_array[i][5]+ "/" + apps_array[i][12];
 
-		if(apps_array[i][0] != "downloadmaster" && (apps_array[i][0] != "mediaserver" || media_support != -1) && (apps_array[i][0] != "cloudsync" || cloudsync_support == -1)) // show needed apps
+		if(apps_array[i][0] != "downloadmaster" && (apps_array[i][0] != "mediaserver" || media_support != -1)) // show needed apps
 			continue;
 		else if((apps_array[i][0] == "downloadmaster" || apps_array[i][0] == "mediaserver" || apps_array[i][0] == "cloudsync") && apps_array[i][3] == "yes" && apps_array[i][4] == "yes"){
 			if(location.host.split(":").length > 1)
@@ -418,12 +462,12 @@ function show_apps(){
 		htmlcode += '<tr><td>\n';
 		if(apps_array[i][4] == "yes" && apps_array[i][3] == "yes"){
 			if(apps_array[i][6] != "")
-				htmlcode += '<img style="margin-top:0px;" src="/images/New_ui/'+ apps_array[i][0] +'.png" style="cursor:pointer" onclick="location.href=\''+ apps_array[i][6] +'\';"></td>\n';
+				htmlcode += '<img style="margin-top:0px;" src="/images/New_ui/USBExt/'+ apps_array[i][0] +'.png" style="cursor:pointer" onclick="location.href=\''+ apps_array[i][6] +'\';"></td>\n';
 			else
-				htmlcode += '<img style="margin-top:0px;" src="/images/New_ui/'+ apps_array[i][0] +'.png"></td>\n';				
+				htmlcode += '<img style="margin-top:0px;" src="/images/New_ui/USBExt/'+ apps_array[i][0] +'.png"></td>\n';				
 		}	
 		else
-			htmlcode += '<img style="margin-top:0px;filter:gray" src="/images/New_ui/'+ apps_array[i][0] +'.png"></td>\n';			
+			htmlcode += '<img style="margin-top:0px;filter:gray" src="/images/New_ui/USBExt/'+ apps_array[i][0] +'.png"></td>\n';			
 
 		// apps_name
 		htmlcode += '<td style="width:350px;">\n';
@@ -474,7 +518,6 @@ function show_apps(){
 		if(apps_array[i][4] == "no" && apps_array[i][3] == "yes"){
 			htmlcode += '<div class="app_desc" style="color:gray">' + apps_array[i][7] + '</div>\n';
 			htmlcode += '<div style="margin-top:10px;">\n';		
-//			htmlcode += '<div style="margin-top:10px;color:gray">\n';		
 		}
 		else{
 			htmlcode += '<div class="app_desc">' + apps_array[i][7] + '</div>\n';
@@ -494,7 +537,7 @@ function show_apps(){
 		}
 		else{
 			if(apps_array[i][0] == "downloadmaster" || apps_array[i][0] == "mediaserver" || apps_array[i][0] == "cloudsync")
-				htmlcode += '<span class="app_action" onclick="_appname=\''+apps_array[i][0]+'\';divdisplayctrl(\'none\', \'\', \'none\', \'none\');">Install</span>\n';
+				htmlcode += '<span class="app_action" onclick="_appname=\''+apps_array[i][0]+'\';divdisplayctrl(\'none\', \'\', \'none\', \'none\');location.href=\'#\';">Install</span>\n';
 			else
 				htmlcode += '<span class="app_action" onclick="apps_form(\'install\',\''+ apps_array[i][0] +'\',\''+ partitions_array[i] +'\');">Install</span>\n';
 		}
@@ -515,6 +558,7 @@ function show_apps(){
 	$("app_table").innerHTML = htmlcode;
 	divdisplayctrl("", "none", "none", "none");
 	stoppullstate = 1;
+	calHeight(1);
 }
 
 var partitions_array = "";
@@ -526,8 +570,6 @@ function show_partition(){
 	
 	$("app_table").style.display = "none";
 	htmlcode += '<table align="center" style="margin:auto;">';
-
-	calHeight(parseInt(partitions_array.length*180));
 
 	for(var i = 0; i < partitions_array.length; i++){
 		var all_accessable_size = simpleNum(pool_kilobytes()[i]-pool_kilobytes_in_use()[i]);
@@ -566,16 +608,18 @@ function show_partition(){
 		htmlcode += '<tr height="360px"><td colspan="2"><span class="app_name"><#no_usb_found#></span></td></tr>\n';
 
 	$("partition_div").innerHTML = htmlcode;
+	$("usbHint").innerHTML = Untranslated.appInstall_partition;
+	calHeight(1);
 }
 
 var mounted_partition_old = 0;
 function detectUSBStatusApp(){
 	var mounted_partition = 0;
 	$j.ajax({
-    		url: '/detect_firmware.asp',
+    		url: '/update_diskinfo.asp',
     		dataType: 'script',
     		error: function(xhr){
-    			detectUSBStatusIndex();
+    			detectUSBStatusApp();
     		},
     		success: function(){
 					for(i=0; i<foreign_disk_interface_names().length; i++){
@@ -607,13 +651,12 @@ function divdisplayctrl(flag1, flag2, flag3, flag4){
 
 	if(flag1 != "none"){ // app list
 		$("return_btn").style.display = "none";
-		calHeight(parseInt(trNum*130+(appnum*130)));
 	}
 	else if(flag2 != "none"){ // partition list
 		detectUSBStatusApp();
 		show_partition()
 		$("return_btn").style.display = "";
-		calHeight(parseInt(partitions_array.length*180));
+		calHeight(1);
 	}
 	else if(flag4 != "none"){ // help
 		if(location.host.split(":").length > 1)
@@ -623,6 +666,7 @@ function divdisplayctrl(flag1, flag2, flag3, flag4){
 
 		$("quick_dmlink").onclick = function(){location.href=_quick_dmlink;}
 		$("return_btn").style.display = "";
+		calHeight(1);
 	}
 	else{ // status
 		calHeight(0);
@@ -633,26 +677,6 @@ function divdisplayctrl(flag1, flag2, flag3, flag4){
 	else
 		$("usbHint").style.display = "none";
 }
-
-/*function showMethod(flag1, flag2){
-	document.getElementById("method1").style.display = flag1;
-	document.getElementById("method1Title").style.display = flag1;
-	document.getElementById("method2").style.display = flag2;
-	document.getElementById("method2Title").style.display = flag2;
-	if(flag1 == ""){
-		$("help1").style.color = "#FFF";
-		$("faq").style.color = "#FFF";		
-		$("help2").style.color = "gray";
-		$("DMUtilityLink").style.color = "gray";
-	}
-	else{
-		$("help1").style.color = "gray";
-		$("DMVedio").style.color = "gray";
-		$("faq").style.color = "gray";
-		$("help2").style.color = "#FFF";
-		$("DMUtilityLink").style.color = "#FFF";
-	}
-}*/
 
 window.onbeforeunload = function(){
 	cookie_help.set("apps_last", _appname, 1000);
@@ -665,26 +689,6 @@ window.onbeforeunload = function(){
 <body onload="initial();" onunload="unload_body();">
 <div id="TopBanner"></div>
 <div id="Loading" class="popup_bg"></div>
-
-<div id="ParentalCtrlHelp" class="popup_bg" style="display:none;visibility:visible;">
-<table cellpadding="5" cellspacing="0" id="loadingBlock" class="loadingBlock" align="center" style="margin:auto;margin-top:50px;">
-<tbody>
-	<tr>
-		<td>
-			<object width="640" height="360">
-				<div onclick="document.body.style.overflow='auto';document.getElementById('ParentalCtrlHelp').style.display='none';">
-					<span style="float:right;margin-bottom:5px;">
-						<img align="right" title="Back" src="/images/backprev.png" onMouseOver="this.src='/images/backprevclick.png'" onMouseOut="this.src='/images/backprev.png'">
-					</span>
-				</div>
-				<param name="movie" value="http://www.youtube.com/v/Em6Hddyytlw&feature=player_embedded&version=3"></param><param name="allowFullScreen" value="true"></param><param name="allowScriptAccess" value="always"></param>
-				<embed src="http://www.youtube.com/v/Em6Hddyytlw&feature=player_embedded&version=3" type="application/x-shockwave-flash" allowfullscreen="true" allowScriptAccess="always" width="640" height="360"></embed>
-			</object>
-		</td>
-	</tr>
-</tbody>
-</table>
-</div>
 
 <iframe name="hidden_frame" id="hidden_frame" width="0" height="0" frameborder="0" scrolling="no"></iframe>
 <form method="post" name="app_form" action="/APP_Installation.asp">
@@ -761,45 +765,29 @@ window.onbeforeunload = function(){
 			</div>
 			<br/>
 			<div><img src="images/New_ui/export/line_export.png" /></div>
-			<div id="mainbody" style="">
-				<div class="wrapper">
-					<div class="shadow-l">
-						<div class="shadow-r">
-							<table class="" cellspacing="0" cellpadding="0">
-								<tbody><tr valign="top">
-									<td class="">
-										<div class="padding">
-											<div class="">
-												<ul class="" style="margin-left:10px;">
-													<li>
-														<a id="faq" href="" target="_blank" style="text-decoration:underline;font-size:14px;font-weight:bolder;color:#FFF">Download Master FAQ</a>
-													</li>
-													<li style="margin-top:10px;">
-														<a id="faq2" href="" target="_blank" style="text-decoration:underline;font-size:14px;font-weight:bolder;color:#FFF">Download Master Tool FAQ</a>
-													</li>
-													<li style="margin-top:10px;">
-														<a id="DMUtilityLink" href="http://dlcdnet.asus.com/pub/ASUS/wireless/ASUSWRT/DM2_2017.zip" style="text-decoration:underline;font-size:14px;font-weight:bolder;color:#FFF">Download "Download Master Tool" Now!</a>
-													</li>
-												</ul>
-												<br>
-												<br>
-												<div style="margin-left:35px" id="helpVedio" style="display:none">
-													<object width="640" height="360">
-														<param name="movie" value="http://www.youtube.com/v/Em6Hddyytlw&feature=player_embedded&version=3"></param><param name="allowFullScreen" value="true"></param><param name="allowScriptAccess" value="always"></param>
-														<embed src="http://www.youtube.com/v/Em6Hddyytlw&feature=player_embedded&version=3" type="application/x-shockwave-flash" allowfullscreen="true" allowScriptAccess="always" width="640" height="360"></embed>
-													</object>
-												</div>
-											</div>	
-										<span class="article_seperator">&nbsp;</span>
-									</div>
-								</td>
-							</tr>
-						</tbody>
-							</table>													
-						</div>
-					</div>
-				</div>
-			</div>
+			<table class="" cellspacing="0" cellpadding="0">
+				<tbody>
+					<tr valign="top">
+					<td>
+						<ul style="margin-left:10px;">
+							<br>
+							<li>
+								<a id="faq" href="" target="_blank" style="text-decoration:underline;font-size:14px;font-weight:bolder;color:#FFF">Download Master FAQ</a>
+							</li>
+							<li style="margin-top:10px;">
+								<a id="faq2" href="" target="_blank" style="text-decoration:underline;font-size:14px;font-weight:bolder;color:#FFF">Download Master Tool FAQ</a>
+							</li>
+							<li style="margin-top:10px;">
+								<a id="DMUtilityLink" href="http://dlcdnet.asus.com/pub/ASUS/wireless/ASUSWRT/DM2_2017.zip" style="text-decoration:underline;font-size:14px;font-weight:bolder;color:#FFF">Download "Download Master Tool" Now!</a>
+							</li>
+							<li style="margin-top:10px;">
+								<a target="_blank" style="font-weight: bolder; cursor:pointer;text-decoration: underline;" href="http://www.youtube.com/v/Em6Hddyytlw">Click to open tutorial video.</a>
+							</li>
+						</ul>
+					</td>
+					</tr>
+				</tbody>
+			</table>													
    	</td> 
   </tr>  
 	   

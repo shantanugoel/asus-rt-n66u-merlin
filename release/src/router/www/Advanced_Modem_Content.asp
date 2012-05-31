@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_4_4#></title>
+<title><#Web_Title#> - <#menu5_4_4#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="other.css">
@@ -28,11 +28,11 @@ var wireless = [<% wl_auth_list(); %>];	// [[MAC, associated, authorized], ...]
 var modem = '<% nvram_get("Dev3G"); %>';
 var country = '<% nvram_get("modem_country"); %>';
 var isp = '<% nvram_get("modem_isp"); %>';
-
 var apn = '<% nvram_get("modem_apn"); %>';
 var dialnum = '<% nvram_get("modem_dialnum"); %>';
 var user = '<% nvram_get("modem_user"); %>';
 var pass = '<% nvram_get("modem_pass"); %>';
+var pin_opt = '<% nvram_get("modem_pincode_opt"); %>';
 
 var modemlist = new Array();
 var countrylist = new Array();
@@ -47,13 +47,18 @@ var wans_dualwan = '<% nvram_get("wans_dualwan"); %>';
 <% wan_get_parameter(); %>
 
 if(dualWAN_support != -1){
-	switch(wans_dualwan.split(" ")[<% nvram_get("wan_unit"); %>]){
+	var wan_type_name = wans_dualwan.split(" ")[<% nvram_get("wan_unit"); %>];
+	wan_type_name = wan_type_name.toUpperCase();
+	switch(wan_type_name){
 		case "DSL":
 			location.href = "Advanced_DSL_Content.asp";
-		case "USB":
+			break;
+		case "WAN":
+		case "LAN":
+			location.href = "Advanced_WAN_Content.asp";
 			break;	
 		default:
-			location.href = "Advanced_Modem_Content.asp";
+			break;	
 	}
 }
 	
@@ -65,8 +70,21 @@ function initial(){
 	switch_modem_mode('<% nvram_get("modem_enable"); %>');
 	show_ISP_list();
 	show_APN_list();
-	$("option5").innerHTML = '<table><tbody><tr><td><img border="0" width="50px" height="50px" src="images/New_ui/icon_index_5.png" style="margin-top:-3px;"></td><td><div style="width:120px;"><#Menu_usb_application#></div></td></tr></tbody></table>';
-	$("option5").className = "m5_r";
+	switch_modem_mode_enable('<% nvram_get("modem_enable"); %>');
+
+	if(dualWAN_support == -1){		
+		$("option5").innerHTML = '<table><tbody><tr><td><img border="0" width="50px" height="50px" src="images/New_ui/icon_index_5.png" style="margin-top:-3px;"></td><td><div style="width:120px;"><#Menu_usb_application#></div></td></tr></tbody></table>';
+		$("option5").className = "m5_r";
+	}
+
+	//pin code
+	if(pin_opt) {
+		document.form.modem_pincode.disabled = false;
+		inputHideCtrl(document.form.modem_pincode, 1);
+	} else {
+		document.form.modem_pincode.disabled = true;
+		inputHideCtrl(document.form.modem_pincode, 0);
+	}
 }
 
 function genWANSoption(){
@@ -173,13 +191,13 @@ function show_4G_modem_list(){
 function switch_modem_mode(mode){
 	//if(mode != "0" && $("hsdpa_hint").style.display == "none")
 	//alert("<#HSDPA_LANtoWAN#>");
-
+	document.form.modem_enable.value = mode;
 	show_modem_list(mode);
 
 	if(mode == "1"){ // WCDMA
 		inputCtrl(document.form.Dev3G, 1);
 		inputCtrl(document.form.modem_country, 1);
-		//inputCtrl(document.form.modem_isp, 1);
+		inputCtrl(document.form.modem_isp, 1);
 		inputCtrl(document.form.modem_apn, 1);
 		//inputCtrl(document.form.wan_3g_pin, 1);
 		inputCtrl(document.form.modem_dialnum, 1);
@@ -191,7 +209,7 @@ function switch_modem_mode(mode){
 	else if(mode == "2"){ // CDMA2000
 		inputCtrl(document.form.Dev3G, 1);
 		inputCtrl(document.form.modem_country, 1);
-		//inputCtrl(document.form.modem_isp, 1);
+		inputCtrl(document.form.modem_isp, 1);
 		inputCtrl(document.form.modem_apn, 1);
 		//inputCtrl(document.form.wan_3g_pin, 1);
 		inputCtrl(document.form.modem_dialnum, 1);
@@ -203,7 +221,7 @@ function switch_modem_mode(mode){
 	else if(mode == "3"){ // TD-SCDMA
 		inputCtrl(document.form.Dev3G, 1);
 		inputCtrl(document.form.modem_country, 1);
-		//inputCtrl(document.form.modem_isp, 1);
+		inputCtrl(document.form.modem_isp, 1);
 		inputCtrl(document.form.modem_apn, 1);
 		//inputCtrl(document.form.wan_3g_pin, 1);
 		inputCtrl(document.form.modem_dialnum, 1);
@@ -212,16 +230,16 @@ function switch_modem_mode(mode){
 		inputCtrl(document.form.modem_ttlsid, 0);
 		//$("hsdpa_hint").style.display = "";
 	}
-	else if(mode == "4"){	//Wi-max
+	else if(mode == "4"){	// WiMAX
 		inputCtrl(document.form.Dev3G, 1);
 		inputCtrl(document.form.modem_country, 1);
-		//inputCtrl(document.form.modem_isp, 1);
+		inputCtrl(document.form.modem_isp, 1);
 		inputCtrl(document.form.modem_apn, 0);
 		//inputCtrl(document.form.wan_3g_pin, 0);
 		inputCtrl(document.form.modem_dialnum, 0);
 		inputCtrl(document.form.modem_user, 1);
 		inputCtrl(document.form.modem_pass, 1);
-		inputCtrl(document.form.modem_ttlsid, 0);
+		inputCtrl(document.form.modem_ttlsid, 1);
 		//$("hsdpa_hint").style.display = "";
 	}
 	else{		//stop
@@ -236,8 +254,30 @@ function switch_modem_mode(mode){
 		inputCtrl(document.form.modem_ttlsid, 0);
 		//$("hsdpa_hint").style.display = "none";
 	}
-
 	//gen_country_list(mode);
+}
+
+function switch_modem_mode_enable(mode){db(mode);
+	if(mode == 0){
+		inputHideCtrl(document.form.modem_enable_option, 0);
+		inputCtrl(document.form.Dev3G, 0);
+		inputCtrl(document.form.modem_country, 0);
+		inputCtrl(document.form.modem_isp, 0);
+		inputCtrl(document.form.modem_apn, 0);
+		//inputCtrl(document.form.wan_3g_pin, 0);
+		inputCtrl(document.form.modem_dialnum, 0);
+		inputCtrl(document.form.modem_user, 0);
+		inputCtrl(document.form.modem_pass, 0);
+		inputCtrl(document.form.modem_ttlsid, 0);
+		//$("hsdpa_hint").style.display = "none";
+		document.form.modem_enable.value = "0";
+	}
+	else{
+		switch_modem_mode(document.form.modem_enable_option.value);
+		gen_list(document.form.modem_enable_option.value);
+		show_ISP_list();
+		show_APN_list();
+	}	
 }
 
 function gen_country_list(mode){
@@ -303,17 +343,22 @@ function show_APN_list(){
 
 	if(document.form.modem_country.value == ""){
 		inputHideCtrl(document.form.modem_isp, 0);
-		inputHideCtrl(document.form.modem_enable, 1);
+		inputHideCtrl(document.form.modem_enable_option, 1);
 	}
 	else{
 		inputHideCtrl(document.form.modem_isp, 1);
-		inputHideCtrl(document.form.modem_enable, 0);
+		inputHideCtrl(document.form.modem_enable_option, 0);
 
 		// document.form.modem_isp.value = "";
 		if(document.form.modem_isp.value == "China Mobile")
 			document.form.modem_enable.value = "3";
-		else if(document.form.modem_isp.value == "Yota")
+		else if(document.form.modem_isp.value == "Yota"
+				|| document.form.modem_isp.value == "GMC"
+				|| document.form.modem_isp.value == "FreshTel"
+				){
 			document.form.modem_enable.value = "4";
+			inputCtrl(document.form.modem_ttlsid, 1);
+		}
 		else if(daillist[isp_order] == "#777")
 			document.form.modem_enable.value = "2";
 		else
@@ -357,12 +402,18 @@ function show_APN_list(){
 
 function applyRule(){
 	var mode = document.form.modem_enable.value;
-
+	
+	//check pin code
+	if(document.form.modem_pincode.value != "") {
+		if(document.form.modem_pincode.value.search(/^\d{4,8}$/)==-1) {
+			alert("<#JS_InvalidPIN#>");
+			return;
+		}
+	}
+	
 	if(document.form.modem_enable.value != "0"){
-		//if(confirm("<#HSDPA_enable_confirm#>")){
-			showLoading(); 
-			document.form.submit();
-		//}
+		showLoading(); 
+		document.form.submit();
 	}
 	else{
 		showLoading(); 
@@ -405,10 +456,11 @@ function done_validating(action){
 <input type="hidden" name="next_host" value="">
 <input type="hidden" name="modified" value="0">
 <input type="hidden" name="action_mode" value="apply">
-<input type="hidden" name="action_script" value="restart_wan_if">
-<input type="hidden" name="action_wait" value="10">
+<input type="hidden" name="action_script" value="reboot">
+<input type="hidden" name="action_wait" value="<% get_default_reboot_time(); %>">
 <input type="hidden" name="preferred_lang" id="preferred_lang" value="<% nvram_get("preferred_lang"); %>">
 <input type="hidden" name="firmver" value="<% nvram_get("firmver"); %>">
+<input type="hidden" name="modem_enable" value="<% nvram_get("modem_enable"); %>">
 
 <table class="content" align="center" cellpadding="0" cellspacing="0">
   <tr>
@@ -462,11 +514,19 @@ function done_validating(action){
 						</table>
 
 			  <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable" style="margin-top:8px">
-							<thead>
-							<tr>
-								<td colspan="2"><#t2BC#></td>
-							</tr>
-							</thead>							
+					<thead>
+					<tr>
+						<td colspan="2"><#t2BC#></td>
+					</tr>
+					</thead>							
+
+					<tr>
+						<th><#HSDPAConfig_hsdpa_enable_itemname#></th>
+						<td>
+							<input type="radio" value="1" onclick="switch_modem_mode_enable(this.value);" name="modem_enable_radio" checked><#checkbox_Yes#>
+							<input type="radio" value="0" onclick="switch_modem_mode_enable(this.value);" name="modem_enable_radio" <% nvram_match("modem_enable", "0", "checked"); %>><#checkbox_No#>
+						</td>
+					</tr>
 
 					<tr>
           	<th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(21,9);"><#HSDPAConfig_Country_itemname#></a></th>
@@ -487,8 +547,8 @@ function done_validating(action){
 							<a class="hintstyle" href="javascript:void(0);" onclick="openHint(21,1);"><#menu5_4_4#></a>
 						</th>
 						<td>
-							<select name="modem_enable" class="input_option" onchange="switch_modem_mode(this.value);gen_list(this.value);show_ISP_list();show_APN_list();">
-								<option value="0" <% nvram_match_x("General", "modem_enable", "0", "selected"); %>><#WLANConfig11b_WirelessCtrl_buttonname#></option>
+							<select name="modem_enable_option" id="modem_enable_option" class="input_option" onchange="switch_modem_mode(this.value);gen_list(this.value);show_ISP_list();show_APN_list();">
+								<!--option value="0" <% nvram_match_x("General", "modem_enable", "0", "selected"); %>><#WLANConfig11b_WirelessCtrl_buttonname#></option-->
 								<option value="1" <% nvram_match_x("General", "modem_enable", "1", "selected"); %>>WCDMA (UMTS)</option>
 								<option value="2" <% nvram_match_x("General", "modem_enable", "2", "selected"); %>>CDMA2000 (EVDO)</option>
 								<option value="3" <% nvram_match_x("General", "modem_enable", "3", "selected"); %>>TD-SCDMA</option>
@@ -506,17 +566,17 @@ function done_validating(action){
 						</td>
 					</tr>
 
-					<!--tr>
-						<th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(21,2);"><#HSDPAConfig_PIN_itemname#></a></th>
-						<td>
-							<input id="wan_3g_pin" name="wan_3g_pin" class="input_20_table" type="password" maxLength="8" value="<% nvram_get("wan_3g_pin"); %>"/>
-						</td>
-					</tr-->
-                                
 					<tr>
 						<th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(21,10);"><#HSDPAConfig_DialNum_itemname#></a></th>
 						<td>
 							<input id="modem_dialnum" name="modem_dialnum" class="input_20_table" type="text" value=""/>
+						</td>
+					</tr>
+					
+					<tr>
+						<th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(21,2);"><#HSDPAConfig_PIN_itemname#></a></th>
+						<td>
+							<input id="modem_pincode" name="modem_pincode" class="input_20_table" type="password" maxLength="8" value="<% nvram_get("modem_pincode"); %>"/>
 						</td>
 					</tr>
                                 

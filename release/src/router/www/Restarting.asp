@@ -1,4 +1,4 @@
-<html>
+﻿<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
@@ -9,23 +9,23 @@
 <link rel="stylesheet" type="text/css" href="other.css">
 
 <script>
-var reboot_needed_time = 60;
+var reboot_needed_time = <% get_default_reboot_time(); %>;
 var action_mode = '<% get_parameter("action_mode"); %>';
 function redirect(){
+	parent.stopFlag = 1;
 	setTimeout("redirect1();", reboot_needed_time*1000);
 }
 
 function redirect1(){
-	if(action_mode == "reboot"){
-		parent.location.href = "/"	;
-		return false;
-	}else if(parent.lan_ipaddr == "192.168.1.1"){
-			parent.parent.location.href = "http://192.168.1.1/QIS_wizard.htm?flag=welcome";
-	}else{
+	if(action_mode == "Restore"){
 		parent.$('drword').innerHTML = "<#Setting_factorydefault_iphint#><br/>";
 		setTimeout("parent.hideLoading()",1000);
 		setTimeout("parent.dr_advise();",1000);
-		parent.parent.location.href = "http://192.168.1.1/QIS_wizard.htm?flag=welcome";
+		parent.location.href = "http://192.168.1.1/QIS_wizard.htm?flag=welcome";
+	}
+	else{
+		parent.location.href = "/";
+		return false;
 	}
 }
 </script>

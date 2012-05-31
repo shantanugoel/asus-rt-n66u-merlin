@@ -1,4 +1,4 @@
-// script by Josh Fraser (http://www.onlineaspect.com)
+﻿// script by Josh Fraser (http://www.onlineaspect.com)
 
 function calculate_time_zone() {
 	var rightNow = new Date();

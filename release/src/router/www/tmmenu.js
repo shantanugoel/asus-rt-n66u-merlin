@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Tomato GUI
 	Copyright (C) 2006-2009 Jonathan Zarate
 	http://www.polarcloud.com/tomato/

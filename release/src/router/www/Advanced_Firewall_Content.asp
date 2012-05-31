@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_5_4#></title>
+<title><#Web_Title#> - <#menu5_5_4#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script language="JavaScript" type="text/javascript" src="/state.js"></script>
@@ -109,9 +109,9 @@ function change_wizard(o, id){
 			if(o.value == wItem[i][0]){
 				if(id == "WLKnownApps"){
 					if(wItem[i][2] == "TCP")
-						document.form.filter_wl_proto_x_0.options[0].selected = 1;
+						document.form.filter_lw_proto_x_0.options[0].selected = 1;
 					else if(wItem[i][2] == "UDP")
-						document.form.filter_wl_proto_x_0.options[8].selected = 1;
+						document.form.filter_lw_proto_x_0.options[8].selected = 1;
 					
 					document.form.filter_wl_srcport_x_0.value = wItem[i][1];
 				}
@@ -153,38 +153,44 @@ function addRow_Group(upper){
 					document.form.filter_lw_srcip_x_0.focus();
 					document.form.filter_lw_srcip_x_0.select();
 					return false;
-	}else if(document.form.filter_lw_srcport_x_0.value=="" && document.form.filter_lw_dstport_x_0.value==""){
-					if(valid_IP_form(document.form.filter_lw_srcip_x_0, 0) 
-							&& valid_IP_form(document.form.filter_lw_dstip_x_0, 0) ){
-										if(check_duplicate() == true)
-												return false;								
-					}
-	}else if(document.form.filter_lw_srcport_x_0.value==""){					
-					replace_symbol();
-					if(valid_IP_form(document.form.filter_lw_srcip_x_0, 0) 
-							&& valid_IP_form(document.form.filter_lw_dstip_x_0, 0) 
-							&& validate_number_range(document.form.filter_lw_dstport_x_0, 1, 65535) ){
-										if(check_duplicate() == true)
-												return false;								
-					}
-	}else if(document.form.filter_lw_dstport_x_0.value==""){
-					replace_symbol();
-					if(valid_IP_form(document.form.filter_lw_srcip_x_0, 0) 
-							&& validate_number_range(document.form.filter_lw_srcport_x_0, 1, 65535)					
-							&& valid_IP_form(document.form.filter_lw_dstip_x_0, 0) ){
-										if(check_duplicate() == true)
-												return false;								
-					}		
-	}else{
-					replace_symbol();
-					if(valid_IP_form(document.form.filter_lw_srcip_x_0, 0) 
-							&& validate_number_range(document.form.filter_lw_srcport_x_0, 1, 65535)
-							&& valid_IP_form(document.form.filter_lw_dstip_x_0, 0) 
-							&& validate_number_range(document.form.filter_lw_dstport_x_0, 1, 65535) ){
-										if(check_duplicate() == true)
-												return false;								
-					}	
+	}else{		
+					if(document.form.filter_lw_srcip_x_0.value.split("*").length >= 2){
+								if(!valid_IP_subnet(document.form.filter_lw_srcip_x_0))
+										return false;
+					}else if(!valid_IP_form(document.form.filter_lw_srcip_x_0, 0))
+								return false;
+
+					if(document.form.filter_lw_dstip_x_0.value.split("*").length >= 2){
+								if(!valid_IP_subnet(document.form.filter_lw_dstip_x_0))
+										return false;
+					}else if(!valid_IP_form(document.form.filter_lw_dstip_x_0, 0))
+								return false;		
 	}
+		
+	if(document.form.filter_lw_srcport_x_0.value != "" || document.form.filter_lw_dstport_x_0.value != "")
+			replace_symbol();
+	
+
+	if(document.form.filter_lw_srcport_x_0.value == "" && document.form.filter_lw_dstport_x_0.value == ""){
+		
+	}else	if(document.form.filter_lw_srcport_x_0.value==""){
+					if(!validate_number_range(document.form.filter_lw_dstport_x_0, 1, 65535) )
+							return false;					
+					
+	}else if(document.form.filter_lw_dstport_x_0.value==""){	
+					if(!validate_number_range(document.form.filter_lw_srcport_x_0, 1, 65535))
+							return false;
+
+	}else{
+					if(!validate_number_range(document.form.filter_lw_srcport_x_0, 1, 65535)							
+							|| !validate_number_range(document.form.filter_lw_dstport_x_0, 1, 65535) )
+								return false;					
+	}
+	
+	if(check_duplicate() == true)
+			return false;		
+			
+	Do_addRow_Group();		
 }	
 
 //Viz add 2011.11 for replace ">" to ":65535"   &   "<" to "1:"  {
@@ -209,7 +215,7 @@ function replace_symbol(){
 						document.form.filter_lw_dstport_x_0.value = document.form.filter_lw_dstport_x_0.value.replace(/[<]/gi,"");	// "<" to ""
 						document.form.filter_lw_dstport_x_0.value = "1:"+document.form.filter_lw_dstport_x_0.value; 						// add "1:"						
 					}
-}					
+}
 //} Viz add 2011.11 for replace ">" to ":65535"   &   "<" to "1:"  	
 
 function check_duplicate(){
@@ -225,14 +231,14 @@ function check_duplicate(){
 							|| portrange_max(document.form.filter_lw_srcport_x_0.value, 11) < portrange_min($('filter_lwlist_table').rows[i].cells[1].innerHTML, 11)
 							|| (document.form.filter_lw_srcport_x_0.value=="" && $('filter_lwlist_table').rows[i].cells[1].innerHTML !="")
 							|| (document.form.filter_lw_srcport_x_0.value!="" && $('filter_lwlist_table').rows[i].cells[1].innerHTML =="") ){
-											//return false;											
+											return false;
 						}else{
 
 									if(portrange_min(document.form.filter_lw_dstport_x_0.value, 11) > portrange_max($('filter_lwlist_table').rows[i].cells[3].innerHTML, 11) 
 											|| portrange_max(document.form.filter_lw_dstport_x_0.value, 11) < portrange_min($('filter_lwlist_table').rows[i].cells[3].innerHTML, 11)
 											|| (document.form.filter_lw_dstport_x_0.value=="" && $('filter_lwlist_table').rows[i].cells[3].innerHTML !="")
 											|| (document.form.filter_lw_dstport_x_0.value!="" && $('filter_lwlist_table').rows[i].cells[3].innerHTML =="") ){											
-													//return false;
+													return false;
 									}else{
 											alert('<#JS_duplicate#>');
 											return true;
@@ -240,7 +246,6 @@ function check_duplicate(){
 						}							
 			}
 		}
-		Do_addRow_Group();
 }
 
 function Do_addRow_Group(){		
@@ -260,7 +265,7 @@ function edit_Row(r){
 	document.form.filter_lw_srcport_x_0.value = $('filter_lwlist_table').rows[i].cells[1].innerHTML; 
 	document.form.filter_lw_dstip_x_0.value = $('filter_lwlist_table').rows[i].cells[2].innerHTML; 
 	document.form.filter_lw_dstport_x_0.value = $('filter_lwlist_table').rows[i].cells[3].innerHTML;
-	document.form.filter_lw_proto_x_0.value = $('filter_lwlist_table').rows[i].cells[3].innerHTML;
+	document.form.filter_lw_proto_x_0.value = $('filter_lwlist_table').rows[i].cells[4].innerHTML;
 
   del_Row(r);	
 }
@@ -308,12 +313,6 @@ function showfilter_lwlist(){
 	$("filter_lwlist_Block").innerHTML = code;
 }
 
-/*Viz 2011.03 start*/
-function valid_icmp_portlist(){
-	if(!validate_portlist(document.form.filter_lw_icmp_x, 'filter_lw_icmp_x'))
-		return false;
-}		
-/*Viz 2011.03  end */
 </script>
 </head>
 
@@ -404,13 +403,13 @@ function valid_icmp_portlist(){
           					<tr>
           						<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(10,1);"><#FirewallConfig_LanWanActiveDate_itemname#></a></th>
           						<td>
-								<input type="checkbox" name="filter_lw_date_x_Sun" class="input" onChange="return changeDate();">Sun
-								<input type="checkbox" name="filter_lw_date_x_Mon" class="input" onChange="return changeDate();">Mon
-								<input type="checkbox" name="filter_lw_date_x_Tue" class="input" onChange="return changeDate();">Tue
-								<input type="checkbox" name="filter_lw_date_x_Wed" class="input" onChange="return changeDate();">Wed
-								<input type="checkbox" name="filter_lw_date_x_Thu" class="input" onChange="return changeDate();">Thu
-								<input type="checkbox" name="filter_lw_date_x_Fri" class="input" onChange="return changeDate();">Fri
-								<input type="checkbox" name="filter_lw_date_x_Sat" class="input" onChange="return changeDate();">Sat		  
+								<input type="checkbox" name="filter_lw_date_x_Sun" class="input" onChange="return changeDate();"><#date_Sun_itemdesc#>
+								<input type="checkbox" name="filter_lw_date_x_Mon" class="input" onChange="return changeDate();"><#date_Mon_itemdesc#>
+								<input type="checkbox" name="filter_lw_date_x_Tue" class="input" onChange="return changeDate();"><#date_Tue_itemdesc#>
+								<input type="checkbox" name="filter_lw_date_x_Wed" class="input" onChange="return changeDate();"><#date_Wed_itemdesc#>
+								<input type="checkbox" name="filter_lw_date_x_Thu" class="input" onChange="return changeDate();"><#date_Thu_itemdesc#>
+								<input type="checkbox" name="filter_lw_date_x_Fri" class="input" onChange="return changeDate();"><#date_Fri_itemdesc#>
+								<input type="checkbox" name="filter_lw_date_x_Sat" class="input" onChange="return changeDate();"><#date_Sat_itemdesc#>
 		  					</td>
         					</tr>
         					<tr>
@@ -425,7 +424,7 @@ function valid_icmp_portlist(){
         					<tr>
           						<th ><a class="hintstyle" href="javascript:void(0);" onClick="openHint(10,4);"><#FirewallConfig_LanWanICMP_itemname#></a></th>
           						<td>
-          							<input type="text" maxlength="32" class="input_32_table" name="filter_lw_icmp_x" value="<% nvram_get("filter_lw_icmp_x"); %>" onKeyPress="return is_portlist(this,event)" onblur="valid_icmp_portlist()">
+          							<input type="text" maxlength="32" class="input_32_table" name="filter_lw_icmp_x" value="<% nvram_get("filter_lw_icmp_x"); %>" onKeyPress="return is_portlist(this,event)">
           						</td>
         					</tr>
 
@@ -438,29 +437,29 @@ function valid_icmp_portlist(){
 	   					</tr>
 	  					</thead>		  
           					<tr>
-          						<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(18,6);"><#FirewallConfig_LanWanSrcIP_itemname#></a></th>
+          						<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(18,3);"><#FirewallConfig_LanWanSrcIP_itemname#></a></th>
             					<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(18,2);"><#FirewallConfig_LanWanSrcPort_itemname#></a></th>
-            					<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(18,6);"><#FirewallConfig_LanWanDstIP_itemname#></a></th>
+            					<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(18,3);"><#FirewallConfig_LanWanDstIP_itemname#></a></th>
             					<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(18,2);"><#FirewallConfig_LanWanDstPort_itemname#></a></th>
             					<th><#FirewallConfig_LanWanProFlag_itemname#></th>
             					<th>Edit</th>
           					</tr>
           					<tr>
-          						<td width="20%"><input type="text" maxlength="15" class="input_15_table" name="filter_lw_srcip_x_0" onKeyPress="return is_iprange(this, event)" onblur="valid_IP_form(this, 0)"></td>
-            					<td width="15%"><input type="text" maxlength="11" class="input_12_table" name="filter_lw_srcport_x_0" onKeyPress="return is_portrange(this,event)" value=""></td><!-- onblur="validate_number_range(this, 1, 65535)"-->
-            					<td width="20%"><input type="text" maxlength="15" class="input_15_table" name="filter_lw_dstip_x_0" onKeyPress="return is_iprange(this, event)" onblur="valid_IP_form(this, 0)"></td>
-            					<td width="15%"><input type="text" maxlength="11" class="input_12_table" name="filter_lw_dstport_x_0" onKeyPress="return is_portrange(this,event)" value=""></td><!--  onblur="validate_number_range(this, 1, 65535)"-->
+          						<td width="20%"><input type="text" maxlength="15" class="input_15_table" name="filter_lw_srcip_x_0" onKeyPress="return is_iprange(this, event)"></td>
+            					<td width="15%"><input type="text" maxlength="11" class="input_12_table" name="filter_lw_srcport_x_0" onKeyPress="return is_portrange(this,event)" value=""></td>
+            					<td width="20%"><input type="text" maxlength="15" class="input_15_table" name="filter_lw_dstip_x_0" onKeyPress="return is_iprange(this, event)"></td>
+            					<td width="15%"><input type="text" maxlength="11" class="input_12_table" name="filter_lw_dstport_x_0" onKeyPress="return is_portrange(this,event)" value=""></td>
             					<td width="15%">
 								<select name="filter_lw_proto_x_0" class="input_option">
-									<option value="TCP" <% nvram_match_list_x("FirewallConfig","filter_lw_proto_x", "TCP","selected", 0); %>>TCP</option>
-									<option value="TCP ALL" <% nvram_match_list_x("FirewallConfig","filter_lw_proto_x", "TCP ALL","selected", 0); %>>TCP ALL</option>
-									<option value="TCP SYN" <% nvram_match_list_x("FirewallConfig","filter_lw_proto_x", "TCP SYN","selected", 0); %>>TCP SYN</option>
-									<option value="TCP ACK" <% nvram_match_list_x("FirewallConfig","filter_lw_proto_x", "TCP ACK","selected", 0); %>>TCP ACK</option>
-									<option value="TCP FIN" <% nvram_match_list_x("FirewallConfig","filter_lw_proto_x", "TCP FIN","selected", 0); %>>TCP FIN</option>
-									<option value="TCP RST" <% nvram_match_list_x("FirewallConfig","filter_lw_proto_x", "TCP RST","selected", 0); %>>TCP RST</option>
-									<option value="TCP URG" <% nvram_match_list_x("FirewallConfig","filter_lw_proto_x", "TCP URG","selected", 0); %>>TCP URG</option>
-									<option value="TCP PSH" <% nvram_match_list_x("FirewallConfig","filter_lw_proto_x", "TCP PSH","selected", 0); %>>TCP PSH</option>
-									<option value="UDP" <% nvram_match_list_x("FirewallConfig","filter_lw_proto_x", "UDP","selected", 0); %>>UDP</option>
+									<option value="TCP">TCP</option>
+									<option value="TCP ALL">TCP ALL</option>
+									<option value="TCP SYN">TCP SYN</option>
+									<option value="TCP ACK">TCP ACK</option>
+									<option value="TCP FIN">TCP FIN</option>
+									<option value="TCP RST">TCP RST</option>
+									<option value="TCP URG">TCP URG</option>
+									<option value="TCP PSH">TCP PSH</option>
+									<option value="UDP">UDP</option>
 								</select>
 	    						</td>
 	    							<td width="15%">

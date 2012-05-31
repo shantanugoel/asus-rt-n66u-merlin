@@ -1,6 +1,6 @@
-<html>
+﻿<html>
 <head>
-<title><#ZVMODELVZ#> Web Manager</title>
+<title><#Web_Title#> Web Manager</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" type="text/css" href="/form_style.css" media="screen"></link>
 <script language="javascript">

@@ -1,2 +1,2 @@
-autodet_state = <% nvram_get("autodet_state"); %>;
+﻿autodet_state = <% nvram_get("autodet_state"); %>;
 <% wanstate(); %>

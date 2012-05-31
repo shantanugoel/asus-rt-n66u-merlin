@@ -30,7 +30,7 @@ var got_wan_dns = (result_of_detectWAN&0x2)>>1;
 var got_more_dns = (result_of_detectWAN&0x4)>>2;
 
 function QKfinish_load_body(){
-	parent.document.title = "ASUS Wireless Router <#Web_Title#>";
+	parent.document.title = "<#Web_Title#>";
 	parent.set_step("t3");
 	
 	if(orig_x_Setting != "1"){
@@ -433,7 +433,7 @@ function addBookmarkForBrowser(sTitle) {
     	  	<#QKSet_finish_moveto8#>
 				</li>
 				<li>
-					<a href="javascript:addBookmarkForBrowser('ASUS <#Web_Title#>');"><#Browser_action_addfavorite#></a>: 
+					<a href="javascript:addBookmarkForBrowser('<#Web_Title#>');"><#Browser_action_addfavorite#></a>: 
 					<#Browser_action_addfavorite_hint2#>
 				</li>				
 			</ol>

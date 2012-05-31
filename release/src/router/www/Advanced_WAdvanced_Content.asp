@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_1_6#></title>
+<title><#Web_Title#> - <#menu5_1_6#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script type="text/javascript" src="/state.js"></script>
@@ -37,6 +37,9 @@ function initial(){
 	}
 
 	$("wl_rate").style.display = "none";
+	if(wifi_hw_sw_support != -1) {
+		$("wl_rf_enable").style.display = "none";	
+	}
 	
 	if(band5g_support == -1)	
 		$("wl_unit_field").style.display = "none";
@@ -68,7 +71,7 @@ function initial(){
 		inputCtrl(document.form.wl_wme, 1);
 		inputCtrl(document.form.wl_wme_no_ack, 1);
 	}	
-
+		
 	document.form.wl_radio_date_x_Sun.checked = getDateCheck(document.form.wl_radio_date_x.value, 0);
 	document.form.wl_radio_date_x_Mon.checked = getDateCheck(document.form.wl_radio_date_x.value, 1);
 	document.form.wl_radio_date_x_Tue.checked = getDateCheck(document.form.wl_radio_date_x.value, 2);
@@ -90,14 +93,15 @@ function applyRule(){
 		var wlcountry = '<% nvram_get("wl0_country_code"); %>';
 		if(wlcountry == 'US' || wlcountry == 'CN' || wlcountry == 'TW'){
 			if(document.form.wl_unit.value == 0)
-				var maxPower = 501;
+				var maxPower = 500;
 			else
-				var maxPower = 251;
+				var maxPower = 250;
 		}
 		else
-			var maxPower = 101;
+			var maxPower = 100;
 
 		if(parseInt(document.form.wl_TxPower.value) > maxPower){
+			alert('<#JS_validrange#> 1 <#JS_validrange_to#> ' + maxPower + '.');
 			document.form.wl_TxPower.focus();
 			return false;
 		}
@@ -109,11 +113,10 @@ function applyRule(){
 		}
 			
 		if(parseInt(document.form.wl_TxPower.value) > parseInt(document.form.wl_TxPower_orig.value))
-		  FormActions("start_apply.htm", "apply", "set_wltxpower;reboot", "30");
+		  FormActions("start_apply.htm", "apply", "set_wltxpower;reboot", "<% get_default_reboot_time(); %>");
 	}
 
 	if(validForm()){
-		updateDateTime(document.form.current_page.value);		
 		showLoading();
 		document.form.submit();
 	}
@@ -126,7 +129,6 @@ function validForm(){
 				|| !validate_range(document.form.wl_dtim, 1, 255)
 				|| !validate_range(document.form.wl_bcn, 20, 1000)
 				){
-			//alert("<#WLANConfig11b_x_RadioEnableTime_itemname#>");		
 			return false;
 		}	
 	}
@@ -158,18 +160,20 @@ function validForm(){
 				
 	}
 		
-	if(document.form.wl_radio_date_x_Sun.checked == false
+	if(document.form.wl_radio[0].checked == true 
+			&& document.form.wl_radio_date_x_Sun.checked == false
 			&& document.form.wl_radio_date_x_Mon.checked == false
 			&& document.form.wl_radio_date_x_Tue.checked == false
 			&& document.form.wl_radio_date_x_Wed.checked == false
 			&& document.form.wl_radio_date_x_Thu.checked == false
 			&& document.form.wl_radio_date_x_Fri.checked == false
-			&& document.form.wl_radio_date_x_Sat.checked == false)
-		document.form.wl_radio[1].checked=true;
-		
-	/*if(!validate_range(document.form.wl_TxPower, 0, 100))
-		return false;*/
-	
+			&& document.form.wl_radio_date_x_Sat.checked == false){
+				document.form.wl_radio_date_x_Sun.focus();
+				$('blank_warn').style.display = "";
+				return false;
+	}	
+
+	updateDateTime(document.form.current_page.value);	
 	return true;
 }
 
@@ -254,8 +258,7 @@ function disableAdvFn(row){
 							</select>			
 						</td>
 				  </tr>
-
-					<tr>
+					<tr id=wl_rf_enable>
 			  			<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(3, 1);"><#WLANConfig11b_x_RadioEnable_itemname#></a></th>
 			  			<td>
 			  				<input type="radio" value="1" name="wl_radio" class="input" onClick="return change_common_radio(this, 'WLANConfig11b', 'wl_radio', '1')" <% nvram_match("wl_radio", "1", "checked"); %>><#checkbox_Yes#>
@@ -263,19 +266,20 @@ function disableAdvFn(row){
 			  			</td>
 					</tr>
 
-					<tr>
+					<tr id="enable_date_tr">
 			  			<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(3, 2);"><#WLANConfig11b_x_RadioEnableDate_itemname#></a></th>
 			  			<td>
-							<input type="checkbox" class="input" name="wl_radio_date_x_Sun" onChange="return changeDate();">Sun
-							<input type="checkbox" class="input" name="wl_radio_date_x_Mon" onChange="return changeDate();">Mon
-							<input type="checkbox" class="input" name="wl_radio_date_x_Tue" onChange="return changeDate();">Tue
-							<input type="checkbox" class="input" name="wl_radio_date_x_Wed" onChange="return changeDate();">Wed
-							<input type="checkbox" class="input" name="wl_radio_date_x_Thu" onChange="return changeDate();">Thu
-							<input type="checkbox" class="input" name="wl_radio_date_x_Fri" onChange="return changeDate();">Fri
-							<input type="checkbox" class="input" name="wl_radio_date_x_Sat" onChange="return changeDate();">Sat			  
+							<input type="checkbox" class="input" name="wl_radio_date_x_Sun" onChange="return changeDate();"><#date_Sun_itemdesc#>
+							<input type="checkbox" class="input" name="wl_radio_date_x_Mon" onChange="return changeDate();"><#date_Mon_itemdesc#>
+							<input type="checkbox" class="input" name="wl_radio_date_x_Tue" onChange="return changeDate();"><#date_Tue_itemdesc#>
+							<input type="checkbox" class="input" name="wl_radio_date_x_Wed" onChange="return changeDate();"><#date_Wed_itemdesc#>
+							<input type="checkbox" class="input" name="wl_radio_date_x_Thu" onChange="return changeDate();"><#date_Thu_itemdesc#>
+							<input type="checkbox" class="input" name="wl_radio_date_x_Fri" onChange="return changeDate();"><#date_Fri_itemdesc#>
+							<input type="checkbox" class="input" name="wl_radio_date_x_Sat" onChange="return changeDate();"><#date_Sat_itemdesc#>
+							<span id="blank_warn" style="display:none;"><#JS_Shareblanktest#></span>	
 			  			</td>
 					</tr>
-					<tr>
+					<tr id="enable_time_tr">
 			  			<th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(3, 3);"><#WLANConfig11b_x_RadioEnableTime_itemname#></a></th>
 			  			<td>
 			  				<input type="text" maxlength="2" class="input_3_table" name="wl_radio_time_x_starthour" onKeyPress="return is_number(this,event)" onblur="validate_timerange(this, 0);">:
@@ -297,7 +301,7 @@ function disableAdvFn(row){
 			  			<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(3, 6);"><#WLANConfig11b_DataRateAll_itemname#></a></th>
 			  			<td>
 							<select name="wl_rate" class="input_option" onChange="return change_common(this, 'WLANConfig11b', 'wl_rate')">
-				  				<option value="0" <% nvram_match("wl_rate", "0","selected"); %>>Auto</option>
+				  				<option value="0" <% nvram_match("wl_rate", "0","selected"); %>><#Auto#></option>
 				  				<option value="1000000" <% nvram_match("wl_rate", "1000000","selected"); %>>1</option>
 				  				<option value="2000000" <% nvram_match("wl_rate", "2000000","selected"); %>>2</option>
 				  				<option value="5500000" <% nvram_match("wl_rate", "5500000","selected"); %>>5.5</option>
@@ -404,7 +408,7 @@ function disableAdvFn(row){
 			  			<th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(3, 14);"><#WLANConfig11b_x_WMM_itemname#></a></th>
 			  			<td>
 							<select name="wl_wme" id="wl_wme" class="input_option" onChange="return change_common(this, 'WLANConfig11b', 'wl_wme')">			  	  				
-			  	  				<option value="auto" <% nvram_match("wl_wme", "auto", "selected"); %>>Auto</option>
+			  	  				<option value="auto" <% nvram_match("wl_wme", "auto", "selected"); %>><#Auto#></option>
 			  	  				<option value="on" <% nvram_match("wl_wme", "on", "selected"); %>><#WLANConfig11b_WirelessCtrl_button1name#></option>
 			  	  				<option value="off" <% nvram_match("wl_wme", "off", "selected"); %>><#WLANConfig11b_WirelessCtrl_buttonname#></option>			  	  			
 							</select>

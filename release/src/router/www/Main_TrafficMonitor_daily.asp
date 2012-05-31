@@ -5,8 +5,8 @@
 <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_8_3#></title>
-<link rel="stylesheet" type="text/css" href="index_style.css"> 
+<title><#Web_Title#> - <#menu5_8_3#></title>
+<link rel="stylesheet" type="text/css" href="index_style.css">
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="tmmenu.css">
 <link rel="shortcut icon" href="images/favicon.png">
@@ -87,12 +87,12 @@ function redraw()
 	block = '';
 	gn = 0;
 
-	grid = '<table width="730px" class="FormTable_NWM">'; 
+	grid = '<table width="730px" class="FormTable_NWM">';
 	grid += "<tr><th style=\"height:30px;\"><#Date#></th>";
 	grid += "<th><#Downlink#></th>";
 	grid += "<th><#Uplink#></th>";
 	grid += "<th><#Total#></th></tr>";
-	
+
 	for (i = 0; i < daily_history.length-1; ++i) {
 		h = daily_history[i];
 		ymd = getYMD(h[0]);
@@ -104,11 +104,11 @@ function redraw()
 			lastu += h[2];
 		}
 	}
-	
+
 	if(rows == 0)
 		grid +='<tr><td style="color:#FFCC00;" colspan="4"><#IPConnection_VSList_Norule#></td></tr>';
 
-	E('bwm-daily-grid').innerHTML = grid + '</table>';	
+	E('bwm-daily-grid').innerHTML = grid + '</table>';
 	E('last-dn').innerHTML = rescale(lastd);
 	E('last-up').innerHTML = rescale(lastu);
 	E('last-total').innerHTML = rescale(lastu + lastd);
@@ -173,15 +173,15 @@ function switchPage(page){
 	 	<div id="mainMenu"></div>
 	 	<div id="subMenu"></div>
 	</td>
-		
+
     	<td valign="top">
 		<div id="tabMenu" class="submenuBlock"></div>
 <!--===================================Beginning of Main Content===========================================-->
       	<table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
 	 	<tr>
-         		<td align="left"  valign="top">           
-				<table width="100%" border="0" cellpadding="4" cellspacing="0" class="FormTitle" id="FormTitle">		
-				<tbody>	
+         		<td align="left"  valign="top">
+				<table width="100%" border="0" cellpadding="4" cellspacing="0" class="FormTitle" id="FormTitle">
+				<tbody>
 				<!--===================================Beginning of QoS Content===========================================-->
 	      		<tr>
 	      			<td bgcolor="#4D595D" valign="top">
@@ -203,7 +203,7 @@ function switchPage(page){
 			    						<option value=1>mm-dd-yyyy</option>
 			    						<option value=2>mmm dd, yyyy</option>
 			    						<option value=3>dd.mm.yyyy</option>
-			    					</select>	
+			    					</select>
 			    					<select style="width:80px" class="input_option" onchange='changeScale(this)' id='scale'>
 			    						<option value=0><#Scale#>:</option>
 			    						<option value=0>KB</option>
@@ -220,12 +220,13 @@ function switchPage(page){
 
         			<tr>
           				<td height="30" align="left" valign="middle" >
-										<p class="formfontcontent"><#traffic_monitor_desc#></p>
+										<div class="formfontcontent"><p class="formfontcontent"><#traffic_monitor_desc#></p></div>
           				</td>
+
         			</tr>
 
 						<tr>
-							<td>		
+							<td>
 								<div id='bwm-daily-grid' style='float:left'></div>
 							</td>
 						</tr>
@@ -233,7 +234,7 @@ function switchPage(page){
 	     					<tr>
 	      					<td bgcolor="#4D595D">
 	      						<table width="730"  border="1" align="left" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
-	      						<thead>	
+	      						<thead>
 	      						<tr>
 	      							<td colspan="2" id="TriggerList" style="text-align:left;"><#Last30days#> <span style="color:#FFF;background-color:transparent;" id='last-dates'></span></td>
 	      						</tr>
@@ -242,21 +243,21 @@ function switchPage(page){
 	      						<tr class='even'><th width="40%"><#Downlink#></th><td id='last-dn'>-</td></tr>
 	      						<tr class='odd'><th width="40%"><#Uplink#></th><td id='last-up'>-</td></tr>
 	      						<tr class='footer'><th width="40%"><#Total#></th><td id='last-total'>-</td></tr>
-	      						</tbody>	
+	      						</tbody>
 	      						</table>
 	      					</td>
 	     					</tr>
 	     					</table>
 	     				</td>
-	     			</tr>		
+	     			</tr>
 				</tbody>
 				</table>
 			</td>
 		</tr>
-		</table>				
+		</table>
 		</div>
 	</td>
-		
+
     	<td width="10" align="center" valign="top">&nbsp;</td>
 </tr>
 </table>

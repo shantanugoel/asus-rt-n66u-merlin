@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_3_5#></title>
+<title><#Web_Title#> - <#menu5_3_5#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script language="JavaScript" type="text/javascript" src="/state.js"></script>
@@ -32,8 +32,11 @@ function applyRule(){
 }
 
 function validForm(){
-	if(!validate_ipaddr(document.form.dmz_ip, 'dmz_ip'))
+	if(!validate_ipaddr(document.form.dmz_ip, 'dmz_ip')){
+		document.form.dmz_ip.focus();
+		document.form.dmz_ip.select();
 		return false;
+	}
 	
 	return true;
 }
@@ -41,9 +44,15 @@ function validForm(){
 function done_validating(action){
 	refreshpage();
 }
+
+function initial(){
+	show_menu(); 
+	load_body();
+	addOnlineHelp($("faq"), ["ASUSWRT", "DMZ"]);
+}
 </script>
 </head>
-<body onload="show_menu(); load_body();" onunLoad="return unload_body();">
+<body onload="initial();" onunLoad="return unload_body();">
 
 <div id="TopBanner"></div>
 
@@ -88,13 +97,16 @@ function done_validating(action){
 		  <div class="formfonttitle"><#menu5_3#> - <#menu5_3_5#></div>
 		  <div style="margin-left:5px;margin-top:10px;margin-bottom:10px"><img src="/images/New_ui/export/line_export.png"></div>
 		  <div class="formfontdesc"><#IPConnection_ExposedIP_sectiondesc#><br/><#IPConnection_BattleNet_sectionname#>: <#IPConnection_BattleNet_sectiondesc#></div>
+			<div class="formfontdesc" style="margin-top:-10px;">
+				<a id="faq" href="" target="_blank" style="font-family:Lucida Console;text-decoration:underline;">DMZ FAQ</a>
+			</div>
 
 
 	<table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable">
           <tr>
             <th><#IPConnection_ExposedIP_itemname#></th>
             <td>
-              <input type="text" maxlength="15" class="input_15_table" name="dmz_ip" value="<% nvram_get("dmz_ip"); %>" onkeypress="return is_ipaddr(this, event)" onblur="valid_IP_form(this, 0)"/>
+              <input type="text" maxlength="15" class="input_15_table" name="dmz_ip" value="<% nvram_get("dmz_ip"); %>" onkeypress="return is_ipaddr(this, event)"/>
             </td>
           </tr>
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -9,7 +9,7 @@
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
 
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_2_2#></title>
+<title><#Web_Title#> - <#menu5_2_2#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script language="JavaScript" type="text/javascript" src="/state.js"></script>
@@ -65,17 +65,51 @@ wan_proto = '<% nvram_get("wan_proto"); %>';
 var wireless = [<% wl_auth_list(); %>];	// [[MAC, associated, authorized], ...]
 var dhcp_staticlist_array = '<% nvram_get("dhcp_staticlist"); %>';
 
+var pptpd_clients = '<% nvram_get("pptpd_clients"); %>';
+var pptpd_clients_subnet = pptpd_clients.split(".")[0]
+															+"."+pptpd_clients.split(".")[1]
+															+"."+pptpd_clients.split(".")[2]
+															+".";	
+var pptpd_clients_start_ip = parseInt(pptpd_clients.split(".")[3].split("-")[0]);
+var pptpd_clients_end_ip = parseInt(pptpd_clients.split("-")[1]);
+
+var dhcp_enable = '<% nvram_get("dhcp_enable_x"); %>';
+var pool_start = '<% nvram_get("dhcp_start"); %>';
+var pool_end = '<% nvram_get("dhcp_end"); %>';
+var pool_subnet = pool_start.split(".")[0]+"."+pool_start.split(".")[1]+"."+pool_start.split(".")[2]+".";
+var pool_start_end = parseInt(pool_start.split(".")[3]);
+var pool_end_end = parseInt(pool_end.split(".")[3]);
+
+var static_enable = '<% nvram_get("dhcp_static_x"); %>';
+var dhcp_staticlists = '<% nvram_get("dhcp_staticlist"); %>';
+var staticclist_row = dhcp_staticlists.split('&#60');
+
 function initial(){
 	show_menu();
 	load_body();
-	//Viz 2011.10{ for LAN ip in DHCP pool
+	//Viz 2011.10{ for LAN ip in DHCP pool or Static list
 	showtext($("LANIP"), '<% nvram_get("lan_ipaddr"); %>');
 	if((inet_network(document.form.lan_ipaddr.value)>=inet_network(document.form.dhcp_start.value))&&(inet_network(document.form.lan_ipaddr.value)<=inet_network(document.form.dhcp_end.value))){
 			$('router_in_pool').style.display="";
-	}	
+	}else if(dhcp_staticlists != ""){
+			for(var i = 1; i < staticclist_row.length; i++){
+					var static_ip = staticclist_row[i].split('&#62')[1];
+					if(static_ip == document.form.lan_ipaddr.value){
+								$('router_in_pool').style.display="";
+  				}
+			}
+	}
 	//}Viz 2011.10
 	showdhcp_staticlist();
 	showLANIPList();
+		 
+	var chk_vpn = check_vpn();
+	if(chk_vpn == true){
+	 		$("VPN_conflict").style.display = "";
+	 		$("VPN_conflict_span").innerHTML = "<#vpn_conflict_dhcp#>"+pptpd_clients;
+	}	
+
+	addOnlineHelp($("faq"), ["set", "up", "specific", "IP", "addresses"]);
 }
 
 function addRow(obj, head){
@@ -108,7 +142,7 @@ function addRow_Group(upper){
 		document.form.dhcp_staticip_x_0.focus();
 		document.form.dhcp_staticip_x_0.select();
 		return false;
-	}else if(check_hwaddr(document.form.dhcp_staticmac_x_0)==true  && valid_IP_form(document.form.dhcp_staticip_x_0,0)==true){
+	}else if(check_macaddr(document.form.dhcp_staticmac_x_0, check_hwaddr_flag(document.form.dhcp_staticmac_x_0)) == true  && valid_IP_form(document.form.dhcp_staticip_x_0,0) == true){
 		
 		//Viz check same rule  //match(ip or mac) is not accepted
 		if(item_num >=2){	
@@ -346,7 +380,7 @@ function showLANIPList(){
 			show_name = client_list_col[1];	
 
 		//client_list_col[]  0:type 1:device 2:ip 3:mac 4: 5: 6:
-		code += '<a href="#"><div onmouseover="over_var=1;" onmouseout="over_var=0;" onclick="setClientIP(\''+client_list_col[3]+'\', \''+client_list_col[2]+'\');"><strong>'+client_list_col[3]+'</strong> ';
+		code += '<a><div onmouseover="over_var=1;" onmouseout="over_var=0;" onclick="setClientIP(\''+client_list_col[3]+'\', \''+client_list_col[2]+'\');"><strong>'+client_list_col[3]+'</strong> ';
 		
 		if(show_name && show_name.length > 0)
 				code += '( '+show_name+')';
@@ -387,16 +421,60 @@ function pullLANIPList(obj){
 
 //Viz add 2012.02 DHCP client MAC } end 
 function check_macaddr(obj,flag){ //control hint of input mac address
-	if (flag){	
-		$("check_mac") ? $("check_mac").style.display="none" : true;
-	}
-	else{
+
+	if(flag == 1){		
 		var childsel=document.createElement("div");
 		childsel.setAttribute("id","check_mac");
 		childsel.style.color="#FFCC00";
 		obj.parentNode.appendChild(childsel);
 		$("check_mac").innerHTML="<#LANHostConfig_ManualDHCPMacaddr_itemdesc#>";		
+		$("check_mac").style.display = "";
+		obj.focus();
+		obj.select();
+		return false;	
+	}else if(flag == 2){
+		var childsel=document.createElement("div");
+		childsel.setAttribute("id","check_mac");
+		childsel.style.color="#FFCC00";
+		obj.parentNode.appendChild(childsel);
+		$("check_mac").innerHTML=Untranslated.illegal_MAC;		
+		$("check_mac").style.display = "";
+		obj.focus();
+		obj.select();
+		return false;			
+	}else{	
+		$("check_mac") ? $("check_mac").style.display="none" : true;
+		return true;
 	}	
+}
+
+function check_vpn(){		//true: (DHCP ip pool & static ip ) conflict with VPN clients
+
+		if(pool_subnet == pptpd_clients_subnet
+					&& ((pool_start_end >= pptpd_clients_start_ip && pool_start_end <= pptpd_clients_end_ip)								
+								|| (pool_end_end >= pptpd_clients_start_ip && pool_end_end <= pptpd_clients_end_ip)								
+								|| (pptpd_clients_start_ip >= pool_start_end && pptpd_clients_start_ip <= pool_end_end)
+								|| (pptpd_clients_end_ip >= pool_start_end && pptpd_clients_end_ip <= pool_end_end))
+					){
+						return true;				
+		}
+		
+		if(dhcp_staticlists != ""){
+			for(var i = 1; i < staticclist_row.length; i++){
+					var static_subnet ="";
+					var static_end ="";					
+					var static_ip = staticclist_row[i].split('&#62')[1];
+					static_subnet = static_ip.split(".")[0]+"."+static_ip.split(".")[1]+"."+static_ip.split(".")[2]+".";
+					static_end = parseInt(static_ip.split(".")[3]);
+					if(static_subnet == pptpd_clients_subnet 
+  						&& static_end >= pptpd_clients_start_ip 
+  						&& static_end <= pptpd_clients_end_ip){
+								return true;  							
+  				}				
+			}
+	}
+
+	return false;	
 }
 </script>
 </head>
@@ -416,7 +494,7 @@ function check_macaddr(obj,flag){ //control hint of input mac address
 <input type="hidden" name="next_host" value="">
 <input type="hidden" name="modified" value="0">
 <input type="hidden" name="action_mode" value="apply">
-<input type="hidden" name="action_wait" value="5">
+<input type="hidden" name="action_wait" value="10">
 <input type="hidden" name="action_script" value="restart_net">
 <input type="hidden" name="first_time" value="">
 <input type="hidden" name="preferred_lang" id="preferred_lang" value="<% nvram_get("preferred_lang"); %>">
@@ -450,8 +528,12 @@ function check_macaddr(obj,flag){ //control hint of input mac address
 		  <div class="formfonttitle"><#menu5_2#> - <#menu5_2_2#></div>
 		  <div style="margin-left:5px;margin-top:10px;margin-bottom:10px"><img src="/images/New_ui/export/line_export.png"></div>
       <div class="formfontdesc"><#LANHostConfig_DHCPServerConfigurable_sectiondesc#></div>
-      <div id="router_in_pool" class="formfontdesc" style="color:#FFCC00;display:none;"><#LANHostConfig_DHCPServerConfigurable_sectiondesc2#>  <span id="LANIP"></span></div>	
-		  
+      <div id="router_in_pool" class="formfontdesc" style="color:#FFCC00;display:none;"><#LANHostConfig_DHCPServerConfigurable_sectiondesc2#><span id="LANIP"></span></div>	
+      <div id="VPN_conflict" class="formfontdesc" style="color:#FFCC00;display:none;"><span id="VPN_conflict_span"></span></div>
+			<div class="formfontdesc" style="margin-top:-10px;">
+				<a id="faq" href="" target="_blank" style="font-family:Lucida Console;text-decoration:underline;"><#LANHostConfig_ManualDHCPList_groupitemdesc#> FAQ</a>
+			</div>
+  
 			<table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
 			  <thead>
 			  <tr>
@@ -466,14 +548,6 @@ function check_macaddr(obj,flag){ //control hint of input mac address
 				  <input type="radio" value="0" name="dhcp_enable_x" class="content_input_fd" onClick="return change_common_radio(this, 'LANHostConfig', 'dhcp_enable_x', '0')" <% nvram_match("dhcp_enable_x", "0", "checked"); %>><#checkbox_No#>
 				</td>
 			  </tr>
-
-		  	<tr>
-     			<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,9);"><#LANHostConfig_ManualDHCPEnable_itemname#></a></th>
-					<td colspan="2"  style="text-align:left;">
-          	<input type="radio" value="1" name="dhcp_static_x"  onclick="return change_common_radio(this, 'LANHostConfig', 'dhcp_static_x', '1')" <% nvram_match("dhcp_static_x", "1", "checked"); %> /><#checkbox_Yes#>
-      		  <input type="radio" value="0" name="dhcp_static_x"  onclick="return change_common_radio(this, 'LANHostConfig', 'dhcp_static_x', '0')" <% nvram_match("dhcp_static_x", "0", "checked"); %> /><#checkbox_No#>
-      		</td>
-			  </tr>			  			
 			  
 			  <tr>
 				<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,2);"><#LANHostConfig_DomainName_itemname#></a></th>
@@ -499,14 +573,14 @@ function check_macaddr(obj,flag){ //control hint of input mac address
 			  <tr>
             <th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,5);"><#LANHostConfig_LeaseTime_itemname#></a></th>
             <td>
-              <input type="text" maxlength="6" name="dhcp_lease" class="input_15_table" value="<% nvram_get("dhcp_lease"); %>" onKeyPress="return is_number(this,event)" onBlur="validate_number_range(this, 1, 604800)">
+              <input type="text" maxlength="6" name="dhcp_lease" class="input_15_table" value="<% nvram_get("dhcp_lease"); %>" onKeyPress="return is_number(this,event)">
             </td>
 			  </tr>
 			  
 			  <tr>
             <th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,6);"><#LANHostConfig_x_LGateway_itemname#></a></th>
             <td>
-              <input type="text" maxlength="15" class="input_15_table" name="dhcp_gateway_x" value="<% nvram_get("dhcp_gateway_x"); %>" onKeyPress="return is_ipaddr(this,event)" onBlur="valid_IP_form(this,0)">
+              <input type="text" maxlength="15" class="input_15_table" name="dhcp_gateway_x" value="<% nvram_get("dhcp_gateway_x"); %>" onKeyPress="return is_ipaddr(this,event)">
             </td>
 			  </tr>
 			</table>
@@ -520,25 +594,41 @@ function check_macaddr(obj,flag){ //control hint of input mac address
 			  <tr>
 				<th width="200"><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,7);"><#LANHostConfig_x_LDNSServer1_itemname#></a></th>
 				<td>
-				  <input type="text" maxlength="15" class="input_15_table" name="dhcp_dns1_x" value="<% nvram_get("dhcp_dns1_x"); %>" onKeyPress="return is_ipaddr(this,event)"  onBlur="valid_IP_form(this,0)">
+				  <input type="text" maxlength="15" class="input_15_table" name="dhcp_dns1_x" value="<% nvram_get("dhcp_dns1_x"); %>" onKeyPress="return is_ipaddr(this,event)">
 				</td>
 			  </tr>
 			  
 			  <tr>
 				<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,8);"><#LANHostConfig_x_WINSServer_itemname#></a></th>
 				<td>
-				  <input type="text" maxlength="15" class="input_15_table" name="dhcp_wins_x" value="<% nvram_get("dhcp_wins_x"); %>" onkeypress="return is_ipaddr(this,event)"  onBlur="valid_IP_form(this,0)"/>
+				  <input type="text" maxlength="15" class="input_15_table" name="dhcp_wins_x" value="<% nvram_get("dhcp_wins_x"); %>" onkeypress="return is_ipaddr(this,event)"/>
 				</td>
 			  </tr>
 			</table>
 
-			<table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" class="FormTable_table" style="margin-top:8px;" >
+			<table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" class="FormTable" style="margin-top:8px;" >
+		  	<thead>
+		  		<tr>
+						<td colspan="2"><#LANHostConfig_ManualDHCPEnable_itemname#></td>
+		  		</tr>
+		  	</thead>
+
+		  	<tr>
+     			<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,9);"><#LANHostConfig_ManualDHCPEnable_itemname#></a></th>
+					<td colspan="2" style="text-align:left;">
+          	<input type="radio" value="1" name="dhcp_static_x"  onclick="return change_common_radio(this, 'LANHostConfig', 'dhcp_static_x', '1')" <% nvram_match("dhcp_static_x", "1", "checked"); %> /><#checkbox_Yes#>
+      		  <input type="radio" value="0" name="dhcp_static_x"  onclick="return change_common_radio(this, 'LANHostConfig', 'dhcp_static_x', '0')" <% nvram_match("dhcp_static_x", "0", "checked"); %> /><#checkbox_No#>
+      		</td>
+			  </tr>
+			</table>
+
+			<table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" class="FormTable_table" style="margin-top:8px;">
 			  	<thead>
 			  		<tr>
 						<td colspan="3" id="GWStatic"><#LANHostConfig_ManualDHCPList_groupitemdesc#></td>
 			  		</tr>
 			  	</thead>
-			  
+
 			  	<tr>
 		  			<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,10);"><#LANHostConfig_ManualMac_itemname#></a></th>
         		<th><#LANHostConfig_ManualIP_itemname#></th>
@@ -549,8 +639,7 @@ function check_macaddr(obj,flag){ //control hint of input mac address
 							<div id="ClientList_Block_PC" class="ClientList_Block_PC"></div>
 			  		
             			<td width="40%">
-            				<input type="hidden" name="dhcp_staticnum_x_0" value="<% nvram_get("dhcp_staticnum_x"); %>" readonly="1" />
-                		<input type="text" class="input_20_table" maxlength="17" name="dhcp_staticmac_x_0" style="margin-left:-12px;width:255px;" onKeyPress="return is_hwaddr(this,event)" onClick="hideClients_Block();" onblur="check_macaddr(this,check_hwaddr_temp(this))">
+                		<input type="text" class="input_20_table" maxlength="17" name="dhcp_staticmac_x_0" style="margin-left:-12px;width:255px;" onKeyPress="return is_hwaddr(this,event)" onClick="hideClients_Block();">
                 		<img id="pull_arrow" height="14px;" src="/images/arrow-down.gif" style="position:absolute;" onclick="pullLANIPList(this);" title="Select the device name of DHCP clients." onmouseover="over_var=1;" onmouseout="over_var=0;">
                 			</td>
             			<td width="40%">

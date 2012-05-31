@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -83,8 +83,8 @@ function initial(){
 	$("LoadingBar").style.display = "none";
 	update_clients();
 	
-	if(macfilter_enable != 0 && sw_mode == 1 || ParentalCtrl_support != -1)
-		$("macFilterHint").style.display = "";
+	if((macfilter_enable != 0 || ParentalCtrl_support != -1) && sw_mode == 1)
+			$("macFilterHint").style.display = "";
 }
 
 function _showNextItem(num){
@@ -181,7 +181,7 @@ function showclient_list(list){
 					if(client_list_col[1] != "")	
 						code += '<td width="40%"><span class="ClientName" onmouseover="return overlib(\''+ overlib_str +'\');" onmouseout="nd();">'+ client_list_col[1] +'</span></td>';	//Device-name
 					else
-						code += '<td width="40%"><span class="ClientName" onmouseover="return overlib(\''+ overlib_str +'\');" onmouseout="nd();" onclick="getOUIFromMAC(\'' + client_list_col[3] +'\');" style="cursor:pointer; text-decoration:underline;">'+ client_list_col[3] +'</span></td>';	//MAC	
+						code += '<td width="40%"><span class="ClientName" onmouseover="return overlib(\''+ overlib_str +'\');" onmouseout="nd();">'+ client_list_col[3] +'</span></td>';	//MAC	
 				}
 				else if(j == 2){
 					if(client_list_col[4] == "1")					
@@ -318,22 +318,6 @@ function networkmap_update(){
 	document.form.target = "";
 	document.form.submit();
 }
-
-// Botho 06/04/2006 : Function to resolve OUI names
-function getOUIFromMAC(mac) {
-
-        var top = 30;
-        var left = Math.floor(screen.availWidth * .66) - 10;
-        var width = 700
-        var height = 400
-        var tab = new Array();
-
-        tab = mac.split(mac.substr(2,1));
-
-        var win = window.open("http://standards.ieee.org/cgi-bin/ouisearch?" + tab[0] + '-' + tab[1] + '-' + tab[2], 'DDWRT_OUI_Search', 'top=' + top + ',left=' + left + ',width=' + width + ',height=' + height + ",resizable=yes,scrollbars=yes,statusbar=no");
-        addEvent(window, "unload", function() { if(!win.closed) win.close(); });
-        win.focus();
-}
 </script>
 </head>
 
@@ -364,8 +348,8 @@ function getOUIFromMAC(mac) {
 		<td>		
 			<table width="100px" border="0" align="left" cellpadding="0" cellspacing="0">
   			<tr>
-  				<td ><div id="t0" class="tabclick_NW" align="center" style="margin-right:2px; width:70px;" onclick="showclient_list(0)"><span id="span1" ><a href="#"><#ConnectedClient#></a></span></div></td>
-  				<td ><div id="t1" class="tab_NW" align="center" style="margin-right:2px; width:70px;" onclick="showclient_list(1)"><span id="span1" ><a href="#"><#BlockedClient#></a></span></div></td>
+  				<td ><div id="t0" class="tabclick_NW" align="center" style="font-weight: bolder; margin-right:2px; width:70px;" onclick="showclient_list(0)"><span id="span1" ><a><#ConnectedClient#></a></span></div></td>
+  				<td ><div id="t1" class="tab_NW" align="center" style="font-weight: bolder; margin-right:2px; width:70px;" onclick="showclient_list(1)"><span id="span1" ><a><#BlockedClient#></a></span></div></td>
 				<td>&nbsp</td>
 			</tr>
 			</table>
@@ -392,8 +376,8 @@ function getOUIFromMAC(mac) {
 </table>
 
 <br/>
-<img height="20" id="leftBtn" onclick="showNextItem(0);" style="cursor:pointer;margin-left:10px;" src="/sliderplugin/arrow-left.png">
+<img height="20" id="leftBtn" onclick="showNextItem(0);" style="cursor:pointer;margin-left:10px;" src="/images/arrow-left.png">
 <input type="button" id="refresh_list" class="button_gen" onclick="networkmap_update();" value="<#CTL_refresh#>" style="margin-left:70px;">
-<img height="20" id="rightBtn" onclick="showNextItem(1);" style="cursor:pointer;margin-left:60px;" src="/sliderplugin/arrow-right.png">
+<img height="20" id="rightBtn" onclick="showNextItem(1);" style="cursor:pointer;margin-left:60px;" src="/images/arrow-right.png">
 </body>
 </html>

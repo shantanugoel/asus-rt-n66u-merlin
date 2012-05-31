@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -7,7 +7,7 @@
 <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
-<link rel="icon" href="images/favicon.png"><title>ASUS Wireless Router <#Web_Title#> - <#menu2#></title>
+<link rel="icon" href="images/favicon.png"><title><#Web_Title#> - <#menu2#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css">
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="usp_style.css">
@@ -18,8 +18,6 @@
 <script type="text/javascript" src="/help.js"></script>
 <script type="text/javascript" src="/jquery.js"></script>
 <script type="text/javascript" src="/switcherplugin/jquery.iphone-switch.js"></script>
-<script type="text/javascript" src="/ext/ext-base.js"></script>
-<script type="text/javascript" src="/ext/ext-all.js"></script>
 
 <script>
 var $j = jQuery.noConflict();
@@ -74,7 +72,7 @@ var $j = jQuery.noConflict();
 	color:#FFFFFF;
 }	
 .upnp_icon{
-	background: url(/images/New_ui/media_sever.jpg) no-repeat;
+	background: url(/images/New_ui/USBExt/media_sever.jpg) no-repeat;
 	width:736px;
 	height:500px;
 	margin-top:15px;
@@ -156,6 +154,9 @@ function initial(){
 		$("upnp_icon").style.height = (calculate_height-3)*52 + 20 + "px";
 	else
 		$("upnp_icon").style.height = "500px";
+
+	setTimeout('addNewScript("/ext/ext-base.js");', 500);
+	setTimeout('addNewScript("/ext/ext-all.js");', 500);
 }
 
 function submit_mediaserver(server, x){
@@ -282,12 +283,11 @@ function initial_folderlist(data){
 
 function getAllParentNodes(node) {
 	var parentNodes = [];
-	var _nodeID = node.id;
-	_layer_order = "0"
-
-	for(i=1; i<_nodeID.length; i++)
-		_layer_order += "_" + node.id[i]; // generating _layer_order for initial_dir()
-
+	eval("var _nodeID = '"+node.id+"'");
+	_layer_order = "0";
+	for(i=1; i<_nodeID.length; i++){
+		_layer_order += "_" + _nodeID.charAt(i); // generating _layer_order for initial_dir()
+	}
 	parentNodes.push(node);
 	while (node.parentNode) {
 		parentNodes = parentNodes.concat(node.parentNode);
@@ -297,7 +297,7 @@ function getAllParentNodes(node) {
 };
 
 function initial_dir(path,node){
-	var url = "getfoldertree.asp";
+	var url = "/getfoldertree.asp";
 	var type = "General";
 
 	url += "?motion=gettree&layer_order="+ _layer_order +"&t=" +Math.random();
@@ -308,6 +308,7 @@ function initial_dir_status(data,node){
 	dm_dir.length = 0;
 	if(data == "/" || (data != null && data != "")){
 		eval("dm_dir=[" + data +"]");	
+
 		while(node.lastChild &&(node.lastChild !=node.firstChild)) {
     			node.removeChild(node.lastChild);
 		}

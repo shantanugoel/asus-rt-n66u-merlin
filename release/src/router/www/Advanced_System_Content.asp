@@ -8,8 +8,8 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_6_2#></title>
-<link rel="stylesheet" type="text/css" href="index_style.css"> 
+<title><#Web_Title#> - <#menu5_6_2#></title>
+<link rel="stylesheet" type="text/css" href="index_style.css">
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script language="JavaScript" type="text/javascript" src="/state.js"></script>
 <script language="JavaScript" type="text/javascript" src="/general.js"></script>
@@ -22,10 +22,10 @@
 	background-color:#576D73;
 	position:absolute;
 	margin-top:106px;
-	*margin-top:96px;	
+	*margin-top:96px;
 	margin-left:127px;
 	width:345px;
-	text-align:left;	
+	text-align:left;
 	height:auto;
 	overflow-y:auto;
 	z-index:200;
@@ -47,13 +47,13 @@
 	color:#FFF;
 	font-size:12px;
 	font-family:Arial, Helvetica, sans-serif;
-	text-decoration:none;	
+	text-decoration:none;
 }
 #ClientList_Block_PC div:hover, #ClientList_Block a:hover{
 	background-color:#3366FF;
 	color:#FFFFFF;
 	cursor:default;
-}	
+}
 </style>
 <script>
 wan_route_x = '<% nvram_get("wan_route_x"); %>';
@@ -103,17 +103,17 @@ function applyRule(){
 		var rule_num = $('http_clientlist_table').rows.length;
 		var item_num = $('http_clientlist_table').rows[0].cells.length;
 		var tmp_value = "";
-	
+
 		for(i=0; i<rule_num; i++){
-			tmp_value += "<"		
-			for(j=0; j<item_num-1; j++){	
+			tmp_value += "<"
+			for(j=0; j<item_num-1; j++){
 				tmp_value += $('http_clientlist_table').rows[i].cells[j].innerHTML;
-				if(j != item_num-2)	
+				if(j != item_num-2)
 					tmp_value += ">";
 			}
 		}
 		if(tmp_value == "<"+"<#IPConnection_VSList_Norule#>" || tmp_value == "<")
-			tmp_value = "";	
+			tmp_value = "";
 		document.form.http_clientlist.value = tmp_value;
 
 		if(document.form.http_clientlist.value == "" && document.form.http_client[0].checked == 1){
@@ -141,20 +141,20 @@ function applyRule(){
 	}
 }
 
-function validForm(){	
+function validForm(){
 	if(document.form.http_passwd2.value != document.form.v_password2.value){
 		showtext($("alert_msg"),"*<#File_Pop_content_alert_desc7#>");
 		document.form.http_passwd2.focus();
-		document.form.http_passwd2.select();		
+		document.form.http_passwd2.select();
 		return false;
 	}
-		
+
 	if(!validate_string(document.form.http_passwd2)){
 		document.form.http_passwd2.focus();
-		document.form.http_passwd2.select();		
-		return false;	
+		document.form.http_passwd2.select();
+		return false;
 	}
-	
+
 	if(document.form.sshd_authkeys.value.length > 512){
                 showtext($("ssh_alert_msg"),"*SSH keys limited to 512 characters.");
                 document.form.sshd_authkeys.focus();
@@ -164,16 +164,16 @@ function validForm(){
 	if(document.form.http_passwd2.value.length > 16){
 		showtext($("alert_msg"),"*<#LANHostConfig_x_Password_itemdesc#>");
 		document.form.http_passwd2.focus();
-		document.form.http_passwd2.select();		
-		return false;		
+		document.form.http_passwd2.select();
+		return false;
 	}
-	
+
 	if(!validate_ipaddr(document.form.log_ipaddr, 'log_ipaddr')
 			|| !validate_string(document.form.ntp_server0)
 			)
 		return false;
-		
-	if(document.form.time_zone_dst_chk.checked && 
+
+	if(document.form.time_zone_dst_chk.checked &&
 		document.form.dst_start_m.value == document.form.dst_end_m.value &&
 		document.form.dst_start_w.value == document.form.dst_end_w.value &&
 		document.form.dst_start_d.value == document.form.dst_end_d.value)
@@ -181,11 +181,11 @@ function validForm(){
 		alert("<#FirewallConfig_URLActiveTime_itemhint4#>");
 		return false;
 	}
-		
-	
+
+
 	if(document.form.http_passwd2.value.length > 0)
 		alert("<#File_Pop_content_alert_desc10#>");
-	
+
 	return true;
 }
 
@@ -195,31 +195,31 @@ function done_validating(action){
 
 function corrected_timezone(){
 	var today = new Date();
-	var StrIndex;	
-	
+	var StrIndex;
+
 	if(today.toString().lastIndexOf("-") > 0)
 		StrIndex = today.toString().lastIndexOf("-");
 	else if(today.toString().lastIndexOf("+") > 0)
 		StrIndex = today.toString().lastIndexOf("+");
 
-	if(StrIndex > 0){		
-		//alert('dstoffset='+dstoffset+', 設定時區='+timezone+' , 當地時區='+today.toString().substring(StrIndex, StrIndex+5))
+	if(StrIndex > 0){
+		//alert('dstoffset='+dstoffset+', ????='+timezone+' , ????='+today.toString().substring(StrIndex, StrIndex+5))
 		if(timezone != today.toString().substring(StrIndex, StrIndex+5)){
 			$("timezone_hint").style.display = "block";
 			$("timezone_hint").innerHTML = "<#LANHostConfig_x_TimeZone_itemhint#>";
 		}
 		else
-			return;			
+			return;
 	}
 	else
-		return;	
+		return;
 }
 
 function show_dst_chk(){
 	var tzdst = new RegExp("^[a-z]+[0-9\-\.:]+[a-z]+", "i");
 	// match "[std name][offset][dst name]"
 	if(document.form.time_zone_select.value.match(tzdst)){
-		document.getElementById("chkbox_time_zone_dst").style.display="";	
+		document.getElementById("chkbox_time_zone_dst").style.display="";
 		if(!document.getElementById("time_zone_dst_chk").checked){
 				document.form.time_zone_dst.value=0;
 				document.getElementById("dst_start").style.display="none";
@@ -236,7 +236,7 @@ function show_dst_chk(){
 		document.form.time_zone_dst.value=0;
 		document.getElementById("dst_start").style.display="none";
 		document.getElementById("dst_end").style.display="none";
-	}	
+	}
 }
 
 var timezones = [
@@ -358,7 +358,7 @@ function parse_dstoffset(){	//Mm.w.d/h,Mm.w.d/h
 			dstoff_end_d = dstoff_end[2].split("/")[0];
 			dstoff_end_h = dstoff_end[2].split("/")[1];
 }
-															
+
 function load_dst_m_Options(){
 	free_options(document.form.dst_start_m);
 	free_options(document.form.dst_end_m);
@@ -377,16 +377,16 @@ function load_dst_m_Options(){
 		}else{
 			if(dstoff_start_m =='M'+i)
 				add_option(document.form.dst_start_m, dst_month[i], i, 1);
-			else	
+			else
 				add_option(document.form.dst_start_m, dst_month[i], i, 0);
-			
+
 			if(dstoff_end_m =='M'+i)
 				add_option(document.form.dst_end_m, dst_month[i], i, 1);
 			else
-				add_option(document.form.dst_end_m, dst_month[i], i, 0);							
-		}	
-		
-	}	
+				add_option(document.form.dst_end_m, dst_month[i], i, 0);
+		}
+
+	}
 }
 
 function load_dst_w_Options(){
@@ -401,19 +401,19 @@ function load_dst_w_Options(){
 				add_option(document.form.dst_start_w, dst_week[i], i, 0);
 				add_option(document.form.dst_end_w, dst_week[i], i, 0);
 			}
-		}else{		
+		}else{
 			if(dstoff_start_w == i)
 				add_option(document.form.dst_start_w, dst_week[i], i, 1);
-			else	
+			else
 				add_option(document.form.dst_start_w, dst_week[i], i, 0);
-			
+
 			if(dstoff_end_w == i)
 				add_option(document.form.dst_end_w, dst_week[i], i, 1);
 			else
-				add_option(document.form.dst_end_w, dst_week[i], i, 0);			
-		}		
-		
-	}	
+				add_option(document.form.dst_end_w, dst_week[i], i, 0);
+		}
+
+	}
 }
 
 function load_dst_d_Options(){
@@ -431,16 +431,16 @@ function load_dst_d_Options(){
 		}else{
 			if(dstoff_start_d == i)
 				add_option(document.form.dst_start_d, dst_day[i], i, 1);
-			else	
+			else
 				add_option(document.form.dst_start_d, dst_day[i], i, 0);
-			
+
 			if(dstoff_end_d == i)
 				add_option(document.form.dst_end_d, dst_day[i], i, 1);
 			else
-				add_option(document.form.dst_end_d, dst_day[i], i, 0);			
+				add_option(document.form.dst_end_d, dst_day[i], i, 0);
 		}
-			
-	}	
+
+	}
 }
 
 function load_dst_h_Options(){
@@ -458,30 +458,30 @@ function load_dst_h_Options(){
 		}else{
 			if(dstoff_start_h == i)
 				add_option(document.form.dst_start_h, dst_hour[i], i, 1);
-			else	
+			else
 				add_option(document.form.dst_start_h, dst_hour[i], i, 0);
-			
+
 			if(dstoff_end_h == i)
 				add_option(document.form.dst_end_h, dst_hour[i], i, 1);
 			else
-				add_option(document.form.dst_end_h, dst_hour[i], i, 0);			
+				add_option(document.form.dst_end_h, dst_hour[i], i, 0);
 		}
-	}	
+	}
 }
 
 function add_tz_option(selectObj, str, value, selected){
 	var tail = selectObj.options.length;
-	
+
 	if(typeof(str) != "undefined")
 		selectObj.options[tail] = new Option(str);
 	else
 		selectObj.options[tail] = new Option();
-	
+
 	if(typeof(value) != "undefined")
 		selectObj.options[tail].value = value;
 	else
 		selectObj.options[tail].value = "";
-	
+
 	if(selected)
 		selectObj.options[tail].selected = 1;
 }
@@ -494,7 +494,7 @@ function hide_https_lanport(_value){
 function show_http_clientlist(){
 	var http_clientlist_row = http_clientlist_array.split('&#60');
 	var code = "";
-	code +='<table width="100%" border="1" cellspacing="0" cellpadding="4" align="center" class="list_table" id="http_clientlist_table">'; 
+	code +='<table width="100%" border="1" cellspacing="0" cellpadding="4" align="center" class="list_table" id="http_clientlist_table">';
 	if(http_clientlist_row.length == 1)
 		code +='<tr><td style="color:#FFCC00;"><#IPConnection_VSList_Norule#></td>';
 	else{
@@ -506,59 +506,59 @@ function show_http_clientlist(){
 		}
 	}
   	code +='</tr></table>';
-	
+
 	$("http_clientlist_Block").innerHTML = code;
 }
 
 function deleteRow(r){
   var i=r.parentNode.parentNode.rowIndex;
   $('http_clientlist_table').deleteRow(i);
-  
+
   var http_clientlist_value = "";
 	for(i=0; i<$('http_clientlist_table').rows.length; i++){
 		http_clientlist_value += "&#60";
 		http_clientlist_value += $('http_clientlist_table').rows[i].cells[0].innerHTML;
 	}
-	
+
 	http_clientlist_array = http_clientlist_value;
 	if(http_clientlist_array == "")
 		show_http_clientlist();
 }
 
 function addRow(obj, upper){
-	//Viz check max-limit 
+	//Viz check max-limit
 	var rule_num = $('http_clientlist_table').rows.length;
-	var item_num = $('http_clientlist_table').rows[0].cells.length;		
+	var item_num = $('http_clientlist_table').rows[0].cells.length;
 	if(rule_num >= upper){
 		alert("<#JS_itemlimit1#> " + upper + " <#JS_itemlimit2#>");
-		return false;	
+		return false;
 	}
-			
+
 	if(obj.value == ""){
 		alert("<#JS_fieldblank#>");
 		obj.focus();
-		obj.select();			
+		obj.select();
 		return false;
 	}
 	else if(valid_IP_form(obj, 0) != true){
 		return false;
 	}
-	else{		
+	else{
 		//Viz check same rule
 		for(i=0; i<rule_num; i++){
 			for(j=0; j<item_num-1; j++){		//only 1 value column
 				if(obj.value == $('http_clientlist_table').rows[i].cells[j].innerHTML){
 					alert("<#JS_duplicate#>");
 					return false;
-				}	
+				}
 			}
 		}
-		
+
 		http_clientlist_array += "&#60";
 		http_clientlist_array += obj.value;
-		obj.value = "";		
+		obj.value = "";
 		show_http_clientlist();
-	}	
+	}
 }
 
 function keyBoardListener(evt){
@@ -573,24 +573,24 @@ function keyBoardListener(evt){
 function showLANIPList(){
 	var code = "";
 	var show_name = "";
-	var client_list_array = '<% get_client_detail_info(); %>';	
-	var client_list_row = client_list_array.split('<');	
+	var client_list_array = '<% get_client_detail_info(); %>';
+	var client_list_row = client_list_array.split('<');
 
 	for(var i = 1; i < client_list_row.length; i++){
 		var client_list_col = client_list_row[i].split('>');
 		if(client_list_col[1] && client_list_col[1].length > 20)
 			show_name = client_list_col[1].substring(0, 16) + "..";
 		else
-			show_name = client_list_col[1];	
+			show_name = client_list_col[1];
 
 		//client_list_col[]  0:type 1:device 2:ip 3:mac 4: 5: 6:
-		code += '<a href="#"><div onmouseover="over_var=1;" onmouseout="over_var=0;" onclick="setClientIP(\''+client_list_col[2]+'\');"><strong>'+client_list_col[2]+'</strong> ';
-		
+		code += '<a><div onmouseover="over_var=1;" onmouseout="over_var=0;" onclick="setClientIP(\''+client_list_col[2]+'\');"><strong>'+client_list_col[2]+'</strong> ';
+
 		if(show_name && show_name.length > 0)
 				code += '( '+show_name+')';
 		code += ' </div></a>';
 		}
-	code +='<!--[if lte IE 6.5]><iframe class="hackiframe2"></iframe><![endif]-->';	
+	code +='<!--[if lte IE 6.5]><iframe class="hackiframe2"></iframe><![endif]-->';
 	$("ClientList_Block_PC").innerHTML = code;
 }
 
@@ -611,18 +611,18 @@ function hideClients_Block(){
 }
 
 function pullLANIPList(obj){
-	
-	if(isMenuopen == 0){		
+
+	if(isMenuopen == 0){
 		obj.src = "/images/arrow-top.gif"
-		$("ClientList_Block_PC").style.display = 'block';		
-		document.form.http_client_ip_x_0.focus();		
+		$("ClientList_Block_PC").style.display = 'block';
+		document.form.http_client_ip_x_0.focus();
 		isMenuopen = 1;
 	}
 	else
 		hideClients_Block();
 }
 
-//Viz add 2012.02 LAN client ip } end 
+//Viz add 2012.02 LAN client ip } end
 </script>
 </head>
 
@@ -653,13 +653,13 @@ function pullLANIPList(obj){
 <table class="content" align="center" cellpadding="0" cellspacing="0">
   <tr>
 	<td width="17">&nbsp;</td>
-	
+
 	<!--=====Beginning of Main Menu=====-->
 	<td valign="top" width="202">
 	  <div id="mainMenu"></div>
 	  <div id="subMenu"></div>
 	</td>
-		
+
     <td valign="top">
 	<div id="tabMenu" class="submenuBlock"></div>
 		<!--===================================Beginning of Main Content===========================================-->
@@ -711,7 +711,7 @@ function pullLANIPList(obj){
               </td>
           </tr>
           <tr>
-              <th>Format JFFS partition at next boot</th> 
+              <th>Format JFFS partition at next boot</th>
               <td>
                   <input type="radio" name="jffs2_format" class="input" value="1" <% nvram_match_x("LANHostConfig", "jffs2_format", "1", "checked"); %>><#checkbox_Yes#>
                   <input type="radio" name="jffs2_format" class="input" value="0" <% nvram_match_x("LANHostConfig", "jffs2_format", "0", "checked"); %>><#checkbox_No#>
@@ -807,8 +807,8 @@ function pullLANIPList(obj){
 	<tr>
 	  <th>WPS Button behavior</th>
 	  <td>
-            <input type="radio" name="btn_ez_radiotoggle" class="input" value="1" <% nvram_match_x("", "btn_ez_radiotoggle", "1", "checked"); %>>Toggle Radio    
-            <input type="radio" name="btn_ez_radiotoggle" class="input" value="0" <% nvram_match_x("", "btn_ez_radiotoggle", "0", "checked"); %>>Activate WPS 
+            <input type="radio" name="btn_ez_radiotoggle" class="input" value="1" <% nvram_match_x("", "btn_ez_radiotoggle", "1", "checked"); %>>Toggle Radio
+            <input type="radio" name="btn_ez_radiotoggle" class="input" value="0" <% nvram_match_x("", "btn_ez_radiotoggle", "0", "checked"); %>>Activate WPS
 	  </td>
 	</tr>
 
@@ -827,7 +827,7 @@ function pullLANIPList(obj){
           			<input type="checkbox" name="time_zone_dst_chk" id="time_zone_dst_chk" <% nvram_match("time_zone_dst", "1", "checked"); %> class="input" onClick="return change_common(this,'LANHostConfig','time_zone_dst_chk')">
           			<label for="time_zone_dst_chk">Manual daylight saving time.</label>
           			<br>
-          		</span>	
+          		</span>
           		<span id="dst_start" style="color:white;display:none;">
           				<b>DST start time</b>
           				<select name="dst_start_m" class="input_option" onchange=""></select>&nbsp;month &nbsp;
@@ -843,7 +843,7 @@ function pullLANIPList(obj){
 	          			<select name="dst_end_d" class="input_option" onchange=""></select>&nbsp;weekday &nbsp;
           				<select name="dst_end_h" class="input_option" onchange=""></select>&nbsp;hour &nbsp;
           				<br>
-          		</span>          			
+          		</span>
             	<span id="timezone_hint" style="display:none;"></span>
           	</div>
             </td>
@@ -863,7 +863,7 @@ function pullLANIPList(obj){
 						<td colspan="4">Specified IP</td>
 					</tr>
 				</thead>
-			
+
 			  <tr>
 					<th width="80%">Client list</th>
 					<th width="20%">Edit</th>
@@ -871,15 +871,15 @@ function pullLANIPList(obj){
 
 				<tr>
 					<!-- client info -->
-					<div id="ClientList_Block_PC" class="ClientList_Block_PC"></div>					
-					
+					<div id="ClientList_Block_PC" class="ClientList_Block_PC"></div>
+
 					<td width="80%">
 				 		<input type="text" class="input_32_table" maxlength="15" name="http_client_ip_x_0"  onKeyPress="" onClick="hideClients_Block();" onblur="if(!over_var){hideClients_Block();}">
-            <img id="pull_arrow" height="14px;" src="/images/arrow-down.gif" style="position:absolute;" onclick="pullLANIPList(this);" title="Select the device name of LAN clients." onmouseover="over_var=1;" onmouseout="over_var=0;">				 		
+            <img id="pull_arrow" height="14px;" src="/images/arrow-down.gif" style="position:absolute;" onclick="pullLANIPList(this);" title="Select the device name of LAN clients." onmouseover="over_var=1;" onmouseout="over_var=0;">
 				 	</td>
-				 	<td width="20%">	
+				 	<td width="20%">
 				  		<input class="add_btn" type="button" onClick="addRow(document.form.http_client_ip_x_0, 4);" value="">
-				 	</td>	
+				 	</td>
 				</tr>
 			</table>
      	<div id="http_clientlist_Block"></div>
@@ -887,7 +887,7 @@ function pullLANIPList(obj){
      	<div class="apply_gen">
      		<input name="button" type="button" class="button_gen" onclick="applyRule();" value="<#CTL_apply#>"/>
      	</div>
-      
+
       </td></tr>
 </tbody>
 
@@ -897,10 +897,10 @@ function pullLANIPList(obj){
 
 
         </tr>
-      </table>				
-		<!--===================================Ending of Main Content===========================================-->		
+      </table>
+		<!--===================================Ending of Main Content===========================================-->
 	</td>
-		
+
     <td width="10" align="center" valign="top">&nbsp;</td>
 	</tr>
 </table>

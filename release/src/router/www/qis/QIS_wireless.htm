@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>                                     
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -18,12 +18,15 @@ var wlc_scan_state = '0';
 var waitingTime = 120;
 
 function QKWireless_load_body(){
-	parent.document.title = "ASUS Wireless Router <#Web_Title#> - <#QKSet_wireless_webtitle#>";
+	parent.document.title = "<#Web_Title#> - <#QKSet_wireless_webtitle#>";
 	parent.set_step("t3");
 
 	hideLinkTag();
 	flash_button();
 	show_prev_button();
+
+	if(parent.w_Setting_tmp == '0')
+		$("HomeImg").style.display = "none";
 
 	if(band5g_support == -1){
 		$("wl_unit_field_1").style.display = "none";
@@ -31,52 +34,96 @@ function QKWireless_load_body(){
 		$("wl_unit_field_3").style.display = "none";
 	}
 
-	document.form.wl0_ssid.value = decodeURIComponent(document.form.wl0_ssid2.value);
-	document.form.wl0_wpa_psk.value = decodeURIComponent(document.form.wl0_wpa_psk.value);
-	document.form.wl1_ssid.value = decodeURIComponent(document.form.wl1_ssid2.value);
-	document.form.wl1_wpa_psk.value = decodeURIComponent(document.form.wl1_wpa_psk.value);
+	document.form.wl0_ssid.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl0_ssid"); %>');
+	document.form.wl0_wpa_psk.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl0_wpa_psk"); %>');
+	document.form.wl1_ssid.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl1_ssid"); %>');
+	document.form.wl1_wpa_psk.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl1_wpa_psk"); %>');
 
 	if('<% nvram_get("sw_mode"); %>' == '2' || parent.document.QKform.sw_mode.value == "2"){
 		if(parent.document.QKform.wlc_band.value == '0'){
-			document.getElementById("wl0_ssid").value = decodeURIComponent(document.form.wl0_1_ssid_org.value);
-			document.getElementById("wl0_wpa_psk").value = decodeURIComponent(document.form.wl0_1_wpa_psk_org.value);
+			document.getElementById("wl0_ssid").value = decodeURIComponent('<% nvram_char_to_ascii("", "wl0.1_ssid"); %>');
+			document.getElementById("wl0_wpa_psk").value = decodeURIComponent('<% nvram_char_to_ascii("", "wl0.1_wpa_psk"); %>');
 		}
 		else{
-			document.getElementById("wl1_ssid").value = decodeURIComponent(document.form.wl1_1_ssid_org.value);
-			document.getElementById("wl1_wpa_psk").value = decodeURIComponent(document.form.wl1_1_wpa_psk_org.value);
+			document.getElementById("wl1_ssid").value = decodeURIComponent('<% nvram_char_to_ascii("", "wl1.1_ssid"); %>');
+			document.getElementById("wl1_wpa_psk").value = decodeURIComponent('<% nvram_char_to_ascii("", "wl1.1_wpa_psk"); %>');
 		}
 	}
 
-	document.getElementById("wl0_ssid").focus();
+	//while %w_Setting% == 1
+	if(parent.w_Setting_tmp == 1 && parent.document.QKform.sw_mode.value != "2"){
+		$("Continued_PrevSetting").style.display = "";
+		$("Continued_PrevSetting").innerHTML = "<#QIS_Previous_WLKey#>";
+		$("radio_Continued_PrevSetting").style.display = "";
+		document.form.Cont_PrevSetting[0].checked = true;		
+				
+		inputCtrl(document.form.wl0_ssid,0);
+		inputCtrl(document.form.wl0_wpa_psk,0);
+		inputCtrl(document.form.sync_with_2ghz,0);
+		inputCtrl(document.form.wl1_ssid,0);
+		inputCtrl(document.form.wl1_wpa_psk,0);		
+		
+	}else{
+		$("Continued_PrevSetting").style.display = "none";
+		$("radio_Continued_PrevSetting").style.display = "none";
+		document.form.wl0_ssid.focus();		
+	}
 }
 
 function submitForm(){
-	if(document.form.wl0_wpa_psk.value == "" && document.form.wl1_wpa_psk.value == ""){
-		if(!confirm("<#QIS_confirm_recommand_encryp#>"))
-			return false;
-	}
-
-	if(!validate_string_ssid(document.form.wl1_ssid))
-		return false;
+	if($('wl0_ssid').disabled == false){
+		if(document.form.wl0_wpa_psk.value == ""){
+				if(!confirm("<#QIS_confirm_recommand_encryp#>")){
+						document.form.wl0_wpa_psk.focus();				
+						return false;
+				}		
+		}
 
 	if(!validate_string_ssid(document.form.wl0_ssid))
 		return false;
-	
-	if(document.form.wl1_wpa_psk.value.length > 0){
-		document.form.wl1_auth_mode_x.value = "pskpsk2";
-		if(!validate_psk(document.form.wl1_wpa_psk))
-			return false;
-	}
-	else
-		document.form.wl1_auth_mode_x.value = "open";
 
 	if(document.form.wl0_wpa_psk.value.length > 0){
 		document.form.wl0_auth_mode_x.value = "pskpsk2";		
 		if(!validate_psk(document.form.wl0_wpa_psk))
-			return false;
-	}
-	else
-		document.form.wl0_auth_mode_x.value = "open";
+				return false;
+		}else
+				document.form.wl0_auth_mode_x.value = "open";
+
+	}else{
+		/* use previous settings */		
+		document.form.wl0_ssid.value = decodeURIComponent("<% nvram_char_to_ascii("", "wl0_ssid"); %>");
+		document.form.wl0_wpa_psk.value = decodeURIComponent("<% nvram_char_to_ascii("", "wl0_wpa_psk"); %>");
+		document.form.wl0_auth_mode_x.value = "<% nvram_get("wl0_auth_mode_x"); %>";		
+	}	
+	
+	
+	if(band5g_support != -1){ 
+		if ($('wl1_ssid').disabled == false){
+				if(document.form.wl1_wpa_psk.value == ""){
+						if(!confirm("<#QIS_confirm_recommand_encryp#>")){
+								document.form.wl1_wpa_psk.focus();
+								document.form.wl1_wpa_psk.select();
+								return false;
+						}		
+				}	
+
+				if(!validate_string_ssid(document.form.wl1_ssid))
+						return false;
+	
+				if(document.form.wl1_wpa_psk.value.length > 0){
+						document.form.wl1_auth_mode_x.value = "pskpsk2";
+						if(!validate_psk(document.form.wl1_wpa_psk))
+								return false;
+				}else
+						document.form.wl1_auth_mode_x.value = "open";
+
+		}else{
+			/* use previous settings */		
+			document.form.wl1_ssid.value = decodeURIComponent("<% nvram_char_to_ascii("", "wl1_ssid"); %>");
+			document.form.wl1_wpa_psk.value = decodeURIComponent("<% nvram_char_to_ascii("", "wl1_wpa_psk"); %>");
+			document.form.wl1_auth_mode_x.value = "<% nvram_get("wl1_auth_mode_x"); %>";		
+		}
+	}	
 
 	if(parent.$("flag").value == "adv_ap_mode" || parent.document.QKform.sw_mode.value == "3"){ // AP mode
 		document.form.flag.value = "adv_ap_mode";
@@ -105,7 +152,7 @@ function submitForm(){
 	}
 	else if(parent.document.QKform.sw_mode.value == "2"){	// Repeater mode
 		document.form.wlc_band.value = parent.document.QKform.wlc_band.value;
-		document.form.wlc_ssid.value = parent.document.QKform.wlc_ssid.value;
+		document.form.wlc_ssid.value = decodeURIComponent(parent.document.QKform.wlc_ssid.value); // ascii to char
 		document.form.wlc_wep.value = parent.document.QKform.wlc_wep.value;
 		document.form.wlc_key.value = parent.document.QKform.wlc_key.value;
 		document.form.wlc_wep_key.value = parent.document.QKform.wlc_wep_key.value;
@@ -179,25 +226,47 @@ function gotoIndex_wireless(){
 		parent.location.href = '/index.asp';
 }
 
+var errCount;
 function update_site_info(){
 	$j.ajax({
 		url: '/apscan.asp',
 		dataType: 'script',
 		error: function(xhr){
+			parent.document.getElementById("connHint").innerHTML = "<#QIS_detect_desc5#>";
 			setTimeout("update_site_info();", 1000);
+			errCount++;
+			if(errCount > 5) // assume it's Repeater mode
+				parent.location.href = 'http://www.asusnetwork.net/QIS_wizard.htm?flag=finish';
 		},
 		success: function(response){
 			parent.$("LoadingBar").style.visibility = 'hidden';
 			if(wlc_state == 2){ // connected
-				location.href = 'http://www.asusnetwork.net/qis/QIS_finish.htm';
+				location.href = '/qis/QIS_finish.htm';
 			}
 			else{
 				parent.issubmit = 120;
 				parent.isrescan = 120;
-				location.href = 'http://www.asusnetwork.net/qis/QIS_sitesurvey.htm';
+				location.href = '/qis/QIS_sitesurvey.htm';
 			}
 		}
 	});	
+}
+
+function PrevSetting(v){
+	if(v == 0){
+		inputCtrl(document.form.wl0_ssid,0);
+		inputCtrl(document.form.wl0_wpa_psk,0);
+		inputCtrl(document.form.sync_with_2ghz,0);
+		inputCtrl(document.form.wl1_ssid,0);
+		inputCtrl(document.form.wl1_wpa_psk,0);	
+		
+	}else{
+		inputCtrl(document.form.wl0_ssid,1);
+		inputCtrl(document.form.wl0_wpa_psk,1);
+		inputCtrl(document.form.sync_with_2ghz,1);
+		inputCtrl(document.form.wl1_ssid,1);
+		inputCtrl(document.form.wl1_wpa_psk,1);	
+	}
 }
 </script>
 </head>
@@ -268,61 +337,67 @@ function update_site_info(){
 								<span class="description_down"><#QKSet_wireless_webtitle#></span>
 							</td>
 							<td align="right">
-								<img onclick="gotoIndex_wireless();" style="cursor:pointer;" align="right" title="Go to Home" src="/images/backtohome.png" onMouseOver="this.src='/images/backtohomeclick.png'" onMouseOut="this.src='/images/backtohome.png'">
+								<img id="HomeImg" onclick="gotoIndex_wireless();" style="cursor:pointer;" align="right" title="Go to Home" src="/images/backtohome.png" onMouseOver="this.src='/images/backtohomeclick.png'" onMouseOut="this.src='/images/backtohome.png'">
 							</td>
 						</tr>
 					</table>
 				</div>
 				<div style="margin:5px;"><img style="width: 720px; *width: 710px; height: 2px;" src="/images/New_ui/export/line_export.png"></div>
 		</div>
-<div class="QISGeneralFont"><#qis_wireless_setting#></div>
-<br/>
-<table class="QISform_wireless" width="400" border=0 align="center" cellpadding="5" cellspacing="0">
+		
+<fieldset>
+	<legend id="Continued_legend">
+			<span id="Continued_PrevSetting"></span>
+			<span id="radio_Continued_PrevSetting">
+					<input type="radio" name="Cont_PrevSetting" class="input" value="0" onclick="PrevSetting(this.value);"><#checkbox_Yes#>
+					<input type="radio" name="Cont_PrevSetting" class="input" value="1" onclick="PrevSetting(this.value);"><#checkbox_No#>
+			</span>	
+	</legend>		
+	<br/>
+	<div class="QISGeneralFont" align="left"><#qis_wireless_setting#></div>
+	<br/>
+	<table class="QISform_wireless" width="400" border=0 align="center" cellpadding="5" cellspacing="0">
 	<tr>
-	<th width="180">2.4GHz - <#Security#> </th>
-	<td class="QISformtd">
-	</td>
+		<th width="180">2.4GHz - <#Security#> </th>
+		<td class="QISformtd">
+		</td>
 	</tr>
-
 	<tr>
-	<th width="180"><span onmouseout="return nd();" onclick="openHint(0, 22);" style="cursor:help;"><#QIS_finish_wireless_item1#><img align="right" style="cursor:pointer;margin-top:-14px\9;" src="/images/New_ui/helpicon.png"></span></th>
-	<td class="QISformtd">
-		<input type="text" id="wl0_ssid" name="wl0_ssid" onkeypress="return is_string(this, event);" onkeyup="Sync_2ghz(2);" style="height:25px;" class="input_32_table" maxlength="32" value="default"/>
-	</td>
+		<th width="180"><span onmouseout="return nd();" onclick="openHint(0, 22);" style="cursor:help;"><#QIS_finish_wireless_item1#><img align="right" style="cursor:pointer;margin-top:-14px\9;" src="/images/New_ui/helpicon.png"></span></th>
+		<td class="QISformtd">
+			<input type="text" id="wl0_ssid" name="wl0_ssid" onkeypress="return is_string(this, event);" onkeyup="Sync_2ghz(2);" style="height:25px;" class="input_32_table" maxlength="32" value="default"/>
+		</td>
 	</tr>
-
 	<tr id="wl_unit_field_0">
-	<th width="180"><span onmouseout="return nd();" onclick="openHint(0, 23);" style="cursor:help;"><#Network_key#><img align="right" style="cursor:pointer;margin-top:-14px\9;" src="/images/New_ui/helpicon.png"></span></th>
-	<td class="QISformtd">
-		<input type="password" id="wl0_wpa_psk" name="wl0_wpa_psk" value="<% nvram_char_to_ascii("WLANConfig11b", "wl0_wpa_psk"); %>" onkeyup="Sync_2ghz(2);" style="height:25px;" class="input_32_table" maxlength="65">
-	</td>
+		<th width="180"><span onmouseout="return nd();" onclick="openHint(0, 23);" style="cursor:help;"><#Network_key#><img align="right" style="cursor:pointer;margin-top:-14px\9;" src="/images/New_ui/helpicon.png"></span></th>
+		<td class="QISformtd">
+			<input type="password" id="wl0_wpa_psk" name="wl0_wpa_psk" value="<% nvram_char_to_ascii("WLANConfig11b", "wl0_wpa_psk"); %>" onkeyup="Sync_2ghz(2);" style="height:25px;" class="input_32_table" maxlength="65">
+		</td>
 	</tr>
-
 	<tr id="wl_unit_field_1">
-	<th width="180">5GHz - <#Security#> </th>
-	<td class="QISformtd">
-		<span id="syncCheckbox"><input type="checkbox" name="sync_with_2ghz" class="input" onclick="setTimeout('Sync_2ghz(2);',0);"><#qis_ssid_desc#></span>
-	</td>
+		<th width="180">5GHz - <#Security#> </th>
+		<td class="QISformtd">
+			<span id="syncCheckbox"><input type="checkbox" id="sync_with_2ghz" name="sync_with_2ghz" class="input" onclick="setTimeout('Sync_2ghz(2);',0);"><#qis_ssid_desc#></span>
+		</td>
 	</tr>
-
 	<tr id="wl_unit_field_2">
-	<th width="180"><span onmouseout="return nd();" onclick="openHint(0, 22);" style="cursor:help;"><#QIS_finish_wireless_item1#><img align="right" style="cursor:pointer;margin-top:-14px\9;" src="/images/New_ui/helpicon.png"></span></th>
-	<td class="QISformtd">
-		<input type="text" id="wl1_ssid" name="wl1_ssid" onkeypress="return is_string(this, event);" onkeyup="Sync_2ghz(5);" style="height:25px;" class="input_32_table" maxlength="32" value="default"/>
-	</td>
+		<th width="180"><span onmouseout="return nd();" onclick="openHint(0, 22);" style="cursor:help;"><#QIS_finish_wireless_item1#><img align="right" style="cursor:pointer;margin-top:-14px\9;" src="/images/New_ui/helpicon.png"></span></th>
+		<td class="QISformtd">
+			<input type="text" id="wl1_ssid" name="wl1_ssid" onkeypress="return is_string(this, event);" onkeyup="Sync_2ghz(5);" style="height:25px;" class="input_32_table" maxlength="32" value="default"/>
+		</td>
 	</tr>
-	
 	<tr id="wl_unit_field_3">
-	<th width="180"><span onmouseout="return nd();" onclick="openHint(0, 23);" style="cursor:help;"><#Network_key#><img align="right" style="cursor:pointer;margin-top:-14px\9;" src="/images/New_ui/helpicon.png"></span></th>
-	<td class="QISformtd">
-		<input type="password" id="wl1_wpa_psk" name="wl1_wpa_psk" value="<% nvram_char_to_ascii("WLANConfig11b", "wl1_wpa_psk"); %>" onkeyup="Sync_2ghz(5);" style="height:25px;" class="input_32_table" maxlength="65">
-	</td>
+		<th width="180"><span onmouseout="return nd();" onclick="openHint(0, 23);" style="cursor:help;"><#Network_key#><img align="right" style="cursor:pointer;margin-top:-14px\9;" src="/images/New_ui/helpicon.png"></span></th>
+		<td class="QISformtd">
+			<input type="password" id="wl1_wpa_psk" name="wl1_wpa_psk" value="<% nvram_char_to_ascii("WLANConfig11b", "wl1_wpa_psk"); %>" onkeyup="Sync_2ghz(5);" style="height:25px;" class="input_32_table" maxlength="65">
+		</td>
 	</tr>
 </table>
 
 <br/>
 <div class="QISGeneralFont"><#qis_wireless_setting_skdesc#></div>
 <br/>
+</fieldset>
 
 <div class="apply_gen" style="margin-top:10px">
   <input type='button' id="prevButton" value="<#CTL_prev#>" onclick="gotoprev(document.form);" style="display:none" class="button_gen">

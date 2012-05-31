@@ -266,21 +266,38 @@ function validate_duplicate2(o, v, l, off){
 	return true;
 }
 
-function is_hwaddr(o,event){
-	keyPressed = event.keyCode ? event.keyCode : event.which;
-	if (	(keyPressed==0)||
-			(keyPressed==8)||		 // backspace
-			(keyPressed==9)||		 // Tab
-			(keyPressed==35)||	 	 // end
-			(keyPressed==36)||		 // home
-			(keyPressed==37)||		 // <-
-			(keyPressed==39)||		 // ->
-			(keyPressed==46)||	 	 // delete
-			(keyPressed ==58)	){   // symbol ':'
+function is_functionButton(e){
+//function keycode for Firefox/Opera
+	var keyCode = e.keyCode;
+	if(e.which == 0) {
+		if (keyCode == 0
+			|| keyCode == 27 //Esc
+			|| keyCode == 35 //end
+			|| keyCode == 36 //home
+			|| keyCode == 37 //<-
+			|| keyCode == 39 //->
+			|| keyCode == 45 //Insert
+			|| keyCode == 46 //Del
+			){
+			return true;
+		}
+	}
+	if (       keyCode == 8 	//backspace
+		|| keyCode == 9 	//tab
+		){
 		return true;
 	}
-	
-	if((keyPressed>47 && keyPressed<58)||(keyPressed>64 && keyPressed<71)||(keyPressed>96 && keyPressed<103)){
+	return false;
+}
+
+function is_hwaddr(o,event){
+	keyPressed = event.keyCode ? event.keyCode : event.which;
+
+	if (is_functionButton(event)){
+		return true;
+	}
+
+	if((keyPressed>47 && keyPressed<58)||(keyPressed>64 && keyPressed<71)||(keyPressed>96 && keyPressed<103)){	//Hex
 		j = 0;
 		
 		for(i = 0; i < o.value.length; i++){
@@ -297,36 +314,12 @@ function is_hwaddr(o,event){
 		
 		return true;
 	}	
+	else if(keyPressed == 58){	//symbol ':'
+		return true;
+	}
 	else{
 		return false;
 	}
-}
-
-function validate_hwaddr(o)
-{
-	if (o.value.length == 0) return true;
-	if(o.value != "")
-	{
-		if(o.value.length == 12)
-		{
-			for(i=0; i<o.value.length; i++)
-			{c=o.value.charAt(i);
-			if (!(c>='0'&&c<='9') && !(c>='a'&&c<='f') && !(c>='A'&&c<='F'))
-				{alert("<#JS_validmac#>");
-				o.value = "";
-				o.focus();
-				o.select();
-				return false;
-			}
-			}
-		return true;
-		}
-	}
-	alert("<#JS_validmac#>");
-	o.value = "";
-	o.focus();
-	o.select();
-	return false;
 }
 
 function validate_ssidchar(ch){
@@ -378,20 +371,14 @@ function validate_groupchar(ch){
 function is_number(o,event){	
 	keyPressed = event.keyCode ? event.keyCode : event.which;
 	
-	if (	(keyPressed==0)||
-			(keyPressed==8)||		// backspace
-			(keyPressed==9)||		// Tab
-			(keyPressed==35)||		// end
-			(keyPressed==36)||		// home
-			(keyPressed==37)||		// <-
-			(keyPressed==39)||		// ->
-			(keyPressed==46)	){	// delete
+	if (is_functionButton(event)){
 		return true;
 	}
+
 	if (keyPressed>47 && keyPressed<58){
-		if (keyPressed==48 && o.value.length == 0){
+		/*if (keyPressed==48 && o.value.length==0){	//single 0
 			return false;	
-		}
+		}*/
 		return true;
 	}
 	else{
@@ -430,7 +417,7 @@ function validate_range_sp(o, min, max, def) {		//allow to set "0"
 	if (o.value==0) return true;
 	
 	if(o.value<min || o.value>max) {
-		alert('<#JS_validrange#> ' + min + ' to ' + max + '.');
+		alert('<#JS_validrange#> ' + min + ' <#JS_validrange_to#> ' + max + '.');
 		o.value = def;
 		o.focus();
 		o.select();
@@ -447,18 +434,11 @@ function change_ipaddr(o){}
 
 function is_ipaddr(o,event){
 	keyPressed = event.keyCode ? event.keyCode : event.which;
-	
-	if (	(keyPressed==0)||
-			(keyPressed==8)||		// backspace
-			(keyPressed==9)||		// Tab
-			(keyPressed==35)||		// end
-			(keyPressed==36)||		// home
-			(keyPressed==37)||		// <-
-			(keyPressed==39)||		// ->
-			(keyPressed==46)	){	// delete
+
+	if (is_functionButton(event)){
 		return true;
 	}
-	
+
 	if((keyPressed > 47 && keyPressed < 58)){
 		j = 0;
 		
@@ -780,7 +760,7 @@ return true;
 function validate_ipaddr_final(o, v){
 	var num = -1;
 	var pos = 0;
-	
+		
 	if(o.value.length == 0){
 		if(v == 'dhcp_start' || v == 'dhcp_end' ||
 				v == 'wan_ipaddr_x' ||
@@ -1016,18 +996,6 @@ function validate_ipaddr_final(o, v){
 	return true;
 }
 
-function is_ipaddrport(o,event){
-	keyPressed = event.keyCode ? event.keyCode : event.which;
-	
-	if (keyPressed==0){
-		return true;
-	}
-	if ((keyPressed>47 && keyPressed<58) || keyPressed == 46 || keyPressed == 58){
-		return true;
-	}
-	
-	return false;
-}
 function validate_ipaddrport(o, v)
 {num = -1;
 pos = 0;
@@ -1086,15 +1054,16 @@ else if (v=='IPRouters' && document.form.lan_netmask.value == '')
 }
 return true;
 }
-function change_iprange(o)
-{}
+
 function is_iprange(o, event){
 	keyPressed = event.keyCode ? event.keyCode : event.which;
-		
-	if (keyPressed==0)
+
+	//function keycode for Firefox/Opera
+	if (is_functionButton(event)){
 		return true;
-		
-	if ((keyPressed>47 && keyPressed<58)){
+	}
+
+	if ((keyPressed > 47 && keyPressed < 58)){	// 0~9
 		j = 0;
 		for(i=0; i<o.value.length; i++){
 			if (o.value.charAt(i)=='.'){
@@ -1107,7 +1076,7 @@ function is_iprange(o, event){
 		}
 		return true;
 	}
-	else if (keyPressed == 46){
+	else if (keyPressed == 46){	// .
 		j = 0;
 		for(i=0; i<o.value.length; i++){
 			if (o.value.charAt(i)=='.'){
@@ -1119,7 +1088,7 @@ function is_iprange(o, event){
 		}
 		return true;
 	}
-	else if (keyPressed == 42){ /* '*' */
+	else if (keyPressed == 42){ // *
 		return true;
 	}
 	
@@ -1173,10 +1142,11 @@ return true;
 function is_portrange(o,event){
 	keyPressed = event.keyCode ? event.keyCode : event.which;
 
-	if (keyPressed==0) 
+	if (is_functionButton(event)){
 		return true;
-	
-	if ((keyPressed>47 && keyPressed<58)){
+	}
+
+	if ((keyPressed > 47 && keyPressed < 58)){	//0~9
 		return true;
 	}
 	else if (keyPressed == 58 && o.value.length>0){
@@ -1201,7 +1171,6 @@ function is_portrange(o,event){
 	}
 
 	return false;
-	
 }
 
 function validate_portrange(o, v){
@@ -1291,8 +1260,10 @@ function validate_portrange(o, v){
 function is_portlist(o,event){
 	keyPressed = event.keyCode ? event.keyCode : event.which;
 
-	if (keyPressed == 0 ) 
+	//function keycode for Firefox/Opera
+	if (is_functionButton(event)){
 		return true;
+	}
 		
 	if ((keyPressed>47 && keyPressed<58) || keyPressed == 32){
 		return true;
@@ -1301,19 +1272,19 @@ function is_portlist(o,event){
 		return false;
 	}
 }
-function validate_portlist(o, v)
-{if (o.value.length==0)
+
+function validate_portlist(o, v){
+	if (o.value.length==0)
 return true;
 num = 0;
-for(i=0; i<o.value.length; i++)
-{c=o.value.charAt(i);
-if (c>='0'&&c<='9')
-{num = num*10 + (c-'0');
+	for(i=0; i<o.value.length; i++){
+		c=o.value.charAt(i);
+		if (c>='0'&&c<='9'){
+				num = num*10 + (c-'0');
 }
-else
-{if (num>255)
-{alert(num + " <#JS_validport#>");
-o.value = "";
+		else{
+				if (num>255){
+						alert(num + " <#JS_validport#>");
 o.focus();
 o.select();
 return false;
@@ -1321,13 +1292,14 @@ return false;
 num = 0;
 }
 }
-if (num>255)
-{alert(num + " <#JS_validport#>");
-o.value = "";
+	
+	if (num>255){
+			alert(num + " <#JS_validport#>");
 o.focus();
 o.select();
 return false;
 }
+	
 return true;
 }
 
@@ -1762,10 +1734,10 @@ function onSubmitCtrlOnly(o, s){
 		document.form.action_mode.value = s;
 	
 	if(s == 'Upload1'){
-		if(document.form.file.value){
-			setTimeout("detect_firmware();", 200000);		//Viz add 2011.11
-			setTimeout("updateStatus_AJAX();", 200000);	//Viz add 2011.11
+		if(document.form.file.value){			
 			disableCheckChangedStatus();
+			setTimeout("detect_httpd();", 255000); // start ajax after 266 seconds 
+			dr_advise();
 			document.form.submit();			
 		}
 		else{
@@ -1773,47 +1745,8 @@ function onSubmitCtrlOnly(o, s){
 			document.form.file.focus();
 		}
 	}
-	stopFlag = 1;	
-	disableCheckChangedStatus();
+	stopFlag = 1;
 	return true;
-}
-
-function validate_ddns_hostname(o)
-{dot=0;
-s=o.value;
-
-var unvalid_start=new RegExp("^[0-9].*", "gi");
-//var valid_keyarr=s.split(".asuscomm.com");
-if(unvalid_start.test(s) )  // || valid_keyarr.length >2 || valid_keyarr[0]=="" ||valid_keyarr[1] !=""
-{alert("<#LANHostConfig_x_DDNS_alarm_7#>");
-return false;
-}
-if (!validate_string(o))
-{return false;
-}
-for(i=0;i<s.length;i++)
-{c = s.charCodeAt(i);
-if (c==46)
-{dot++;
-if(dot>0)
-{alert("<#LANHostConfig_x_DDNS_alarm_7#>");
-return false;
-}
-}
-if (!validate_hostnamechar(c))
-{alert("<#LANHostConfig_x_DDNS_alarm_13#> '" + s.charAt(i) +"' !");
-return(false);
-}
-}
-return(true);
-}
-function validate_hostnamechar(ch)
-{if (ch>=48&&ch<=57) return true;
-if (ch>=97&&ch<=122) return true;
-if (ch>=65&&ch<=90) return true;
-if (ch==45) return true;
-if (ch==46) return true;
-return false;
 }
 
 function onSubmitApply(s){
@@ -1900,7 +1833,7 @@ function automode_hint(){ //Lock add 2009.11.05 for 54Mbps limitation in auto mo
 	   (document.form.wl_wep_x.value == 1 || 
 	    document.form.wl_wep_x.value == 2 ||
 	    document.form.wl_auth_mode_x.value == "radius" ||
-	    (document.form.wl_crypto.value.indexOf("tkip") == 0 && !document.form.wl_crypto.disabled)
+	    (document.form.wl_crypto.value == 'tkip' && !document.form.wl_crypto.disabled)
 	   )
 	  ){
 		if(document.form.current_page.value == "Advanced_Wireless_Content.asp")
@@ -1965,12 +1898,10 @@ function change_common(o, s, v){
 			
 			if(o.value == "psk" || o.value == "psk2" || o.value == "pskpsk2"){
 				document.form.wl_wpa_psk.focus();
-				document.form.wl_wpa_psk.select();
 			}
 		}
 		else if(o.value == "shared"){ //2009.03.10 Lock
-			document.form.wl_key1.focus();
-			document.form.wl_key1.select();
+			document.form.wl_key.focus();
 		}
 		nmode_limitation();
 		automode_hint();
@@ -2131,7 +2062,7 @@ function change_ddns_setting(v){
 				document.form.ddns_wildcard_x[0].disabled= 1;
 				document.form.ddns_wildcard_x[1].disabled= 1;
 				//document.form.LANHostConfig_x_DDNSHostnameCheck_button.disabled= 0;
-				document.getElementsByTagName("a")[0].removeAttribute("href");
+				//document.getElementsByTagName("a")[0].removeAttribute("href");
 				showhide("link", 0);
 				//showhide("Hostname_Note", 1);
 		}else{
@@ -2142,7 +2073,7 @@ function change_ddns_setting(v){
 				document.form.ddns_wildcard_x[0].disabled= 0;
 				document.form.ddns_wildcard_x[1].disabled= 0;
 				//document.form.LANHostConfig_x_DDNSHostnameCheck_button.disabled= 1;
-				document.getElementsByTagName("a")[0].setAttribute("href","javascript:openLink('x_DDNSServer')");
+				//document.getElementsByTagName("a")[0].setAttribute("href","javascript:openLink('x_DDNSServer')");
 				showhide("link", 1);
 				//showhide("Hostname_Note", 0);
 		}
@@ -2157,6 +2088,7 @@ else if (v=='wl_lazywds')
 {}
 else if (v=='wl_radio')
 {
+	if(sw_mode != "3"){
 	if(document.form.wl_radio[0].checked==true){
 				if(document.form.wl_radio_date_x_Sun.checked == false
 						&& document.form.wl_radio_date_x_Mon.checked == false
@@ -2165,11 +2097,17 @@ else if (v=='wl_radio')
 						&& document.form.wl_radio_date_x_Thu.checked == false
 						&& document.form.wl_radio_date_x_Fri.checked == false
 						&& document.form.wl_radio_date_x_Sat.checked == false){
-					alert("<#JS_Shareblanktest#>");
+					document.form.wl_radio_date_x_Sun.focus();
+					$('blank_warn').style.display = "";
 					return false;
 				}
+				else{
+						$('blank_warn').style.display = "none";
+				}
+	}else{
+				$('blank_warn').style.display = "none";
 	}
-	
+		}
 }
 	else if (v=='wps_mode')
 	{
@@ -2368,8 +2306,9 @@ function change_wlweptype(o, s, isload){
 function is_wlkey(o, event){
 	keyPressed = event.keyCode ? event.keyCode : event.which;
 	
-	if(keyPressed == 0)
+	if (is_functionButton(event)){
 		return true;
+	}
 	
 	if(document.form.current_page.value == "Advanced_WirelessGuest_Content.asp")
 		wep = document.form.wl_guest_wep_x_1.value;
@@ -2666,7 +2605,7 @@ function openLink(s){
 		else if (document.form.ddns_server_x.value == 'WWW.DNSOMATIC.COM')
 			tourl = "http://dnsomatic.com/create/";
 		else if (document.form.ddns_server_x.value == 'WWW.NO-IP.COM')
-		    tourl = "http://www.no-ip.com/newUser.php";
+			tourl = "http://www.no-ip.com/newUser.php";
 		else if (document.form.ddns_server_x.value == 'WWW.ASUS.COM')
 			tourl = "";
 		else	tourl = "";
@@ -2948,6 +2887,7 @@ function insertExtChannelOption_5g(){
         var orig = document.form.wl_channel.value;
         free_options(document.form.wl_channel);   
         if (document.form.wl_bw.value == "0"){ // 20 MHz
+						inputCtrl(document.form.wl_nctrlsb, 0);
                 	if (country == "AL" || 
                 	 country == "DZ" || 
 			 country == "AU" || 
@@ -3064,6 +3004,7 @@ function insertExtChannelOption_5g(){
                 		channels = new Array(0, 36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 149, 153, 157, 161, 165); // Region 7
                 }
 								else if(document.form.wl_bw.value == "1"){  // 20/40 MHz
+									inputCtrl(document.form.wl_nctrlsb, 1);
                 	if (country == "AL" || 
                 	 country == "DZ" || 
 			 country == "AU" || 
@@ -3180,6 +3121,7 @@ function insertExtChannelOption_5g(){
                 		channels = new Array(36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 149, 153, 157, 161); // Region 7
                 }		
                 else{  // 40 MHz
+                	inputCtrl(document.form.wl_nctrlsb, 1);
                 	if (country == "AL" || 
                 	 country == "DZ" || 
 			 country == "AU" || 
@@ -3649,15 +3591,17 @@ function valid_IP_form(obj, flag){
 				return false;	
 			}else
 				return true;
-	}else if(flag==1){	//with netMask						
+	}else if(flag==1){	//with netMask and generate netmask
 			var strIP = obj.value;
-			//var re=/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/g;
 			var re = new RegExp("^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})$", "gi");			
+			
 			if(!validate_ipaddr_final(obj, obj.name)){
 				obj.focus();
 				obj.select();		
 				return false;	
-			}else if(obj.name=="sr_ipaddr_x_0" && re.test(strIP)){
+			}			
+			
+			if(obj.name=="sr_ipaddr_x_0" && re.test(strIP)){
 					if((RegExp.$1 > 0) && (RegExp.$1 < 127)) document.form.sr_netmask_x_0.value = "255.0.0.0";
 					else if ((RegExp.$1 > 127) && (RegExp.$1 < 192)) document.form.sr_netmask_x_0.value = "255.255.0.0";
 					else if ((RegExp.$1 > 191) && (RegExp.$1 < 224)) document.form.sr_netmask_x_0.value = "255.255.255.0";
@@ -3667,56 +3611,91 @@ function valid_IP_form(obj, flag){
 					else if ((RegExp.$1 > 127) && (RegExp.$1 < 192)) document.form.wan_netmask_x.value = "255.255.0.0";
 					else if ((RegExp.$1 > 191) && (RegExp.$1 < 224)) document.form.wan_netmask_x.value = "255.255.255.0";
 					else document.form.wan_netmask_x.value = "0.0.0.0";												
-			}			
+			}else if(obj.name=="lan_ipaddr" && re.test(strIP)){
+					if((RegExp.$1 > 0) && (RegExp.$1 < 127)) document.form.lan_netmask.value = "255.0.0.0";
+					else if ((RegExp.$1 > 127) && (RegExp.$1 < 192)) document.form.lan_netmask.value = "255.255.0.0";
+					else if ((RegExp.$1 > 191) && (RegExp.$1 < 224)) document.form.lan_netmask.value = "255.255.255.0";
+					else document.form.lan_netmask.value = "0.0.0.0";				
+			}
+			
+			return true;
+	}else if(flag==2){ 	//ip plus netmask
+				
+			if(obj.value.search("/") == -1){		// only IP
+					if(!validate_ipaddr_final(obj, obj.name)){
+							obj.focus();
+							obj.select();		
+							return false;	
+					}else
+							return true;
+			}else{															// IP plus netmask
+					if(obj.value.split("/").length > 2){
+							alert(obj.value + " <#JS_validip#>");
+							obj.value = "";
+							obj.focus();
+							obj.select();
+							return false;
+					}else{
+							if(obj.value.split("/")[1] == "" || obj.value.split("/")[1] == 0 || obj.value.split("/")[1] > 30){
+									alert(obj.value + " <#JS_validip#>");
+									obj.value = "";
+									obj.focus();
+									obj.select();
+									return false;								
+							}else{
+									var IP_tmp = obj.value;
+									obj.value = obj.value.split("/")[0];
+									if(!validate_ipaddr_final(obj, obj.name)){
+											obj.focus();
+											obj.select();		
+											return false;	
+									}else{
+											obj.value = IP_tmp;
+											return true;
+									}		
+							}
+					}
+			}		
 	}else
 		return false;
 }
 
-function check_hwaddr_temp(obj){  //remove alert() 
-	if(obj.value == ""){
+function valid_IP_subnet(obj){
+	var ipPattern1 = new RegExp("(^([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})\\.(\\*)$)", "gi");
+	var ipPattern2 = new RegExp("(^([0-9]{1,3})\\.([0-9]{1,3})\\.(\\*)\\.(\\*)$)", "gi");
+	var ipPattern3 = new RegExp("(^([0-9]{1,3})\\.(\\*)\\.(\\*)\\.(\\*)$)", "gi");
+	var ipPattern4 = new RegExp("(^(\\*)\\.(\\*)\\.(\\*)\\.(\\*)$)", "gi");
+	var parts = obj.value.split(".");
+	if(!ipPattern1.test(obj.value) && !ipPattern2.test(obj.value) && !ipPattern3.test(obj.value) && !ipPattern4.test(obj.value)){
+			alert(obj.value + " <#JS_validip#>");
+    	obj.focus();
+    	obj.select();
+    	return false;
+	
+	}else if(parts[0] == 0 || parts[0] > 255 || parts[1] > 255 || parts[2] > 255){			
+			alert(obj.value + " <#JS_validip#>");
+			obj.focus();
+    	obj.select();
+    	return false;
+    	
+	}else
 			return true;
+}
+
+function check_hwaddr_flag(obj){  //check_hwaddr() remove alert() 
+	if(obj.value == ""){
+			return 0;
 	}else{
 		var hwaddr = new RegExp("(([a-fA-F0-9]{2}(\:|$)){6})", "gi");			
-		if(!hwaddr.test(obj.value)){			
-    	obj.focus();
-    	obj.select();
-    	return false;
-  	}
+		var legal_hwaddr = new RegExp("(^([a-fA-F0-9][cC048])(\:))", "gi"); // for legal MAC, unicast & globally unique (OUI enforced)
+		
+		if(!hwaddr.test(obj.value))
+    	return 1;
+  	else if(!legal_hwaddr.test(obj.value))
+    	return 2;
 		else
-			return true;
+			return 0;
   }
-}
-
-function check_hwaddr(obj){
-	if(obj.value == ""){
-			return true;
-	}else{
-		var hwaddr = new RegExp("(([a-fA-F0-9]{2}(\:|$)){6})", "gi");		// ,"g" whole erea match & "i" Ignore Letter		
-		if(!hwaddr.test(obj.value)){		
-			alert("<#LANHostConfig_ManualDHCPMacaddr_itemdesc#>");    		
-    	obj.focus();
-    	obj.select();
-    	return false;
-  	}
-		else
-			return true;
-  }
-}
-
-function valid_IPorMAC(obj){	
-	var hwaddr = new RegExp("(([a-fA-F0-9]{2}(\:|$)){6})", "gi");		// ,"g" whole erea match & "i" Ignore Letter		
-	
-	if(obj.value == ""){
-			return true;
-	}else if(hwaddr.test(obj.value)){
-			return true;
-	}else if(validate_ipaddr_final(obj, obj.name)){
-			return true;
-	}else{		
-    			obj.focus();
-    			obj.select();
-    			return false;
-	}	
 }
 
 function validate_number_range(obj, mini, maxi){

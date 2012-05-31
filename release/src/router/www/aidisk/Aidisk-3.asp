@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -38,10 +38,7 @@ function switch_ddns(){
 		document.form.ddns_server_x.value = "WWW.ASUS.COM";
 	}
 	else{
-
-		var ddns_enable_x = '<% nvram_get("ddns_enable_x"); %>';
-		//Viz 2011.10{ parent.setASUSDDNS_enable(ddns_enable_x);
-		parent.setASUSDDNS_enable("0");	//Viz 2011.10 }
+		parent.setASUSDDNS_enable("0");
 		document.form.ddns_server_x.value = this.ddns_server_x;
 		
 		if(parent.show_iframe_page("statusframe").indexOf("ASUS_DDNS_TOS.asp") > 0)
@@ -106,39 +103,67 @@ function check_return_code(){
 		show_alert_block("<#LANHostConfig_x_DDNS_alarm_11#>");
 	else if(this.ddns_return_code == 'time_out')
 		show_alert_block("<#LANHostConfig_x_DDNS_alarm_12#>");
-        else if(this.ddns_return_code =='unknown_error')
-                show_alert_block("<#LANHostConfig_x_DDNS_alarm_2#>");
+  else if(this.ddns_return_code =='unknown_error')
+    show_alert_block("<#LANHostConfig_x_DDNS_alarm_2#>");
 	else if(this.ddns_return_code =='connect_fail')
-                show_alert_block("<#qis_fail_desc7#>");
+    show_alert_block("<#qis_fail_desc7#>");
+  else if(this.ddns_return_code == 'update,200')
+    show_alert_block("<#LANHostConfig_x_DDNS_alarm_3#>");
+  else if(this.ddns_return_code == 'update,220')
+    show_alert_block("<#LANHostConfig_x_DDNS_alarm_4#>");
+  else if(this.ddns_return_code == 'update,297')
+    show_alert_block("<#LANHostConfig_x_DDNS_alarm_7#>");
+  else if(this.ddns_return_code == 'update,298')
+    show_alert_block("<#LANHostConfig_x_DDNS_alarm_8#>");
+  else if(this.ddns_return_code == 'update,299')
+    show_alert_block("<#LANHostConfig_x_DDNS_alarm_9#>");
+  else if(this.ddns_return_code == 'update,401')
+    show_alert_block("<#LANHostConfig_x_DDNS_alarm_10#>");
+  else if(this.ddns_return_code == 'update,407')
+    show_alert_block("<#LANHostConfig_x_DDNS_alarm_11#>");
+  else if(this.ddns_return_code =='no_change')
+    show_alert_block("Both hostname & IP address have not changed since the last update.");
+  else if(this.ddns_return_code =='ddns_query')
+    show_alert_block("<#LANHostConfig_x_DDNSHostnameCheck_buttonname#>");
+  else if(this.ddns_return_code !='')
+    show_alert_block("<#LANHostConfig_x_DDNS_alarm_2#>");
 
 	document.getElementById("loadingIcon").style.display = "none";	
 	this.ddns_return_code = "";
 }
 
 function verify_ddns_name(){
-	if(validate_ddns_hostname($("DDNSName"))){
+	
+	if(!validate_ddns_hostname($("DDNSName"))){
+		document.form.DDNSName.focus();
+		document.form.DDNSName.select();
+		return false;		
+		
+	}else{
 		document.getElementById("loadingIcon").style.display = "";
 		
 		document.form.current_page.value = "/aidisk/Aidisk-3.asp";
 		document.form.ddns_hostname_x.value = $("DDNSName").value+".asuscomm.com";
 		
 		document.form.flag.value = "nodetect";
-		FormActions("", "apply", "ddns_hostname_check", "1");
+		FormActions("", "apply", "aidisk_asusddns_register", "1");
 		document.form.target = "hidden_frame";
 		document.form.submit();
+		
+		return true;
 	}
 }
 
 function go_next_page(){
-	if(document.form.check_asus_ddns[0].checked ){//&& this.ddns_return_code == ""){		
-		verify_ddns_name();
-		
-		return;
+	if(document.form.check_asus_ddns[0].checked){
+		if(!verify_ddns_name())
+			return;
 	}
-	
-	document.form.action = "/aidisk/Aidisk-4.asp";
-	document.form.target = "";
-	document.form.submit();
+	else {
+		document.form.action = "/aidisk/Aidisk-4.asp";
+		document.form.target = "";
+		document.form.submit();
+	}
 }
 
 function go_pre_page(){
@@ -150,12 +175,17 @@ function go_pre_page(){
 function validate_ddns_hostname(o){
 	dot = 0;
 	s = o.value;
-	
 	if(s == ""){
 		show_alert_block("<#QKSet_account_nameblank#>");
 		return false;
 	}
 	
+	var unvalid_start=new RegExp("^[0-9].*", "gi");
+	if(unvalid_start.test(s) )
+	{
+		show_alert_block("<#LANHostConfig_x_DDNS_alarm_7#>");
+		return false;
+	}	
 	if(!validate_string(o)){
 		return false;
 	}
@@ -164,8 +194,7 @@ function validate_ddns_hostname(o){
 		c = s.charCodeAt(i);
 		if(c == 46){
 			++dot;
-			
-			if(dot > 2){
+			if(dot > 0){
 				show_alert_block("<#LANHostConfig_x_DDNS_alarm_7#>");
 				return false;
 			}
@@ -181,20 +210,11 @@ function validate_ddns_hostname(o){
 }
 
 function validate_hostnamechar(ch){
-	if(ch >= 48 && ch <= 57)
-		return true;
-	
-	if(ch >= 97 && ch <= 122)
-		return true;
-	
-	if(ch >= 65 && ch <= 90)
-		return true;
-	
-	if(ch == 45)
-		return true;
-	
-	if(ch == 46)
-		return true;
+	if(ch >= 48 && ch <= 57)	return true;	//0~9		
+	if(ch >= 97 && ch <= 122)	return true;	//little EN
+	if(ch >= 65 && ch <= 90)	return true;	//large EN
+	if(ch == 45)	return true;	//-
+	if(ch == 46)	return true;	//.
 	
 	return false;
 }
@@ -225,17 +245,17 @@ function checkDDNSReturnCode(){
                 if(ddns_return_code == 'ddns_query')
                         setTimeout("checkDDNSReturnCode();", 500);
                 else {
-			if( (ddns_return_code == 'register,200')
-			||  (ddns_return_code == 'register,220')
-			||  (ddns_return_code == 'register,230') ) {
-		                parent.setASUSDDNS_enable("1");
-                		document.form.action = "/aidisk/Aidisk-4.asp";
-		                document.form.target = "";
-                		document.form.submit();
-			}
-			else
-				check_return_code();
-		}
+									if( (ddns_return_code == 'register,200')
+												||  (ddns_return_code == 'register,220')
+												||  (ddns_return_code == 'register,230') ) {
+		                				parent.setASUSDDNS_enable("1");
+                						document.form.action = "/aidisk/Aidisk-4.asp";
+		                				document.form.target = "";
+                						document.form.submit();
+									}
+									else
+												check_return_code();
+								}
         }
    });
 }
@@ -245,12 +265,12 @@ function checkDDNSReturnCode(){
 
 <body onload="initial();">
 <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
-<form method="GET" name="form" action="/start_apply.htm">
+<form method="GET" name="form" id="ruleForm" action="/start_apply.htm" target="hidden_frame">
 <input type="hidden" name="current_page" value="">
 <input type="hidden" name="next_page" value="">
 <input type="hidden" name="group_id" value="">
 <input type="hidden" name="action_mode" value="apply">
-<input type="hidden" name="action_script" value="restart_ddns">
+<input type="hidden" name="action_script" value="aidisk_asusddns_register">
 <input type="hidden" name="action_wait" value="15">
 <input type="hidden" name="asusddns_tos_agreement" value="<% nvram_get("asusddns_tos_agreement"); %>">
 <input type="hidden" name="ddns_server_x" value="<% nvram_get("ddns_server_x"); %>">
@@ -287,7 +307,7 @@ function checkDDNSReturnCode(){
 			<div style="margin-left:20px;">	
 				<p><input type="radio" name="check_asus_ddns" id="c1" onClick="switch_ddns();" checked>
 						<label for="c1"><#DDNSterm_agreeword#></label>
-						<a href="#" onclick="parent.show_help_iframe(5);"><#DDNS_termofservice_Title#></a>
+						<a onclick="parent.show_help_iframe(5);"><#DDNS_termofservice_Title#></a>
 				</p>			
 				<br/>
 						<div id="ddnsname_input" class="aidiskdesc" style="display:none;">

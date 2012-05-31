@@ -1,4 +1,4 @@
-<html>
+﻿<html>
 <head>
 <style>
 .string{
@@ -15,7 +15,7 @@
 </style>
 
 <script>
-var apps_array = <% apps_info(); %>;
+var apps_array = <% apps_info("asus"); %>;
 </script>
 </head>
 

@@ -1,5 +1,4 @@
-apps_array = <% apps_info(); %>;
-apps_state_upgrade = "<% nvram_get("apps_state_upgrade"); %>";
+﻿apps_state_upgrade = "<% nvram_get("apps_state_upgrade"); %>";
 apps_state_update = "<% nvram_get("apps_state_update"); %>";
 apps_state_remove = "<% nvram_get("apps_state_remove"); %>";
 apps_state_enable = "<% nvram_get("apps_state_enable"); %>";

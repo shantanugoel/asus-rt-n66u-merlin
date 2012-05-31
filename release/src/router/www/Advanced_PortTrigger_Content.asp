@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -9,7 +9,7 @@
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
 
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_3_3#></title>
+<title><#Web_Title#> - <#menu5_3_3#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script language="JavaScript" type="text/javascript" src="/state.js"></script>
@@ -24,7 +24,7 @@ wan_proto = '<% nvram_get("wan_proto"); %>';
 
 <% login_state_hook(); %>
 var wireless = [<% wl_auth_list(); %>];	// [[MAC, associated, authorized], ...]
-var autofw_rulelist_array = '<% nvram_get("autofw_rulelist"); %>';
+var autofw_rulelist_array = "<% nvram_char_to_ascii("","autofw_rulelist"); %>";
 
 function initial(){
 	show_menu(); 
@@ -58,7 +58,7 @@ function done_validating(action){
 	refreshpage();
 }
 
-function change_wizard(o, id){
+function change_wizard(o){
 	for(var i = 0; i < wItem.length; i++){
 		if(wItem[i][0] != null){
 			if(o.value == wItem[i][0]){
@@ -66,8 +66,7 @@ function change_wizard(o, id){
 				document.form.autofw_outproto_x_0.value = wItem[i][2];
 				document.form.autofw_inport_x_0.value = wItem[i][3];
 				document.form.autofw_inproto_x_0.value = wItem[i][4];
-				document.form.autofw_desc_x_0.value = wItem[i][0];
-				
+				document.form.autofw_desc_x_0.value = wItem[i][0];				
 				break;
 			}
 		}
@@ -77,61 +76,77 @@ function change_wizard(o, id){
 //new table start 2 // jerry5 added.
 function addRow(obj, head){
 	if(head == 1)
-		autofw_rulelist_array += "&#60"
+		autofw_rulelist_array += "<"
 	else
-		autofw_rulelist_array += "&#62"
+		autofw_rulelist_array += ">"
 			
 	autofw_rulelist_array += obj.value;
 	obj.value = "";
 }
 
-function addRow_Group(upper){
-	var rule_num = $('autofw_rulelist_table').rows.length;
-	var item_num = $('autofw_rulelist_table').rows[0].cells.length;	
-	
-	if(rule_num >= upper){
-		alert("<#JS_itemlimit1#> " + upper + " <#JS_itemlimit2#>");
-		return false;	
+function validForm(){
+
+	if(!Block_chars(document.form.autofw_desc_x_0, ["<" ,">"])){
+				return false;		
 	}	
-		
+
 	if(document.form.autofw_outport_x_0.value==""){
 		alert("<#JS_fieldblank#>");
 		document.form.autofw_outport_x_0.focus();
-		document.form.autofw_outport_x_0.select();		
+		document.form.autofw_outport_x_0.select();
+		return false;
 	
-	}else	if(document.form.autofw_inport_x_0.value==""){
+	}
+	if(document.form.autofw_inport_x_0.value==""){
 		alert("<#JS_fieldblank#>");
 		document.form.autofw_inport_x_0.focus();
-		document.form.autofw_inport_x_0.select();		
+		document.form.autofw_inport_x_0.select();
+		return false;
 	
-	}else if(validate_number_range(document.form.autofw_outport_x_0, 1, 65535)==true && validate_number_range(document.form.autofw_inport_x_0, 1, 65535)==true){	
-		
-//Viz check same rule  //match(out port+out_proto+in port+in_proto) is not accepted
+	}
+	
+	if(!validate_number_range(document.form.autofw_outport_x_0, 1, 65535)
+		|| !validate_number_range(document.form.autofw_inport_x_0, 1, 65535)){		
+			return false;
+	}
+	
+	return true;	
+}
+
+function addRow_Group(upper){
+	if(validForm()){
+		var rule_num = $('autofw_rulelist_table').rows.length;
+		var item_num = $('autofw_rulelist_table').rows[0].cells.length;	
+	
+		if(rule_num >= upper){
+			alert("<#JS_itemlimit1#> " + upper + " <#JS_itemlimit2#>");
+			return;
+		}
+			
+		//Viz check same rule  //match(out port+out_proto+in port+in_proto) is not accepted
 		if(item_num >=2){
 			for(i=0; i<rule_num; i++){
 					if(document.form.autofw_outport_x_0.value == $('autofw_rulelist_table').rows[i].cells[1].innerHTML 
-						&& document.form.autofw_outproto_x_o.value == $('autofw_rulelist_table').rows[i].cells[2].innerHTML
+						&& document.form.autofw_outproto_x_0.value == $('autofw_rulelist_table').rows[i].cells[2].innerHTML
 						&& document.form.autofw_inport_x_0.value == $('autofw_rulelist_table').rows[i].cells[3].innerHTML
-						&& document.form.autofw_inproto_x_o.value == $('autofw_rulelist_table').rows[i].cells[4].innerHTML){
+						&& document.form.autofw_inproto_x_0.value == $('autofw_rulelist_table').rows[i].cells[4].innerHTML){
 						alert("<#JS_duplicate#>");						
 						document.form.autofw_outport_x_0.focus();
 						document.form.autofw_outport_x_0.select();
-						return false;
+						return;
 					}				
 			}
 		}		
 		
 		addRow(document.form.autofw_desc_x_0 ,1);
 		addRow(document.form.autofw_outport_x_0, 0);
-		addRow(document.form.autofw_outproto_x_o, 0);
-		document.form.autofw_outproto_x_o.value="TCP";
+		addRow(document.form.autofw_outproto_x_0, 0);
+		document.form.autofw_outproto_x_0.value="TCP";
 		addRow(document.form.autofw_inport_x_0, 0);
-		addRow(document.form.autofw_inproto_x_o, 0);
-		document.form.autofw_inproto_x_o.value="TCP";
+		addRow(document.form.autofw_inproto_x_0, 0);
+		document.form.autofw_inproto_x_0.value="TCP";
 		showautofw_rulelist();
-	}else{
-		return false;
-	}
+	}	
 }
 
 function edit_Row(r){ 	
@@ -139,9 +154,9 @@ function edit_Row(r){
   	
 	document.form.autofw_desc_x_0.value = $('autofw_rulelist_table').rows[i].cells[0].innerHTML;
 	document.form.autofw_outport_x_0.value = $('autofw_rulelist_table').rows[i].cells[1].innerHTML; 
-	document.form.autofw_outproto_x_o.value = $('autofw_rulelist_table').rows[i].cells[2].innerHTML; 
+	document.form.autofw_outproto_x_0.value = $('autofw_rulelist_table').rows[i].cells[2].innerHTML; 
 	document.form.autofw_inport_x_0.value = $('autofw_rulelist_table').rows[i].cells[3].innerHTML;
-	document.form.autofw_inproto_x_o.value = $('autofw_rulelist_table').rows[i].cells[4].innerHTML;
+	document.form.autofw_inproto_x_0.value = $('autofw_rulelist_table').rows[i].cells[4].innerHTML;
 	
   del_Row(r);	
 }
@@ -167,7 +182,7 @@ function del_Row(r){
 }
 
 function showautofw_rulelist(){
-	var autofw_rulelist_row = autofw_rulelist_array.split('&#60');
+	var autofw_rulelist_row = decodeURIComponent(autofw_rulelist_array).split('<');
 	var code = "";
 
 	code +='<table width="100%" cellspacing="0" cellpadding="4" align="center" class="list_table" id="autofw_rulelist_table">';
@@ -176,7 +191,7 @@ function showautofw_rulelist(){
 	else{
 		for(var i = 1; i < autofw_rulelist_row.length; i++){
 			code +='<tr id="row'+i+'">';
-			var autofw_rulelist_col = autofw_rulelist_row[i].split('&#62');
+			var autofw_rulelist_col = autofw_rulelist_row[i].split('>');
 			var wid=[22, 21, 10, 21, 10];
 				for(var j = 0; j < autofw_rulelist_col.length; j++){
 					code +='<td width="'+wid[j]+'%">'+ autofw_rulelist_col[j] +'</td>';		//IP  width="98"
@@ -283,7 +298,7 @@ function trigger_validate_duplicate(o, v, l, off){
 						<tr>
             	<th colspan="2"align="right" id="autofw_rulelist"><#IPConnection_TriggerList_widzarddesc#></th>
             	<td colspan="4">
-            		<select name="TriggerKnownApps" class="input_option" onChange="change_wizard(this, 'TriggerKnownApps');">
+            		<select name="TriggerKnownApps" class="input_option" onChange="change_wizard(this);">
             			<option value="User Defined"><#Select_menu_default#></option>
             		</select>
             	</td>
@@ -314,9 +329,9 @@ function trigger_validate_duplicate(o, v, l, off){
               		<input type="text" maxlength="5" class="input_6_table"  name="autofw_outport_x_0" onKeyPress="return is_portrange(this,event)">
             	</td>
             	<td width="10%">
-              		<select name="autofw_outproto_x_o" class="input_option">
-              			<option value="TCP" <% nvram_match_list_x("IPConnection","autofw_outproto_x", "TCP","selected", 0); %>>TCP</option>
-              			<option value="UDP" <% nvram_match_list_x("IPConnection","autofw_outproto_x", "UDP","selected", 0); %>>UDP</option>
+              		<select name="autofw_outproto_x_0" class="input_option">
+              			<option value="TCP">TCP</option>
+              			<option value="UDP">UDP</option>
               		</select>
               		</div>
             	</td>
@@ -324,9 +339,9 @@ function trigger_validate_duplicate(o, v, l, off){
               		<input type="text" maxlength="5" class="input_6_table" name="autofw_inport_x_0" onKeyPress="return is_portrange(this,event)">
             	</td>
             	<td width="10%">
-              		<select name="autofw_inproto_x_o" class="input_option">
-              			<option value="TCP" <% nvram_match_list_x("IPConnection","autofw_inproto_x", "TCP","selected", 0); %>>TCP</option>
-              			<option value="UDP" <% nvram_match_list_x("IPConnection","autofw_inproto_x", "UDP","selected", 0); %>>UDP</option>
+              		<select name="autofw_inproto_x_0" class="input_option">
+              			<option value="TCP">TCP</option>
+              			<option value="UDP">UDP</option>
               		</select>
             	</td>
 								<td width="16%">

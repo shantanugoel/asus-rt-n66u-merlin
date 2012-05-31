@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"> 
 <html xmlns:v>
 <head>
@@ -8,11 +8,16 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#BOP_isp_heart_item#></title>
+<title><#Web_Title#> - <#BOP_isp_heart_item#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
-<script language="JavaScript" type="text/javascript" src="/state.js"></script>
+<style>
+.vpndetails{
+	display: none;
+}
+</style>
 <script language="JavaScript" type="text/javascript" src="/help.js"></script>
+<script language="JavaScript" type="text/javascript" src="/state.js"></script>
 <script language="JavaScript" type="text/javascript" src="/general.js"></script>
 <script language="JavaScript" type="text/javascript" src="/popup.js"></script>
 <script language="JavaScript" type="text/javascript" src="/detect.js"></script>
@@ -22,7 +27,8 @@ wan_nat_x = '<% nvram_get("wan_nat_x"); %>';
 
 <% login_state_hook(); %>
 var wireless = [<% wl_auth_list(); %>];	// [[MAC, associated, authorized], ...]
-var pptpd_clientlist_array = '<% nvram_char_to_ascii("", "pptpd_clientlist"); %>';
+var pptpd_clientlist_array_ori = '<% nvram_char_to_ascii("","pptpd_clientlist"); %>';
+var pptpd_clientlist_array = decodeURIComponent(pptpd_clientlist_array_ori);
 var pptpd_clients = '<% nvram_get("pptpd_clients"); %>';
 
 var origin_lan_ip = '<% nvram_get("lan_ipaddr"); %>';
@@ -41,10 +47,10 @@ var dhcp_staticlists = '<% nvram_get("dhcp_staticlist"); %>';
 var staticclist_row = dhcp_staticlists.split('&#60');
 
 function initial(){
-	show_menu();
-	pptpd_clientlist_array = decodeURIComponent(pptpd_clientlist_array);
+	show_menu();	
 	showpptpd_clientlist();
 
+	//*/ Viz marked 2012.04 cuz these codes move to PPTPAdvanced page
 	if (pptpd_clients != "") {
 		document.form._pptpd_clients_start.value = pptpd_clients.split("-")[0];
 		document.form._pptpd_clients_end.value = pptpd_clients.split("-")[1];
@@ -59,6 +65,7 @@ function initial(){
 	//document.form.pptpd_mppe_56.checked = (document.form.pptpd_mppe.value & 4);
 	document.form.pptpd_mppe_40.checked = (document.form.pptpd_mppe.value & 4);
 	document.form.pptpd_mppe_no.checked = (document.form.pptpd_mppe.value & 8);
+	//*/	//Viz marked 2012.04 
 
 	addOnlineHelp($("faq"), ["ASUSWRT", "VPN"]);
 }
@@ -74,6 +81,8 @@ function applyRule(){
 	var rule_num = $('pptpd_clientlist_table').rows.length;
 	var item_num = $('pptpd_clientlist_table').rows[0].cells.length;
 	var tmp_value = "";
+	
+	/*  Viz marked 2012.04 cuz these codes moved to PPTPAdvanced page
 	var pptpd_clients_subnet = document.form._pptpd_clients_start.value.split(".")[0] + "." +
 				   document.form._pptpd_clients_start.value.split(".")[1] + "." +
 				   document.form._pptpd_clients_start.value.split(".")[2] + ".";
@@ -121,20 +130,19 @@ function applyRule(){
   		document.form._pptpd_clients_start.focus();	  			
   		document.form._pptpd_clients_start.select();
 			return false;
-  }/*else if(dhcp_enable == 1){*/	//1
+  }
 	else if(pool_subnet == pptpd_clients_subnet
 					&& ((pool_start_end >= pptpd_clients_start_ip && pool_start_end <= pptpd_clients_end_ip)								
 								|| (pool_end_end >= pptpd_clients_start_ip && pool_end_end <= pptpd_clients_end_ip)								
 								|| (pptpd_clients_start_ip >= pool_start_end && pptpd_clients_start_ip <= pool_end_end)
 								|| (pptpd_clients_end_ip >= pool_start_end && pptpd_clients_end_ip <= pool_end_end))
 					){
-  		//alert("It is conflict with router's DHCP pool: "+pool_start+" ~ "+pool_end);
   		$('pptpd_conflict').innerHTML = Untranslated.vpn_conflict_DHCPpool+" <b>"+pool_start+" ~ "+pool_end+"</b>";
   		document.form._pptpd_clients_start.focus();
   		document.form._pptpd_clients_start.select();
 			return false;				
 		
-	}/*}else if(static_enable == 1){*/ //2
+	}
 	else if(dhcp_staticlists != ""){
 			for(var i = 1; i < staticclist_row.length; i++){
 					var static_subnet ="";
@@ -145,7 +153,6 @@ function applyRule(){
 					if(static_subnet == pptpd_clients_subnet 
   						&& static_end >= pptpd_clients_start_ip 
   						&& static_end <= pptpd_clients_end_ip){
-  							//alert("It is conflict with router's DHCP static ip: "+static_ip);
   							$('pptpd_conflict').innerHTML = Untranslated.vpn_conflict_DHCPstatic+" <b>"+static_ip+"</b>";
   							document.form._pptpd_clients_start.focus();
   							document.form._pptpd_clients_start.select();
@@ -153,13 +160,13 @@ function applyRule(){
   				}				
   }
 	}
-		
-	/*}*/ //3
+*/ // Viz marked 2012.04		
+
 	
 	for(i=0; i<rule_num; i++){
 		tmp_value += "<"		
 		for(j=0; j<item_num-1; j++){																		//<td>			//<pre>
-			tmp_value += $('pptpd_clientlist_table').rows[i].cells[j].childNodes[0].childNodes[0].nodeValue;
+			tmp_value += $('pptpd_clientlist_table').rows[i].cells[j].childNodes[0].nodeValue;
 			if(j != item_num-2)	
 				tmp_value += ">";
 		}
@@ -168,8 +175,9 @@ function applyRule(){
 		tmp_value = "";	
 	document.form.pptpd_clientlist.value = tmp_value;
 
+	/* Viz marked 2012.04 
 	document.form.pptpd_clients.value = document.form._pptpd_clients_start.value + "-" + document.form._pptpd_clients_end.value;
-
+	
 	document.form.pptpd_mppe.value = 0;
 	if (document.form.pptpd_mppe_128.checked)
 		document.form.pptpd_mppe.value |= 1;
@@ -179,12 +187,15 @@ function applyRule(){
 		document.form.pptpd_mppe.value |= 4;
 	if (document.form.pptpd_mppe_no.checked)
 		document.form.pptpd_mppe.value |= 8;
+		
+	*/ //Viz marked 2012.04
 
 	showLoading();
 	document.form.submit();	
 }
 
 function addRow(obj, head){
+
 	if(head == 1)
 		pptpd_clientlist_array += "<" /*&#60*/
 	else
@@ -195,7 +206,31 @@ function addRow(obj, head){
 	obj.value = "";
 }
 
+function validForm(){
+	
+		if(document.form.pptpd_clientlist_username.value==""){
+				alert("<#JS_fieldblank#>");
+				document.form.pptpd_clientlist_username.focus();
+				return false;
+		
+		}else if(!Block_chars(document.form.pptpd_clientlist_username, ["*", " ", "\\", "/", "<", ">"])){
+				return false;		
+		}
+
+		if(document.form.pptpd_clientlist_password.value==""){
+				alert("<#JS_fieldblank#>");
+				document.form.pptpd_clientlist_password.focus();
+				return false;
+		
+		}else if(!Block_chars(document.form.pptpd_clientlist_password, ["*", " ", "\\", "/", "<", ">"])){
+				return false;		
+		}
+		
+		return true;				
+}
+
 function addRow_Group(upper){
+if(validForm()){
 	var rule_num = $('pptpd_clientlist_table').rows.length;
 	var item_num = $('pptpd_clientlist_table').rows[0].cells.length;
 		
@@ -203,21 +238,9 @@ function addRow_Group(upper){
 		alert("<#JS_itemlimit1#> " + upper + " <#JS_itemlimit2#>");
 		return false;	
 	}			
-		
-	if(document.form.pptpd_clientlist_username.value==""){
-		alert("<#JS_fieldblank#>");
-		document.form.pptpd_clientlist_username.focus();
-		document.form.pptpd_clientlist_username.select();
-		return false;
-	}else if(document.form.pptpd_clientlist_password.value==""){
-		alert("<#JS_fieldblank#>");
-		document.form.pptpd_clientlist_password.focus();
-		document.form.pptpd_clientlist_password.select();
-		return false;
-	}else{
-		
+
 		//Viz check same rule  //match(username) is not accepted
-		if(item_num >=2){	
+		if(item_num >=2){
 			for(i=0; i<rule_num; i++){	
 					if(document.form.pptpd_clientlist_username.value.toLowerCase() == $('pptpd_clientlist_table').rows[i].cells[0].innerHTML.toLowerCase()){
 						alert("<#JS_duplicate#>");
@@ -228,20 +251,10 @@ function addRow_Group(upper){
 			}
 		}		
 		
-		if(!validate_string_ssid(document.form.pptpd_clientlist_username))
-			return false;
-		if(!validate_string_group(document.form.pptpd_clientlist_username))
-			return false;
-
-		if(!validate_string_ssid(document.form.pptpd_clientlist_password))
-			return false;				
-		if(!validate_string_group(document.form.pptpd_clientlist_password))
-			return false;		
-		
 		addRow(document.form.pptpd_clientlist_username ,1);
 		addRow(document.form.pptpd_clientlist_password, 0);
-		showpptpd_clientlist();		
-	}
+		showpptpd_clientlist();	
+	}	
 }
 
 function del_Row(r){
@@ -252,13 +265,15 @@ function del_Row(r){
 	for(k=0; k<$('pptpd_clientlist_table').rows.length; k++){
 		for(j=0; j<$('pptpd_clientlist_table').rows[k].cells.length-1; j++){
 			if(j == 0)	
-				pptpd_clientlist_value += "&#60";
-			else
-				pptpd_clientlist_value += "&#62";
-			pptpd_clientlist_value += $('pptpd_clientlist_table').rows[k].cells[j].innerHTML;		
+				pptpd_clientlist_value += "<";
+			else{
+			pptpd_clientlist_value += $('pptpd_clientlist_table').rows[k].cells[0].innerHTML;
+			pptpd_clientlist_value += ">";
+			pptpd_clientlist_value += $('pptpd_clientlist_table').rows[k].cells[1].innerHTML;
+			}
 		}
 	}
-	
+
 	pptpd_clientlist_array = pptpd_clientlist_value;
 	if(pptpd_clientlist_array == "")
 		showpptpd_clientlist();
@@ -271,7 +286,7 @@ function edit_Row(r){
   del_Row(r);	
 }
 
-function showpptpd_clientlist(){
+function showpptpd_clientlist(){	
 	var pptpd_clientlist_row = pptpd_clientlist_array.split('<');
 	var code = "";
 
@@ -283,7 +298,7 @@ function showpptpd_clientlist(){
 			code +='<tr id="row'+i+'">';
 			var pptpd_clientlist_col = pptpd_clientlist_row[i].split('>');
 				for(var j = 0; j < pptpd_clientlist_col.length; j++){
-					code +='<td width="40%"><pre>'+ pptpd_clientlist_col[j] +'</pre></td>';		//IP  width="98"
+					code +='<td width="40%">'+ pptpd_clientlist_col[j] +'</td>';		//IP  width="98"
 				}
 				code +='<td width="20%"><!--input class="edit_btn" onclick="edit_Row(this);" value=""/-->';
 				code +='<input class="remove_btn" onclick="del_Row(this);" value=""/></td></tr>';
@@ -378,7 +393,7 @@ function setEnd(){
 			<input type="hidden" name="preferred_lang" id="preferred_lang" value="<% nvram_get("preferred_lang"); %>">
 			<input type="hidden" name="firmver" value="<% nvram_get("firmver"); %>">
 			<input type="hidden" name="wl_ssid" value="<% nvram_get("wl_ssid"); %>">
-			<input type="hidden" name="pptpd_clientlist" value="<% nvram_get("pptpd_clientlist"); %>">
+			<input type="hidden" name="pptpd_clientlist" value="<% nvram_char_to_ascii("","pptpd_clientlist"); %>">
 			<input type="hidden" name="pptpd_clients" value="<% nvram_get("pptpd_clients"); %>">
 			<input type="hidden" name="pptpd_mppe" value="<% nvram_get("pptpd_mppe"); %>">	
 
@@ -390,7 +405,7 @@ function setEnd(){
 								<tr>
 								  <td bgcolor="#4D595D" valign="top">
 								  <div>&nbsp;</div>
-								  <div class="formfonttitle"><#BOP_isp_heart_item#></div>
+								  <div class="formfonttitle"><#BOP_isp_heart_item#> - <#vpn_setting#></div>
 								  <div style="margin-left:5px;margin-top:10px;margin-bottom:10px"><img src="/images/New_ui/export/line_export.png"></div>
 								  <div class="formfontdesc"><#PPTP_desc#></div>
 								  <div class="formfontdesc"><#PPTP_desc2#> <% nvram_get("wan0_ipaddr"); %></div>
@@ -409,14 +424,17 @@ function setEnd(){
 										<tr>
 											<th><#vpn_enable#></th>
 											<td>
-												<select name="pptpd_enable" class="input_option">
+						          	<input type="radio" value="1" name="pptpd_enable" <% nvram_match("pptpd_enable", "1", "checked"); %> /><#checkbox_Yes#>
+						      		  <input type="radio" value="0" name="pptpd_enable" <% nvram_match("pptpd_enable", "0", "checked"); %> /><#checkbox_No#>
+												<!-- need to unify -->
+												<!--select name="pptpd_enable" class="input_option">
 													<option class="content_input_fd" value="0" <% nvram_match("pptpd_enable", "0","selected"); %>><#btn_disable#></option>
 													<option class="content_input_fd" value="1"<% nvram_match("pptpd_enable", "1","selected"); %>><#btn_Enable#></option>
-												</select>			
+												</select-->			
 											</td>
 									  </tr>
 							
-										<tr>
+										<tr class="vpndetails">
 											<th><#vpn_broadcast#></th>
 											<td>
 												<select name="pptpd_broadcast" class="input_option">
@@ -428,7 +446,7 @@ function setEnd(){
 											</td>
 									  </tr>
 							
-										<tr>
+										<tr class="vpndetails">
 											<th><#PPPConnection_Authentication_itemname#></th>
 											<td>
 												<select name="pptpd_chap" class="input_option">
@@ -438,36 +456,36 @@ function setEnd(){
 												</select>			
 											</td>
 									  </tr>
-										<tr>
-                                                                                        <th><#MPPE_Encryp#></th>
-                                                                                        <td>
+										<tr class="vpndetails">
+											<th><#MPPE_Encryp#></th>
+                      <td>
 												<input type="checkbox" class="input" name="pptpd_mppe_128" onClick="return changeMppe();">MPPE-128<br>
 												<!--input type="checkbox" class="input" name="pptpd_mppe_56" onClick="return changeMppe();">MPPE-56<br-->
 												<input type="checkbox" class="input" name="pptpd_mppe_40" onClick="return changeMppe();">MPPE-40<br>
 												<input type="checkbox" class="input" name="pptpd_mppe_no" onClick="return changeMppe();"><#No_Encryp#>
 											</td>
-									 </tr>
-			          		<tr>
+									 	</tr>
+			          		<tr class="vpndetails">
 			            		<th><a class="hintstyle" href="javascript:void(0);"><#IPConnection_x_DNSServer1_itemname#></a></th>
 			            		<td><input type="text" maxlength="15" class="input_15_table" name="pptpd_dns1" value="<% nvram_get("pptpd_dns1"); %>" onkeypress="return is_ipaddr(this, event)" ></td>
 			          		</tr>
 
-			          		<tr>
+			          		<tr class="vpndetails">
 			            		<th><a class="hintstyle" href="javascript:void(0);"><#IPConnection_x_DNSServer2_itemname#></a></th>
 			            		<td><input type="text" maxlength="15" class="input_15_table" name="pptpd_dns2" value="<% nvram_get("pptpd_dns2"); %>" onkeypress="return is_ipaddr(this, event)" ></td>
 			          		</tr>
 
-			          		<tr>
+			          		<tr class="vpndetails">
 			            		<th>WINS 1</th>
 			            		<td><input type="text" maxlength="15" class="input_15_table" name="pptpd_wins1" value="<% nvram_get("pptpd_wins1"); %>" onkeypress="return is_ipaddr(this, event)" ></td>
 			          		</tr>
 
-			          		<tr>
+			          		<tr class="vpndetails">
 			            		<th>WINS 2</th>
 			            		<td><input type="text" maxlength="15" class="input_15_table" name="pptpd_wins2" value="<% nvram_get("pptpd_wins2"); %>" onkeypress="return is_ipaddr(this, event)" ></td>
 			          		</tr>
 
-			          		<tr>
+			          		<tr class="vpndetails">
 			            		<th><#vpn_client_ip#></th>
 			            		<td>
                           <input type="text" maxlength="15" class="input_15_table" name="_pptpd_clients_start" onBlur="setEnd();"  onKeyPress="return is_ipaddr(this, event);" value=""/> ~
@@ -492,16 +510,14 @@ function setEnd(){
 									  	</tr>			  
 									  	<tr>
 						          	<td width="40%">
-						              <input type="text" class="input_25_table" maxlength="32" name="pptpd_clientlist_username" >
+						              <input type="text" class="input_25_table" maxlength="32" name="pptpd_clientlist_username" onKeyPress="return is_string(this, event)">
 						            </td>
-						            			<td width="40%">
-						            				<input type="text" class="input_25_table" maxlength="32" name="pptpd_clientlist_password">
-						            			</td>
-						            			<td width="20%">
-																<div> 
-																	<input type="button" class="add_btn" onClick="addRow_Group(32);" value="">
-																</div>
-						            			</td>
+						            <td width="40%">
+						            	<input type="text" class="input_25_table" maxlength="16" name="pptpd_clientlist_password" onKeyPress="return is_string(this, event)">
+						            </td>
+						            <td width="20%">
+													<div><input type="button" class="add_btn" onClick="addRow_Group(16);" value=""></div>
+						            </td>
 									  	</tr>	 			  
 								  </table>        			
 						        			

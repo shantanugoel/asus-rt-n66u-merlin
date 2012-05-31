@@ -20,7 +20,7 @@ var now_flag = '<% get_parameter("flag"); %>';
 
 function QKISP_load_body(){
 //	load_alttxt_enviroment();
-	parent.document.title = "ASUS Wireless Router <#Web_Title#> - <#QKSet_ISP_head#>";
+	parent.document.title = "<#Web_Title#> - <#QKSet_ISP_head#>";
 	parent.set_step("t2");
 	hideLinkTag();
 	flash_button();
@@ -74,7 +74,8 @@ function submitForm(){
 		document.form.wan_hostname.focus();
 		return false;
 	}
-	if(!check_hwaddr(document.form.wan_hwaddr_x)){
+	
+	if(!check_macaddr(document.form.wan_hwaddr_x,check_hwaddr_flag(document.form.wan_hwaddr_x))){
 		document.form.wan_hwaddr_x.select();
 		document.form.wan_hwaddr_x.focus();
 		return false;
@@ -112,16 +113,24 @@ function submitForm(){
 }
 
 function check_macaddr(obj,flag){ //control hint of input mac address
-	if (flag){	
-		$("check_mac") ? $("check_mac").style.display="none" : true;
-	}
-	else{
+	if(flag == 1){
 		var childsel=document.createElement("div");
 		childsel.setAttribute("id","check_mac");
 		childsel.style.color="#FFCC00";
 		obj.parentNode.appendChild(childsel);
 		$("check_mac").innerHTML="<#LANHostConfig_ManualDHCPMacaddr_itemdesc#>";		
-	}	
+		return false;
+	}else if(flag == 2){
+		var childsel=document.createElement("div");
+		childsel.setAttribute("id","check_mac");
+		childsel.style.color="#FFCC00";
+		obj.parentNode.appendChild(childsel);
+		$("check_mac").innerHTML=Untranslated.illegal_MAC;
+		return false;
+	}else{
+		$("check_mac") ? $("check_mac").style.display="none" : true;
+		return true;
+	}
 }
 </script>
 </head>
@@ -184,7 +193,7 @@ function check_macaddr(obj,flag){ //control hint of input mac address
 			</span>
 		</th>
 	  <td class="QISformtd">
-		<input type="text" name="wan_hwaddr_x" onkeypress="return is_hwaddr(this,event);" onblur="check_macaddr(this,check_hwaddr_temp(this))" class="input_20_table" maxlength="17" value=""/>
+		<input type="text" name="wan_hwaddr_x" onkeypress="return is_hwaddr(this,event);" class="input_20_table" maxlength="17" value=""/>
 		&nbsp&nbsp&nbsp<input type="button" class="button_gen_long" onclick="showMAC();" value="<#BOP_isp_MACclone#>">		
 	  </td>
 	</tr>

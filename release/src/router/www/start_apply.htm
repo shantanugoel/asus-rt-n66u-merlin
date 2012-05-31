@@ -1,4 +1,4 @@
-<html>
+﻿<html>
 <head>
 <title></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -9,6 +9,8 @@
 <script type="text/javascript">
 var page_modified = 0;
 var restart_time = 0;
+var rc_support = "<% nvram_get("rc_support"); %>"; 
+var dsl_support = rc_support.search("dsl");
 
 var current_page = '<% get_parameter("current_page"); %>';
 var next_page = '<% get_parameter("next_page"); %>';
@@ -76,34 +78,39 @@ function initial(){
 			parent.parent.location.href = parent.parent.location.href;
 	}
 	else if(next_page.indexOf("QIS_") >= 0){
-		if(getflag.length > 0)
-			document.redirectForm.flag.value = getflag;
-
-		if(parent.$("hidden_frame")){
-			setTimeout("qis_delay_redirect('/qis/QIS_verify_detect.htm');", restart_time*1000);
+		if(dsl_support != -1){
+			setTimeout("delay_redirect('"+next_page+"');", restart_time*1000);
 		}
-		else{
-			if(getflag == "auto_way_vpn"){
-				parent.showLoading(restart_time);
-				setTimeout("delay_redirect('/qis/QIS_verify_detect.htm');", restart_time*1000);
-				return;
-			}
-			else if(getflag == "detect"){
-				parent.showLoading(restart_time);
-				setTimeout("delay_redirect('/qis/QIS_detect.htm');", restart_time*1000);
-				return;
-			}		
-			else if(getflag == "verify_detect"){
-				parent.showLoading(restart_time);
-				setTimeout("delay_redirect('/qis/QIS_verify_detect.htm');", restart_time*1000);
-				return;
+		else {
+			if(getflag.length > 0)
+				document.redirectForm.flag.value = getflag;
+	
+			if(parent.document.getElementById("hidden_frame")){
+				setTimeout("qis_delay_redirect('/qis/QIS_verify_detect.htm');", restart_time*1000);
 			}
 			else{
-				parent.showLoading(restart_time, "waiting");
-				if(parent.parent.isWLclient())
-					setTimeout("parent.parent.detectLANstatus('"+next_page+"', '"+getflag+"');", restart_time*1000);
-				else
-					setTimeout("top_delay_redirect('"+next_page+"');", restart_time*1000);
+				if(getflag == "auto_way_vpn"){
+					parent.showLoading(restart_time);
+					setTimeout("delay_redirect('/qis/QIS_verify_detect.htm');", restart_time*1000);
+					return;
+				}
+				else if(getflag == "detect"){
+					parent.showLoading(restart_time);
+					setTimeout("delay_redirect('/qis/QIS_detect.htm');", restart_time*1000);
+					return;
+				}		
+				else if(getflag == "verify_detect"){
+					parent.showLoading(restart_time);
+					setTimeout("delay_redirect('/qis/QIS_verify_detect.htm');", restart_time*1000);
+					return;
+				}
+				else{
+					parent.showLoading(restart_time, "waiting");
+					if(parent.parent.isWLclient())
+						setTimeout("parent.parent.detectLANstatus('"+next_page+"', '"+getflag+"');", restart_time*1000);
+					else
+						setTimeout("top_delay_redirect('"+next_page+"');", restart_time*1000);
+				}
 			}
 		}
 	}
@@ -114,15 +121,23 @@ function initial(){
 		parent.Webdav_status = (parent.Webdav_status == 1) ? 0 : 1;
 		parent.resultOfSwitchWebdavStatus();
 	}
-	else if(action_script.indexOf("ddns_hostname_check") >= 0){
+	else if(action_script.indexOf("aidisk_asusddns_register") >= 0){
 		setTimeout("parent.checkDDNSReturnCode();", 1000);
 	}
-	else if(action_script.indexOf("restart_ddns") >= 0) {
-                setTimeout("parent.parent.checkDDNSReturnCode();", 1000); 
-        }
-  else if(action_script.indexOf("start_webs_upgrade") >= 0) {
-                setTimeout("parent.showLoadingBar(restart_time);", 1000); 
-  }
+  else if(action_script.indexOf("adm_asusddns_register") >= 0) {
+  	setTimeout("parent.parent.checkDDNSReturnCode();", 1000);
+	}
+	else if(action_script.indexOf("start_webs_upgrade") >= 0) {
+		setTimeout("parent.showLoadingBar(restart_time);", 1000); 
+	}
+	else if(action_script == "restart_cloudsync"){
+		/* if multi-rule
+		setTimeout("parent.isonEdit=0;", restart_time*1000);
+		setTimeout("parent.document.getElementById('update_scan').style.display = 'none';", restart_time*1000);*/
+		/* if one rule */
+		parent.showLoading(restart_time, "waiting");
+		setTimeout("top_delay_redirect('"+current_page+"');", restart_time*1000); 
+	}
 	else if(page_modified == 1){
 		parent.showLoading(restart_time, "waiting");
 		if(current_page.length > 0){
@@ -131,13 +146,13 @@ function initial(){
 				setTimeout("top_delay_redirect('/');", restart_time*1000);
 			}
 			else if(current_page == "Advanced_OperationMode_Content.asp"){
-				parent.$('drword').innerHTML = "<#LAN_IP_changed_suggedtion1#>"+parent.document.form.lan_ipaddr.value+"<#LAN_IP_changed_suggedtion2#><br/>";
+				parent.document.getElementById('drword').innerHTML = "<#LAN_IP_changed_suggedtion1#>"+parent.document.form.lan_ipaddr.value+"<#LAN_IP_changed_suggedtion2#><br/>";
 				setTimeout("hideLoading()	",20000);
 				setTimeout("parent.dr_advise();",20000);
 				setTimeout("redirect()",35000);
 			}
 			else if(current_page == "Advanced_LAN_Content.asp"){
-				parent.$('drword').innerHTML = "<#LAN_IP_changed_suggedtion1#>"+parent.document.form.lan_ipaddr.value+"<#LAN_IP_changed_suggedtion2#><br/>";
+				parent.document.getElementById('drword').innerHTML = "<#LAN_IP_changed_suggedtion1#>"+parent.document.form.lan_ipaddr.value+"<#LAN_IP_changed_suggedtion2#><br/>";
 				setTimeout("hideLoading()	",20000);
 				setTimeout("parent.dr_advise();",20000);
 				setTimeout("redirect_qis()",35000);
@@ -145,15 +160,16 @@ function initial(){
 			else if(getflag == "nodetect"){
 				setTimeout("top_delay_redirect('"+current_page+"');", restart_time*1000);
 			}
-			else if(action_script == "restart_webdav"){
+			/*else if(action_script == "restart_webdav"){
 				setTimeout("top_delay_redirect('"+current_page+"');", restart_time*1000);
-			}
+			}*/
 			else{
 				setTimeout("parent.parent.detectLANstatus('"+current_page+"', '');", restart_time*1000);
 			}
 		}
 	}
 	else if(action_script == "reboot"){
+		parent.stopFlag = 1;
 		parent.showLoading(restart_time);
 		setTimeout("top_delay_redirect('"+next_page+"');", restart_time*1000);
 	}
@@ -168,8 +184,8 @@ function initial(){
 }
 
 function hideLoading(){
-	parent.$("loadingBlock").style.visibility = "hidden";
-  parent.$("Loading").style.width = "10px";
+	parent.document.getElementById("loadingBlock").style.visibility = "hidden";
+	//parent.htmlbodyforIE[0].style.overflow = "";	  //hidden the Y-scrollbar for preventing from user scroll it.
 }
 </script>
 </head>

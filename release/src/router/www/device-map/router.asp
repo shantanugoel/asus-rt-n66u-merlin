@@ -23,7 +23,16 @@ var $j = jQuery.noConflict();
 function initial(){
 	flash_button();
 
+	// modify wlX.1_ssid(SSID to end clients) under repeater mode
+	if(parent.sw_mode == 2 && '<% nvram_get("wlc_band"); %>' == '<% nvram_get("wl_unit"); %>')
+		document.form.wl_subunit.value = 1;
+	else
+		document.form.wl_subunit.value = -1;
+	
 	if(sw_mode == 2 && '<% nvram_get("wl_unit"); %>' == '<% nvram_get("wlc_band"); %>' && '<% nvram_get("wl_subunit"); %>' != '1'){
+		tabclickhandler('<% nvram_get("wl_unit"); %>');
+	}
+	else if(sw_mode == 2 && '<% nvram_get("wl_unit"); %>' != '<% nvram_get("wlc_band"); %>' && '<% nvram_get("wl_subunit"); %>' == '1'){
 		tabclickhandler('<% nvram_get("wl_unit"); %>');
 	}
 
@@ -32,30 +41,48 @@ function initial(){
 		$("t1").style.display = "";
 	}
 
-	/*if("<% nvram_get("wl_subunit"); %>" != "0" && "<% nvram_get("wl_subunit"); %>" != "-1"){
-		tabclickhandler("<% nvram_get("wl_unit"); %>");
-	}*/
-
 	$("t0").className = <% nvram_get("wl_unit"); %> ? "tab_NW" : "tabclick_NW";
 	$("t1").className = <% nvram_get("wl_unit"); %> ? "tabclick_NW" : "tab_NW";
 
 	if($("t1").className == "tabclick_NW" && 	parent.Rawifi_support != -1)	//no exist Rawifi
 		$("wl_txbf_tr").style.display = "";		//Viz Add 2011.12 for RT-N56U Ralink 			
 
-	document.form.wl_ssid.value = decodeURIComponent(document.form.wl_ssid_org.value);
-	document.form.wl_wpa_psk.value = decodeURIComponent(document.form.wl_wpa_psk_org.value);
-	document.form.wl_key1.value = decodeURIComponent(document.form.wl_key1_org.value);
-	document.form.wl_key2.value = decodeURIComponent(document.form.wl_key2_org.value);
-	document.form.wl_key3.value = decodeURIComponent(document.form.wl_key3_org.value);
-	document.form.wl_key4.value = decodeURIComponent(document.form.wl_key4_org.value);
+	document.form.wl_ssid.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl_ssid"); %>');
+	document.form.wl_wpa_psk.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl_wpa_psk"); %>');
+	document.form.wl_key1.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl_key1"); %>');
+	document.form.wl_key2.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl_key2"); %>');
+	document.form.wl_key3.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl_key3"); %>');
+	document.form.wl_key4.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl_key4"); %>');
 
 	if(document.form.wl_wpa_psk.value.length <= 0)
-		document.form.wl_wpa_psk.value = "Please type Password";
+		document.form.wl_wpa_psk.value = parent.Untranslated.wireless_psk_fillin;
+	
+	if(sw_mode == 2){				
+			//remove Crypto: WPA & RADIUS
+			for(i=document.form.wl_auth_mode_x.length-1;i>=0;i--){
+					var authmode_opt = document.form.wl_auth_mode_x.options[i].value.toString();
+					if(authmode_opt.match('wpa') || authmode_opt.match('radius'))
+      					document.form.wl_auth_mode_x.remove(i);      									
+  		}  		  		
+  }
 	
 	wl_auth_mode_change(1);
 	show_LAN_info();
 	domore_create();
 	parent.show_middle_status(document.form.wl_auth_mode_x.value, document.form.wl_wpa_mode.value, parseInt(document.form.wl_wep_x.value));
+}
+
+function tabclickhandler(wl_unit){
+	if(parent.sw_mode == 2 && '<% nvram_get("wlc_band"); %>' == wl_unit)
+		document.form.wl_subunit.value = 1;
+	else
+		document.form.wl_subunit.value = -1;
+
+	document.form.wl_unit.value = wl_unit;
+	document.form.current_page.value = "device-map/router.asp";
+	FormActions("/apply.cgi", "change_wl_unit", "", "");
+	document.form.target = "";
+	document.form.submit();
 }
 
 function disableAdvFn(){
@@ -456,7 +483,7 @@ function PBC_normal(){
 function submitForm(){
 	var auth_mode = document.form.wl_auth_mode_x.value;
 
-	if(document.form.wl_wpa_psk.value == "Please type Password")
+	if(document.form.wl_wpa_psk.value == parent.Untranslated.wireless_psk_fillin)
 		document.form.wl_wpa_psk.value = "";
 		
 	if(!validate_string_ssid(document.form.wl_ssid))
@@ -525,19 +552,6 @@ function nmode_limitation2(){ //Lock add 2009.11.05 for TKIP limitation in n mod
 	document.form.wl_wpa_psk.focus();
 	document.form.wl_wpa_psk.select();
 }
-
-function tabclickhandler(wl_unit){
-	if(parent.sw_mode == 2 && '<% nvram_get("wlc_band"); %>' == wl_unit)
-		document.form.wl_subunit.value = 1;
-	else
-		document.form.wl_subunit.value = -1;
-	
-	document.form.wl_unit.value = wl_unit;
-	document.form.current_page.value = "device-map/router.asp";
-	FormActions("/apply.cgi", "change_wl_unit", "", "");
-	document.form.target = "";
-	document.form.submit();
-}
 </script>
 </head>
 
@@ -579,10 +593,16 @@ function tabclickhandler(wl_unit){
 <tr>
 	<td>		
 		<table width="100px" border="0" align="left" style="margin-left:8px;" cellpadding="0" cellspacing="0">
-	<!--td align="center" class="r1">2.4GHz</td-->
-  		<td ><div id="t0" class="tabclick_NW" align="center" style="display:none; margin-right:2px; width:90px;" onclick="tabclickhandler(0)"><span id="span1" ><a href="#">2.4GHz</a></span></div></td>
-  		<td ><div id="t1" class="tab_NW" align="center" style="display:none; margin-right:2px; width:90px;" onclick="tabclickhandler(1)"><span id="span1" ><a href="#">5GHz</a></span></div></td>
-  	<!--td align="center" class="r2"><a href="router.asp">5GHz</a></td-->
+  		<td>
+				<div id="t0" class="tabclick_NW" align="center" style="font-weight: bolder;display:none; margin-right:2px; width:90px;" onclick="tabclickhandler(0)">
+					<span id="span1" style="cursor:pointer;font-weight: bolder;">2.4GHz</span>
+				</div>
+			</td>
+  		<td>
+				<div id="t1" class="tab_NW" align="center" style="font-weight: bolder;display:none; margin-right:2px; width:90px;" onclick="tabclickhandler(1)">
+					<span id="span1" style="cursor:pointer;font-weight: bolder;">5GHz</span>
+				</div>
+			</td>
 		</table>
 	</td>
 </tr>

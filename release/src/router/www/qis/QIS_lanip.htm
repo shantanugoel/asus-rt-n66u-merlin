@@ -19,7 +19,7 @@
 </style>
 <script type="text/JavaScript">
 function QKInternet_load_body(){
-	parent.document.title = "ASUS Wireless Router <#Web_Title#> - <#QKSet_ISP_head#>";
+	parent.document.title = "<#Web_Title#> - <#QKSet_ISP_head#>";
 	parent.set_step("t2");
 	display_lan_dns(<% nvram_get("lan_dnsenable_x"); %>);
 	change_ip_setting('<% nvram_get("lan_proto"); %>');
@@ -207,8 +207,7 @@ function back_to_Adv(){
 
 		<table id="tblsetting_1" class="QISform" width="400" border=0 align="center" cellpadding="5" cellspacing="0" style="padding-left:100px;">
 			<tr>
-			<!--th width="50%">Get the LAN IP of <% nvram_get("productid"); %> automatically?</th-->
-			<th width="50%"><#LANHostConfig_x_LANDHCPClient_itemname#></th>
+			<th width="50%"><#LANHostConfig_x_LAN_DHCP_itemname#></th>
 			<td>
 				<input type="radio" name="lan_proto_radio" class="input" onclick="change_ip_setting('dhcp')" value="dhcp"><#checkbox_Yes#>
 				<input type="radio" name="lan_proto_radio" class="input" onclick="change_ip_setting('static')" value="static"><#checkbox_No#>

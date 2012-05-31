@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#errormessage_title#></title>                          
+<title><#Web_Title#> - <#errormessage_title#></title>                          
 <link rel="stylesheet" type="text/css" href="index_style.css">
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="other.css">
@@ -21,7 +21,7 @@ var reboot_time = 5;
 var wanstate = -1;
 var wansbstate = -1;
 var wanauxstate = -1;
-var _wlc_ssid = '<% nvram_get("wlc_ssid"); %>';
+var _wlc_ssid = decodeURIComponent('<% nvram_char_to_ascii("WLANConfig11b", "wlc_ssid"); %>');
 
 // get the wan state at the first time.
 <% wanstate(); %>
@@ -118,12 +118,12 @@ function initial(){
 	}
 	else if(casenum == 8){
 		new_lan_ip = get_new_lanip();
-		showtext($("#failReason1")[0], "<B>["+_wlc_ssid+"]</B> <#APSurvey_action_ConnectingStatus0#>");
+		showtext($("#failReason1")[0], "<#APSurvey_action_ConnectingStatus0#>");		
 		showtext($("#suggestion_title")[0], "<#web_redirect_suggestion0#>:");
 		html_code += "<ul>\n";
 		html_code += "<li><#APSurvey_action_search_again_hint2#>";
 		html_code += "<span style=\"text-align: right;\">\n";
-		html_code += "<input type=\"button\" class=\"button_gen\" width=\"72\" onclick=\"javascript:location.href=\'QIS_wizard.htm?flag=sitesurvey\';\" value=\"Rescan\">";
+		html_code += "<input type=\"button\" class=\"button_gen\" width=\"72\" onclick=\"javascript:location.href=\'http://www.asusnetwork.net/QIS_wizard.htm?flag=sitesurvey\';\" value=\"Rescan\">";
 		html_code += "</span>\n";
 		html_code += "</li>\n";
 
@@ -347,7 +347,7 @@ function hideLoadingBar(){
 <table width="500" border="0" align="center" cellspacing="0" class="erTable">
 <thead>
   <tr>
-    <td height="52" align="left" valign="top"><span class="modelName">ASUS <#Web_Title#></span></td>
+    <td height="52" align="left" valign="top"><span class="modelName"><#Web_Title2#></span></td>
   </tr>
 </thead>
   <tr>

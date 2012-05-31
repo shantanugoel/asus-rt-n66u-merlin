@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_1_3#></title>
+<title><#Web_Title#> - <#menu5_1_3#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <style>
@@ -110,7 +110,7 @@ function show_wl_wdslist(){
 	else{
 		for(var i = 1; i < wl_wdslist_row.length; i++){
 			code +='<tr id="row'+i+'">';
-			code +='<td width="40%">'+ wl_wdslist_row[i] +'</td>';	
+			code +='<td width="80%">'+ wl_wdslist_row[i] +'</td>';	
 			code +='<td width="20%"><input type="button" class=\"remove_btn\" onclick=\"deleteRow(this);\" value=\"\"/></td></tr>';
 		}
 	}
@@ -145,8 +145,13 @@ function addRow(obj, upper){
 	if(obj.value==""){
 		alert("<#JS_fieldblank#>");
 		obj.focus();
-		obj.select();			
-	}else if(check_hwaddr_temp(obj)){
+		obj.select();
+		return false;
+	}else if (!check_macaddr(obj, check_hwaddr_flag(obj))){
+		obj.focus();
+		obj.select();		
+		return false;
+	}
 		
 		//Viz check same rule
 		for(i=0; i<rule_num; i++){
@@ -162,8 +167,7 @@ function addRow(obj, upper){
 		wl_wdslist_array += obj.value;
 		obj.value = "";
 		show_wl_wdslist();
-	}else
-		return false;			
+	
 }
 
 function applyRule(){
@@ -244,7 +248,7 @@ function showLANIPList(){
 				show_name = wds_aplist[i][0];
 			
 			if(wds_aplist[i][1]){
-				code += '<a href="#"><div onmouseover="over_var=1;" onmouseout="over_var=0;" onclick="setClientIP('+i+');"><strong>'+show_name+'</strong>';
+				code += '<a><div onmouseover="over_var=1;" onmouseout="over_var=0;" onclick="setClientIP('+i+');"><strong>'+show_name+'</strong>';
 				if(show_name && show_name.length > 0)
 					code += '( '+wds_aplist[i][1]+')';
 				else
@@ -281,17 +285,28 @@ function hideClients_Block(){
 	document.getElementById('WDSAPList').style.display='none';
 	isMenuopen = 0;
 }
+
 function check_macaddr(obj,flag){ //control hint of input mac address
-	if (flag){	
-		$("check_mac") ? $("check_mac").style.display="none" : true;
-	}
-	else{
+	if(flag == 1){
 		var childsel=document.createElement("div");
 		childsel.setAttribute("id","check_mac");
 		childsel.style.color="#FFCC00";
 		obj.parentNode.appendChild(childsel);
-		$("check_mac").innerHTML="<br><br><#LANHostConfig_ManualDHCPMacaddr_itemdesc#>";		
-	}	
+		$("check_mac").innerHTML="<br><br><#LANHostConfig_ManualDHCPMacaddr_itemdesc#>";
+		$("check_mac").style.display = "";
+		return false;	
+	}else if(flag == 2){
+		var childsel=document.createElement("div");
+		childsel.setAttribute("id","check_mac");
+		childsel.style.color="#FFCC00";
+		obj.parentNode.appendChild(childsel);
+		$("check_mac").innerHTML="<br><br>"+Untranslated.illegal_MAC;
+		$("check_mac").style.display = "";
+		return false;			
+	}else{
+		$("check_mac") ? $("check_mac").style.display="none" : true;
+		return true;
+	} 	
 }
 /*---------- Site Survey End -----------------*/
 </script>
@@ -435,14 +450,14 @@ function check_macaddr(obj,flag){ //control hint of input mac address
 			  </thead>		
 
           		<tr>
-            		<th width="40%"><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,10);">
+            		<th width="80%"><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,10);">
 								 <#WLANConfig11b_RBRList_groupitemdesc#>
 								</th>
 								<th class="edit_table" width="20%">Edit</th>
           		</tr>
           		<tr>
-            		<td width="40%">
-              		<input type="text" style="margin-left:180px;float:left;" maxlength="17" class="input_macaddr_table" name="wl_wdslist_0" onKeyPress="return is_hwaddr(this,event)" onblur="check_macaddr(this,check_hwaddr_temp(this))">						
+            		<td width="80%">
+              		<input type="text" style="margin-left:180px;float:left;" maxlength="17" class="input_macaddr_table" name="wl_wdslist_0" onKeyPress="return is_hwaddr(this,event)">
 						<img style="float:left;" id="pull_arrow" height="14px;" src="/images/arrow-down.gif" onclick="pullLANIPList(this);" title="Select the Access Point" onmouseover="over_var=1;" onmouseout="over_var=0;">			
 						<div id="WDSAPList" class="WDSAPList"></div>							
               	</td>

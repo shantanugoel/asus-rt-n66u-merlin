@@ -30,81 +30,276 @@ span{
 
 var auth_mode2 = '<% nvram_get("wl0_auth_mode_x"); %>';
 var wep_x2 = '<% nvram_get("wl0_wep_x"); %>';
+var key_x2 = '<% nvram_get("wl0_key"); %>';
 var wpa_mode2 = '<% nvram_get("wl0_wpa_mode"); %>';
 var auth_mode = '<% nvram_get("wl1_auth_mode_x"); %>';
 var wep_x = '<% nvram_get("wl1_wep_x"); %>';
+var key_x = '<% nvram_get("wl1_key"); %>';
 var wpa_mode = '<% nvram_get("wl1_wpa_mode"); %>';
 var reIP = '<% nvram_get("lan_ipaddr"); %>';
 var band5g_support = "<% nvram_get("rc_support"); %>".search("5G");
 
+wlc_state = '<% nvram_get("wlc_state"); %>';
+wlc_sbstate = '<% nvram_get("wlc_sbstate"); %>';
+wlc_scan_state = '<% nvram_get("wlc_scan_state"); %>';
+_wlc_ssid = '<% nvram_char_to_ascii("", "wlc_ssid"); %>';
+_sw_mode = '<% nvram_get("sw_mode"); %>';
+
 function QKfinish_load_body(){
-	parent.document.title = "ASUS Wireless Router <#Web_Title#> - <#QKSet_all_title#>";
+	parent.document.title = "<#Web_Title#> - <#QKSet_all_title#>";
 	parent.set_step("t3");
 	parent.$("LoadingBar").style.visibility = 'hidden';
 
-	if('<% nvram_get("sw_mode"); %>' == '2'){
-		if('<% nvram_get("wlc_band"); %>' == 0){
-			auth_mode2 = '<% nvram_get("wl0.1_auth_mode_x"); %>';
-			wep_x2 = '<% nvram_get("wl0.1_wep_x"); %>';
-			document.form.wl0_ssid2.value = '<% nvram_char_to_ascii("WLANConfig11b", "wl0.1_ssid"); %>';
-			document.form.wl0_wpa_psk.value = '<% nvram_char_to_ascii("WLANConfig11b", "wl0.1_wpa_psk"); %>';
-		}
-		else{
-			auth_mode2 = '<% nvram_get("wl1.1_auth_mode_x"); %>';
-			wep_x2 = '<% nvram_get("wl1.1_wep_x"); %>';
-			document.form.wl1_ssid2.value = '<% nvram_char_to_ascii("WLANConfig11b", "wl1.1_ssid"); %>';
-			document.form.wl1_wpa_psk.value = '<% nvram_char_to_ascii("WLANConfig11b", "wl1.1_wpa_psk"); %>';
-		}
-	}
-
 	// Wireless Security
 	$("#ssid_2_item")[0].innerHTML = "<#QIS_finish_wireless_item1#>";
-	$("#ssid_2")[0].innerHTML = decodeURIComponent(document.form.wl0_ssid2.value);
+	$("#ssid_2")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl0_ssid"); %>');
 	$("#ssid_5_item")[0].innerHTML = "<#QIS_finish_wireless_item1#>";
-	$("#ssid_5")[0].innerHTML = decodeURIComponent(document.form.wl1_ssid2.value);
+	$("#ssid_5")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl1_ssid"); %>');
 	$("#security_item2")[0].innerHTML = "<#QIS_finish_wireless_item2#>";
 	$("#security_item5")[0].innerHTML = "<#QIS_finish_wireless_item2#>";
 
-	if(auth_mode2 == "open" && wep_x2 == "0"){
-		$("#security2")[0].innerHTML = "Open System";
-		$("#key2_block")[0].style.display = "none";
-	}
-	else if(auth_mode2 == "pskpsk2"){
-		$("#security2")[0].innerHTML = "WPA-Auto-Personal - TKIP + AES";
-		$("#key2_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
-		$("#key2")[0].innerHTML = decodeURIComponent(document.form.wl0_wpa_psk.value);
-	}
-	else{
-		$("#freqtitle2")[0].style.display = "none";
-		$("#ssid2_block")[0].style.display = "none";
-		$("#key2_block")[0].style.display = "none";
-		$("#security2_block")[0].style.display = "none";
-	}
+		if(auth_mode2 == "open" && wep_x2 == "0"){
+			$("#security2")[0].innerHTML = "Open System";
+			$("#key2_block")[0].style.display = "none";
+		}
+		else if(auth_mode2 == "open" && wep_x2 != "0"){
+			$("#security2")[0].innerHTML = "Open System";
+			$("#key2_item")[0].innerHTML = "<#WLANConfig11b_WEPKey_itemname#>";
+			if(key_x2 ==1)
+				$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0_key1"); %>');
+			else if(key_x2 ==2)	
+				$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0_key2"); %>');
+			else if(key_x2 ==3)
+				$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0_key3"); %>');
+			else if(key_x2 ==4)		
+				$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0_key4"); %>');
+		}
+		else if(auth_mode2 == "shared"){
+			$("#security2")[0].innerHTML = "Shared Key";
+			$("#key2_item")[0].innerHTML = "<#WLANConfig11b_WEPKey_itemname#>";
+			if(key_x2 ==1)
+				$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0_key1"); %>');
+			else if(key_x2 ==2)	
+				$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0_key2"); %>');
+			else if(key_x2 ==3)
+				$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0_key3"); %>');
+			else if(key_x2 ==4)		
+				$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0_key4"); %>');		
+		}
+		else if(auth_mode2 == "psk"){
+			$("#security2")[0].innerHTML = "WPA-Personal - TKIP";
+			$("#key2_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
+			$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl0_wpa_psk"); %>');		
+		}
+		else if(auth_mode2 == "psk2"){
+			$("#security2")[0].innerHTML = "WPA2-Personal - AES";
+			$("#key2_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
+			$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl0_wpa_psk"); %>');		
+		}	
+		else if(auth_mode2 == "pskpsk2"){
+			$("#security2")[0].innerHTML = "WPA-Auto-Personal - TKIP + AES";
+			$("#key2_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
+			$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl0_wpa_psk"); %>');
+		}
+		else{
+			$("#freqtitle2")[0].style.display = "none";
+			$("#ssid2_block")[0].style.display = "none";
+			$("#key2_block")[0].style.display = "none";
+			$("#security2_block")[0].style.display = "none";
+		}
 
-	if(band5g_support == -1){
-		$("#desc2g")[0].style.display = "none";
-		$("#freqtitle5")[0].style.display = "none";
-		$("#ssid5_block")[0].style.display = "none";
-		$("#key5_block")[0].style.display = "none";
-		$("#security5_block")[0].style.display = "none";
-	}
-	else{
-		if(auth_mode == "open" && wep_x == "0"){
-			$("#security5")[0].innerHTML = "Open System";
-			$("#key5_block")[0].style.display = "none";
-		}
-		else if(auth_mode == "pskpsk2"){
-			$("#security5")[0].innerHTML = "WPA-Auto-Personal - TKIP + AES";
-			$("#key5_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
-			$("#key5")[0].innerHTML = decodeURIComponent(document.form.wl1_wpa_psk.value);
-		}
-		else{	
+		if(band5g_support == -1){
+			$("#desc2g")[0].style.display = "none";
 			$("#freqtitle5")[0].style.display = "none";
 			$("#ssid5_block")[0].style.display = "none";
 			$("#key5_block")[0].style.display = "none";
 			$("#security5_block")[0].style.display = "none";
 		}
-	}
+		else{
+			if(auth_mode == "open" && wep_x == "0"){
+				$("#security5")[0].innerHTML = "Open System";
+				$("#key5_block")[0].style.display = "none";
+			}
+			else if(auth_mode == "open" && wep_x != "0"){
+				$("#security5")[0].innerHTML = "Open System";
+				$("#key5_item")[0].innerHTML = "<#WLANConfig11b_WEPKey_itemname#>";
+				if(key_x ==1)
+					$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1_key1"); %>');
+				else if(key_x ==2)	
+					$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1_key2"); %>');
+				else if(key_x ==3)
+					$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1_key3"); %>');
+				else if(key_x ==4)		
+					$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1_key4"); %>');
+			}
+			else if(auth_mode == "shared"){
+				$("#security5")[0].innerHTML = "Shared Key";
+				$("#key5_item")[0].innerHTML = "<#WLANConfig11b_WEPKey_itemname#>";
+				if(key_x ==1)
+					$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1_key1"); %>');
+				else if(key_x ==2)	
+					$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1_key2"); %>');
+				else if(key_x ==3)
+					$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1_key3"); %>');
+				else if(key_x ==4)		
+					$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1_key4"); %>');		
+			}
+			else if(auth_mode == "psk"){
+				$("#security5")[0].innerHTML = "WPA-Personal - TKIP";
+				$("#key5_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
+				$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl1_wpa_psk"); %>');		
+			}
+			else if(auth_mode == "psk2"){
+				$("#security5")[0].innerHTML = "WPA2-Personal - AES";
+				$("#key5_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
+				$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl1_wpa_psk"); %>');		
+			}
+			else if(auth_mode == "pskpsk2"){
+				$("#security5")[0].innerHTML = "WPA-Auto-Personal - TKIP + AES";
+				$("#key5_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
+				$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl1_wpa_psk"); %>');
+			}
+			else{	
+				$("#freqtitle5")[0].style.display = "none";
+				$("#ssid5_block")[0].style.display = "none";
+				$("#key5_block")[0].style.display = "none";
+				$("#security5_block")[0].style.display = "none";
+			}
+		}
+
+	
+	//Repeater mode wireless LAN 2.4G/5G
+	if('<% nvram_get("sw_mode"); %>' == "2"){
+		
+		if('<% nvram_get("wlc_band"); %>' == 0){
+			auth_mode2 = '<% nvram_get("wl0.1_auth_mode_x"); %>';
+			wep_x2 = '<% nvram_get("wl0.1_wep_x"); %>';
+			key_x2 = '<% nvram_get("wl0.1_key"); %>';
+			document.form.wl0_ssid2.value = decodeURIComponent('<% nvram_char_to_ascii("WLANConfig11b", "wl0.1_ssid"); %>');
+			document.form.wl0_wpa_psk.value = decodeURIComponent('<% nvram_char_to_ascii("WLANConfig11b", "wl0.1_wpa_psk"); %>');
+			$("#ssid_2")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl0.1_ssid"); %>');
+			
+			if(auth_mode2 == "open" && wep_x2 == "0"){
+					$("#security2")[0].innerHTML = "Open System";
+					$("#key2_block")[0].style.display = "none";
+			}
+			else if(auth_mode2 == "open" && wep_x2 != "0"){
+					$("#security2")[0].innerHTML = "Open System";
+					$("#key2_item")[0].innerHTML = "<#WLANConfig11b_WEPKey_itemname#>";
+					if(key_x2 ==1)
+							$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0.1_key1"); %>');
+					else if(key_x2 ==2)	
+							$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0.1_key2"); %>');
+					else if(key_x2 ==3)
+							$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0.1_key3"); %>');
+					else if(key_x2 ==4)		
+							$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0.1_key4"); %>');
+			}
+			else if(auth_mode2 == "shared"){
+					$("#security2")[0].innerHTML = "Shared Key";
+					$("#key2_item")[0].innerHTML = "<#WLANConfig11b_WEPKey_itemname#>";
+					if(key_x2 ==1)
+							$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0.1_key1"); %>');
+					else if(key_x2 ==2)	
+							$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0.1_key2"); %>');
+					else if(key_x2 ==3)
+							$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0.1_key3"); %>');
+					else if(key_x2 ==4)		
+							$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_get("wl0.1_key4"); %>');		
+			}
+			else if(auth_mode2 == "psk"){
+					$("#security2")[0].innerHTML = "WPA-Personal - TKIP";
+					$("#key2_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
+					$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl0.1_wpa_psk"); %>');
+			}
+			else if(auth_mode2 == "psk2"){
+					$("#security2")[0].innerHTML = "WPA2-Personal - AES";
+					$("#key2_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
+					$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl0.1_wpa_psk"); %>');
+			}	
+			else if(auth_mode2 == "pskpsk2"){
+					$("#security2")[0].innerHTML = "WPA-Auto-Personal - TKIP + AES";
+					$("#key2_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
+					$("#key2")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl0.1_wpa_psk"); %>');
+			}
+			else{
+					$("#freqtitle2")[0].style.display = "none";
+					$("#ssid2_block")[0].style.display = "none";
+					$("#key2_block")[0].style.display = "none";
+					$("#security2_block")[0].style.display = "none";
+			}
+			
+		}
+		
+		if(band5g_support == -1){
+				$("#desc2g")[0].style.display = "none";
+				$("#freqtitle5")[0].style.display = "none";
+				$("#ssid5_block")[0].style.display = "none";
+				$("#key5_block")[0].style.display = "none";
+				$("#security5_block")[0].style.display = "none";
+		}
+		else{		
+				if('<% nvram_get("wlc_band"); %>' == 1){			
+						auth_mode = '<% nvram_get("wl1.1_auth_mode_x"); %>';
+						wep_x = '<% nvram_get("wl1.1_wep_x"); %>';
+						key_x = '<% nvram_get("wl1.1_key"); %>';			
+						document.form.wl1_ssid2.value = decodeURIComponent('<% nvram_char_to_ascii("WLANConfig11b", "wl1.1_ssid"); %>');
+						document.form.wl1_wpa_psk.value = decodeURIComponent('<% nvram_char_to_ascii("WLANConfig11b", "wl1.1_wpa_psk"); %>');
+						$("#ssid_5")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl1.1_ssid"); %>');
+			
+						if(auth_mode == "open" && wep_x == "0"){
+								$("#security5")[0].innerHTML = "Open System";
+								$("#key5_block")[0].style.display = "none";
+						}
+						else if(auth_mode == "open" && wep_x != "0"){
+								$("#security5")[0].innerHTML = "Open System";
+								$("#key5_item")[0].innerHTML = "<#WLANConfig11b_WEPKey_itemname#>";
+								if(key_x ==1)
+										$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1.1_key1"); %>');
+								else if(key_x ==2)	
+										$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1_key2"); %>');
+								else if(key_x ==3)
+										$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1_key3"); %>');
+								else if(key_x ==4)		
+										$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1_key4"); %>');
+						}
+						else if(auth_mode == "shared"){
+								$("#security5")[0].innerHTML = "Shared Key";
+								$("#key5_item")[0].innerHTML = "<#WLANConfig11b_WEPKey_itemname#>";
+								if(key_x ==1)
+										$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1.1_key1"); %>');
+								else if(key_x ==2)	
+										$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1.1_key2"); %>');
+								else if(key_x ==3)
+										$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1.1_key3"); %>');
+								else if(key_x ==4)		
+										$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_get("wl1.1_key4"); %>');		
+						}
+						else if(auth_mode == "psk"){
+								$("#security5")[0].innerHTML = "WPA-Personal - TKIP";
+								$("#key5_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
+								$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl1.1_wpa_psk"); %>');
+						}
+						else if(auth_mode == "psk2"){
+								$("#security5")[0].innerHTML = "WPA2-Personal - AES";
+								$("#key5_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
+								$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl1.1_wpa_psk"); %>');
+						}
+						else if(auth_mode == "pskpsk2"){
+								$("#security5")[0].innerHTML = "WPA-Auto-Personal - TKIP + AES";
+								$("#key5_item")[0].innerHTML = "<#QIS_finish_wireless_item3#>";
+								$("#key5")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wl1.1_wpa_psk"); %>');
+						}
+						else{	
+								$("#freqtitle5")[0].style.display = "none";
+								$("#ssid5_block")[0].style.display = "none";
+								$("#key5_block")[0].style.display = "none";
+								$("#security5_block")[0].style.display = "none";
+						}
+				}
+		}	
+	}		
+	
 
 	// Connection Status
 	$("#mac_item")[0].innerHTML = "MAC";
@@ -130,14 +325,27 @@ function QKfinish_load_body(){
 		
 	$("#wanip_item")[0].innerHTML = "WAN IP";
 	
-	if('<% nvram_get("sw_mode"); %>' == '2'){
-		$("#wanip")[0].innerHTML = reIP;
+		//Repeater mode P-AP
+	if('<% nvram_get("sw_mode"); %>' == "2"){
+		$("#wlcssid")[0].innerHTML = decodeURIComponent('<% nvram_char_to_ascii("", "wlc_ssid"); %>');
+
+		if(wlc_state == 2){
+			$("#wlcstate")[0].innerHTML = "<#APSurvey_action_ConnectingStatus24#>";
+		}
+		else{
+			$("#wlcstate")[0].innerHTML = "<span style='color:#FC0;text-decoration:underline;cursor:pointer;' onclick=\"javascript:parent.location.href=\'http://www.asusnetwork.net/QIS_wizard.htm?flag=sitesurvey\';\"><#APSurvey_action_ConnectingStatus0#></span>";
+		}
+
+		$("#wlcip")[0].innerHTML = reIP;
+
 		$(".reItem").css("display", "none");
+		$(".wlcItem").css("display", "");
 	}
 	else{
 		$("#wanip")[0].innerHTML = wanlink_ipaddr();
 		$("#lanip_item")[0].innerHTML = "LAN IP";
 		$("#lanip")[0].innerHTML = reIP;
+		$(".wlcItem").css("display", "none");
 	}
 
 	// System account
@@ -222,6 +430,7 @@ function redirect_page(redirect_flag){
 <p class="QISGeneralFont" style="margin-top:-5px;"><#QIS_finish_Desc#></p>
 <br/>
 <table id="tblsetting_1" class="QISform_finish" width="400" border=0 align="center" cellpadding="5" cellspacing="0" style="margin-top:-10px;">
+	<!-- WL 2.4GHz -->
 	<tr id="freqtitle2">
 		<td align="left" colspan="4" style="color:#5AD;font-size:16px; border-bottom:1px dashed #AAA;"><#menu5_1#> <span style="color:#5AD;" id="desc2g">(2.4GHz)</span></td>	
 	</tr>
@@ -244,6 +453,8 @@ function redirect_page(redirect_flag){
 	  </td>
 	</tr>
 
+
+	<!-- WL 5GHz -->
 	<tr id="freqtitle5">
 		<td align="left" colspan="4" style="color:#5AD;font-size:16px; border-bottom:1px dashed #AAA;"><#menu5_1#> <span style="color:#5AD;">(5GHz)</span></td>	
 	</tr>
@@ -266,7 +477,8 @@ function redirect_page(redirect_flag){
 	  </td>
 	</tr>
 
-	<tr>
+	<!-- WAN -->
+	<tr class="reItem">
 		<td align="left" colspan="4" style="color:#5AD;font-size:16px; border-bottom:1px dashed #AAA;">WAN</td>	
 	</tr>
 	<tr class="reItem">
@@ -275,13 +487,14 @@ function redirect_page(redirect_flag){
 			<span id="wantype"></span>
 	  </td>
 	</tr>
-	<tr>
+	<tr class="reItem">
 	  <th width="180"><span id="wanip_item"></span></th>
 	  <td class="QISformtd">
 			<span id="wanip"></span>
 	  </td>
 	</tr>
 
+	<!-- LAN -->
 	<tr class="reItem">
 		<td align="left" colspan="4" style="color:#5AD;font-size:16px; border-bottom:1px dashed #AAA;">LAN</td>	
 	</tr>
@@ -291,6 +504,7 @@ function redirect_page(redirect_flag){
 			<span id="lanip"></span>
 	  </td>
 	</tr>
+
 	<tr class="reItem">
 	  <th width="180"><span id="mac_item"></span></th>
 	  <td class="QISformtd">
@@ -310,6 +524,32 @@ function redirect_page(redirect_flag){
 			<span id="password"></span>
 	  </td>
 	</tr>
+
+	<!-- WLC -->
+	<tr class="wlcItem">
+		<td align="left" colspan="4" style="color:#5AD;font-size:16px; border-bottom:1px dashed #AAA;"><#OP_RE_item#></td>	
+	</tr>
+	<tr class="wlcItem">
+	  <th width="180"><span id="wlcssid_item"><#Wireless_name#>(Remote)</span></th>
+	  <td class="QISformtd">
+			<span id="wlcssid"></span>
+	  </td>
+	</tr>
+
+	<tr class="wlcItem">
+	  <th width="180"><span id="wlcstate_item"><#statusTitle_AP#></span></th>
+	  <td class="QISformtd">
+			<span id="wlcstate"></span>
+	  </td>
+	</tr>
+
+	<tr class="wlcItem">
+	  <th width="180"><span id="wlcip_item"><#QIS_internet_success_item1#></span></th>
+	  <td class="QISformtd">
+			<span id="wlcip"></span>
+	  </td>
+	</tr>
+
 </table>
 	
 <div class="apply_gen" style="margin-top:5px">

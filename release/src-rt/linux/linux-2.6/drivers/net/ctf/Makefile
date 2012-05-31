@@ -18,7 +18,7 @@
 # $Id: Makefile,v 1.1 2009-10-27 01:27:44 Exp $
 #
 
-CTFSRC := ../../../../../router/ctf
+CTFSRC := ../../../../../../$(SRCBASEDIR)/ctf
 
 CTFOBJS := $(CTFSRC)/hndctf.o $(CTFSRC)/hndctf_linux.o
 

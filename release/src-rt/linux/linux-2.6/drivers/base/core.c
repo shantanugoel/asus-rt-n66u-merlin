@@ -1052,8 +1052,8 @@ EXPORT_SYMBOL_GPL(device_unregister);
 EXPORT_SYMBOL_GPL(get_device);
 EXPORT_SYMBOL_GPL(put_device);
 
-EXPORT_SYMBOL_GPL(device_create_file);
-EXPORT_SYMBOL_GPL(device_remove_file);
+EXPORT_SYMBOL_GPL_FUTURE(device_create_file);
+EXPORT_SYMBOL_GPL_FUTURE(device_remove_file);
 
 
 static void device_create_release(struct device *dev)

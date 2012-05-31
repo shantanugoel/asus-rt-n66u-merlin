@@ -410,7 +410,6 @@ static struct mtd_info *cfi_amdstd_setup(struct mtd_info *mtd)
 		unsigned long ernum, ersize;
 		ersize = ((cfi->cfiq->EraseRegionInfo[i] >> 8) & ~0xff) * cfi->interleave;
 		ernum = (cfi->cfiq->EraseRegionInfo[i] & 0xffff) + 1;
-
 		if (mtd->erasesize < ersize) {
 			mtd->erasesize = ersize;
 		}

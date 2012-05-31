@@ -313,7 +313,6 @@ CFLAGS          := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
                    -fno-strict-aliasing -fno-common
 AFLAGS          := -D__ASSEMBLY__
 
-
 # Broadcom source tree
 TOPDIR  := $(shell /bin/pwd)
 SRCBASE ?= $(TOPDIR)/../..
@@ -529,11 +528,9 @@ CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
 CFLAGS += $(call cc-option,-Wno-pointer-sign,)
 
 ifneq ($(CONFIG_BCM_CTF),)
-CFLAGS += -DHNDCTF
+CFLAGS += -DHNDCTF -DCTFPOOL -DCTFMAP
 ifneq ($(CONFIG_WL_USBAP),)
 CFLAGS += -DCTFPOOL_SPINLOCK
-else
-CFLAGS += -DCTFPOOL -DCTFMAP
 endif
 endif
 

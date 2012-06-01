@@ -397,7 +397,7 @@ function getCookie(c_name)
 													</select>										
 												</td> 
 											</tr-->
-											<tr>
+											</tr-->
 												<th>Spin duty cycle</th>
 												<td> 
 													<select name="fanctrl_dutycycle" class="input_option">
@@ -408,7 +408,7 @@ function getCookie(c_name)
 														<option class="content_input_fd" value="4" <% nvram_match("fanctrl_dutycycle", "4", "selected"); %>>80%</option>
 													</select>										
 												</td> 
-											</tr>
+											</tr-->
 										</table>
 										<div class="apply_gen">
 											<input class="button_gen" onclick="applyRule();" type="button" value="<#CTL_apply#>"/>

@@ -1,7 +1,7 @@
 include ../common.mak
 
 CFLAGS	= -Os -Wall $(EXTRACFLAGS) #-mips32
-CFLAGS	+= -I$(SRCBASE)/include -I$(TOP)/shared
+CFLAGS	+= -I$(SRCBASE)/include -I$(TOP)/shared #-DRTCONFIG_ISP_METER -DDEBUG
 LDFLAGS	=
 
 OBJS = rstats.o

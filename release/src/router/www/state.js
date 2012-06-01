@@ -368,9 +368,9 @@ function remove_url(){
 		tablink[3].splice(1, 1);	
 	}
 
-	if(cooler_support == -1){
-		remove_menu_item(7, "Advanced_PerformanceTuning_Content.asp");
-	}
+//	if(cooler_support == -1){
+//		remove_menu_item(7, "Advanced_PerformanceTuning_Content.asp");
+//	}
 
 	if(ParentalCtrl_support == -1){
 		if(sw_mode == 3){

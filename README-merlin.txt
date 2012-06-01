@@ -1,4 +1,4 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.108.7 (27-May-2012)
+Asus RT-N66U Modded Firmware - build 3.0.0.3.130.8 (XX-Jun-2012)
 ================================================================
 
 About
@@ -203,6 +203,20 @@ The "merlin" branch contains my modifications to the Asus firmware.
 
 History
 -------
+
+3.0.0.3.130.8:
+*** Reverting to factory defaults BEFORE and AFTER flashing
+this version is strongly recommended!  The newer Asus code base 
+seems to have changed quite a few settings, so you'll want to 
+not only start with the new default values, but also get rid 
+of removed settings.  Otherwise you will be wasting a 
+good amount of the limited nvram available! ***
+
+   - NEW: Rebased patches on 3.0.0.4.130 (RT-N53U sources).
+          Build 130 brings various code changes to IPv6.
+   - FIXED: Firmware/settings can now be uploaded over HTTPS
+            (bug fixed by Asus)
+
 
 3.0.0.3.108.7:
    - NEW: Added no-ip.com support to DDNS (patch submitted by Igor Pavlov)

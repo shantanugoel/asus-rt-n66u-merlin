@@ -65,7 +65,7 @@ endif
 ifeq ($(CONFIG_RALINK),y)
 KERNEL_BINARY=$(LINUXDIR)/vmlinux
 else
-KERNEL_BINARY=$(LINUXDIR)/arch/mips/brcm-board/bcm947xx/compressed/zImage
+KERNEL_BINARY=$(LINUXDIR)/arch/mips/brcm-boards/bcm947xx/compressed/zImage
 endif
 
 rt_ver:

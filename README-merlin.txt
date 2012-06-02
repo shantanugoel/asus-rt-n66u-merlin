@@ -21,7 +21,7 @@ The list of changes (so far):
 - Added SSHD (dropbear, configurable under Administration->Advanced->System)
 - Clicking on the MAC address of an unidentified client will do a lookup in
   the OUI database (ported from DD-WRT).
-- Enabled HTTPS access to web interface (with certain limitations)
+- Enabled HTTPS access to web interface
 - Start crond at boot time
 - Optionally turn the WPS button into a radio enable/disable switch
 - Optionally save traffic stats to disk (USB or JFFS partition)
@@ -107,11 +107,6 @@ I re-enabled HTTPS access in the firmware.  From the Administration->System
 page you can configure your router so it accepts connections on http, https 
 or both.  You can also change the https port to a different one 
 (default is 8443).
-
-There's currently an issue preventing you from flashing the FW or 
-restoring your settings from a saved file over https - you have 
-to use the regular http webui for now.  This is a bug in 
-Asus' original code that I have been unable to fix so far.
 
 
 * WPS button mode - toggle radio *

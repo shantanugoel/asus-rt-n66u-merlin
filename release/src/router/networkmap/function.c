@@ -1035,7 +1035,7 @@ int SendSMBReq(UCHAR *des_ip, MY_DEVICE_INFO *my_info)
         struct timeval tv1, tv2, tm;
         int error=-1, len;
         len = sizeof(int);
-        UCHAR securitymode;
+        UCHAR securitymode=0x00;
         UCHAR  WordCount;               // Count of parameter words
         USHORT ParameterWords[1024];    // The parameter words
         USHORT ByteCount;               // Count of bytes

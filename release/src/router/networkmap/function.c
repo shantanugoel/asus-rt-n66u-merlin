@@ -1672,9 +1672,9 @@ int FindAllApp(unsigned char *src_ip, P_CLIENT_DETAIL_INFO_TABLE p_client_detail
 		if(strcmp("",description.modelname)) {
 			if(!strcmp("Wireless Router", description.modelname)||//ASUS Router
 			   !strcmp("ADSL Router", description.modelname))
-				strcpy(p_client_detail_info_tab->device_name[p_client_detail_info_tab->detail_info_num], description.modelnumber);
+				strncpy(p_client_detail_info_tab->device_name[p_client_detail_info_tab->detail_info_num], description.modelnumber,15);
 			else
-				strcpy(p_client_detail_info_tab->device_name[p_client_detail_info_tab->detail_info_num], description.modelname);
+				strncpy(p_client_detail_info_tab->device_name[p_client_detail_info_tab->detail_info_num], description.modelname,15);
 		}
 		spinlock_unlock(SPINLOCK_Networkmap);
 	}

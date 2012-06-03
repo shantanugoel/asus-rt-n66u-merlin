@@ -204,13 +204,17 @@ History
 this version is strongly recommended!  The newer Asus code base 
 seems to have changed quite a few settings, so you'll want to 
 not only start with the new default values, but also get rid 
-of removed settings.  Otherwise you will be wasting a 
+of obsolete settings.  Otherwise you will be wasting a 
 good amount of the limited nvram available! ***
 
    - NEW: Rebased patches on 3.0.0.4.130 (RT-N53U sources).
-          Build 130 brings various code changes to IPv6.
+          Build 130 brings various code changes to IPv6, not sure 
+          what else (as I have no changelog between 108 and 130).
    - FIXED: Firmware/settings can now be uploaded over HTTPS
             (bug fixed by Asus)
+   - FIXED: Buffer overflow in networkmap that would cause garbled 
+            device names to appear on the clists list (bug in
+            Asus's code)
 
 
 3.0.0.3.108.7:

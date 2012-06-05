@@ -210,11 +210,15 @@ good amount of the limited nvram available! ***
    - NEW: Rebased patches on 3.0.0.4.130 (RT-N53U sources).
           Build 130 brings various code changes to IPv6, not sure 
           what else (as I have no changelog between 108 and 130).
+   - NEW: Added "diff" utility
    - FIXED: Firmware/settings can now be uploaded over HTTPS
             (bug fixed by Asus)
    - FIXED: Buffer overflow in networkmap that would cause garbled 
             device names to appear on the clists list (bug in
             Asus's code)
+   - FIXED: Firewall would break when applying a game preset that 
+            had multiple ports separated by a "," (bug in Asus's
+            code)
 
 
 3.0.0.3.108.7:

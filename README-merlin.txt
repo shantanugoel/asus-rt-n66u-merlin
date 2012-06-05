@@ -219,6 +219,7 @@ good amount of the limited nvram available! ***
    - FIXED: Firewall would break when applying a game preset that 
             had multiple ports separated by a "," (bug in Asus's
             code)
+   - FIXED: WOL through webui wasn't working when IPv6 is enabled
 
 
 3.0.0.3.108.7:

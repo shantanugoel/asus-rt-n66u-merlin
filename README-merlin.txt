@@ -1,4 +1,4 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.130.8 (XX-Jun-2012)
+Asus RT-N66U Modded Firmware - build 3.0.0.3.130.8 (08-Jun-2012)
 ================================================================
 
 About
@@ -207,10 +207,16 @@ not only start with the new default values, but also get rid
 of obsolete settings.  Otherwise you will be wasting a 
 good amount of the limited nvram available! ***
 
+   - KNOWN ISSUE: Memory leak when using IPv6 (bug in Asus's code 
+                  and/or kernel code)
+
    - NEW: Rebased patches on 3.0.0.4.130 (RT-N53U sources).
           Build 130 brings various code changes to IPv6, not sure 
           what else (as I have no changelog between 108 and 130).
+          The QoS code remains from build 108, as build 130 is 
+          unstable.
    - NEW: Added "diff" utility
+   - NEW: Keyword-based filter (new in 130)
    - FIXED: Firmware/settings can now be uploaded over HTTPS
             (bug fixed by Asus)
    - FIXED: Buffer overflow in networkmap that would cause garbled 
@@ -220,6 +226,7 @@ good amount of the limited nvram available! ***
             had multiple ports separated by a "," (bug in Asus's
             code)
    - FIXED: WOL through webui wasn't working when IPv6 is enabled
+   - FIXED: Memory leak in sit.ko (backported from Linux 2.6.25.3)
 
 
 3.0.0.3.108.7:

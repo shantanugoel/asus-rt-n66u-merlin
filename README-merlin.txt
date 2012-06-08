@@ -11,6 +11,7 @@ alternative for those who prefer to stay closer to the original firmware.
 
 The list of changes (so far):
 
+- Based on the source code of the RT-N53 (newer - 3.0.0.4.130)
 - Updated MiniDLNA from 1.0.21 to 1.0.24 (all Asus patches to the 
   MiniDLNA sources were reapplied).  
   MiniDLNA Changelog: http://sourceforge.net/projects/minidlna/files/minidlna/1.0.24/
@@ -29,6 +30,8 @@ The list of changes (so far):
 - Monitor your router's temperature (under Administration -> Performance Tuning)
 - Display active/tracked network connections
 - Allows tweaking TCP/UDP connection tracking timeouts
+- Fixed webui crash related to DLNA devices (such as Sonos devices)
+- Fixed port forwarding where multiple ports are separated by a ","
 
 
 Installation
@@ -181,10 +184,6 @@ To make it simple to determine which version you are running, I am simply
 appending another digit to determine my build version.  
 For example, 3.0.0.3.108 becomes 3.0.0.3.108.1.
 
-It's currently not possible to either upgrade your firmware or 
-restore your settings over HTTPS.  You have to use HTTP 
-for that.
-
 
 Source code
 -----------
@@ -205,14 +204,22 @@ this version is strongly recommended!  The newer Asus code base
 seems to have changed quite a few settings, so you'll want to 
 not only start with the new default values, but also get rid 
 of obsolete settings.  Otherwise you will be wasting a 
-good amount of the limited nvram available! ***
+good amount of the limited available nvram. ***
 
    - KNOWN ISSUE: Memory leak when using IPv6 (bug in Asus's code 
                   and/or kernel code)
 
+   - KNOWN ISSUE: PPTP VPN can randomly reboot the router if accessing 
+                  a LAN device behind the router.  Workaround is to 
+                  use an IP range outside of the local LAN
+                  (i.e. 10.0.0.0 instead of 192.168.1.0), and either 
+                  set your VPN to use the VPN tunnel as default 
+                  gateway, or manually add a route to your VPN 
+                  client.
+
    - NEW: Rebased patches on 3.0.0.4.130 (RT-N53U sources).
           Build 130 brings various code changes to IPv6, not sure 
-          what else (as I have no changelog between 108 and 130).
+          what else (as I have no changelog between 112 and 130).
           The QoS code remains from build 108, as build 130 is 
           unstable.
    - NEW: Added "diff" utility

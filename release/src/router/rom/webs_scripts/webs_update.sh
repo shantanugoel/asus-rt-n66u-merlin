@@ -19,7 +19,7 @@ else
 	firmver=`grep $model /tmp/wlan_update.txt | sed s/.*#FW//;`
 	firmver=`echo $firmver | sed s/#.*//;`
 	buildno=`echo $firmver | sed s/....//;`
-	firmver=`echo $firmver | sed s/..$//;`
+	firmver=`echo $firmver | sed s/$buildno$//;`
 	nvram set webs_state_info=${firmver}_${buildno}
 	rm -f /tmp/wlan_update.*
 fi

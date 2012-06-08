@@ -70,7 +70,8 @@ int optFloodDiscovery    = 0;   /* Flood server with discovery requests.
 PPPoEConnection *Connection = NULL; /* Must be global -- used
 				       in signal handler */
 
-int persist = 0; 		/* We are not a pppd plugin */
+int persist = -1; 		/* We are not a pppd plugin */
+int asked_to_quit = 0;		/* Ignored at the moment */
 /***********************************************************************
 *%FUNCTION: sendSessionPacket
 *%ARGUMENTS:

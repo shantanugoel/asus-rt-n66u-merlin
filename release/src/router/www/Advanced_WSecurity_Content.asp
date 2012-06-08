@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_1_5#></title>
+<title><#Web_Title#> - <#menu5_1_5#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script type="text/javascript" src="/state.js"></script>
@@ -42,7 +42,8 @@ function initial(){
 
 function applyRule(){
 	if(validForm()){
-		showLoading();
+		showLoading()
+		document.form.current_page.value = "/Advanced_Wireless_Content.asp";
 		document.form.submit();
 	}
 }
@@ -74,7 +75,7 @@ function done_validating(action){
 <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
 <form method="post" name="form" id="ruleForm" action="/start_apply.htm" target="hidden_frame">
 <input type="hidden" name="current_page" value="Advanced_WSecurity_Content.asp">
-<input type="hidden" name="next_page" value="Advanced_WAdvanced_Content.asp">
+<input type="hidden" name="next_page" value="Advanced_WSecurity_Content.asp">
 <input type="hidden" name="next_host" value="">
 <input type="hidden" name="group_id" value="">
 <input type="hidden" name="modified" value="0">
@@ -133,7 +134,7 @@ function done_validating(action){
 			  	<#WLANAuthentication11a_ExAuthDBIPAddr_itemname#></a>			  
 			</th>
 			<td>
-				<input type="text" maxlength="15" class="input_15_table" name="wl_radius_ipaddr" value="<% nvram_get("wl_radius_ipaddr"); %>" onKeyPress="return is_ipaddr(this, event)" onblur="valid_IP_form(this, 0)">
+				<input type="text" maxlength="15" class="input_15_table" name="wl_radius_ipaddr" value="<% nvram_get("wl_radius_ipaddr"); %>" onKeyPress="return is_ipaddr(this, event)">
 			</td>
 		</tr>
 		<tr>
@@ -142,7 +143,7 @@ function done_validating(action){
 			  	<#WLANAuthentication11a_ExAuthDBPortNumber_itemname#></a>
 			</th>
 			<td>
-				<input type="text" maxlength="5" class="input_6_table" name="wl_radius_port" value="<% nvram_get("wl_radius_port"); %>" onkeypress="return is_number(this,event)" onblur="validate_number_range(this, 0, 65535)"/>
+				<input type="text" maxlength="5" class="input_6_table" name="wl_radius_port" value="<% nvram_get("wl_radius_port"); %>" onkeypress="return is_number(this,event)"/>
 			</td>
 		</tr>
 		<tr>

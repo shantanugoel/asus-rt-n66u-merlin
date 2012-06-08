@@ -32,6 +32,9 @@
 #include <shutils.h>
 #include <rc.h>
 
+/* Zeroconf support if DHCP fails */
+#undef DHCP_ZEROCONF
+
 static int
 expires(char *wan_ifname, unsigned int in)
 {
@@ -60,17 +63,19 @@ expires(char *wan_ifname, unsigned int in)
  * deconfigured state.
 */
 static int
-deconfig(void)
+deconfig(int zcip)
 {
 	char *wan_ifname = safe_getenv("interface");
-	char prefix[] = "wanXXXXXXXXXX_";
-	int unit;
+	char tmp[100], prefix[] = "wanXXXXXXXXXX_";
+	int unit = wan_ifunit(wan_ifname);
 
 	/* Figure out nvram variable name prefix for this i/f */
 	if (wan_prefix(wan_ifname, prefix) < 0)
 		return -1;
-	if ((unit = wan_ifunit(wan_ifname)) < 0) {
-		logmessage("dhcp client", "skipping resetting IP address to 0.0.0.0");
+	if ((unit < 0) &&
+	    (nvram_match(strcat_r(prefix, "proto", tmp), "l2tp") ||
+	     nvram_match(strcat_r(prefix, "proto", tmp), "pptp"))) {
+		logmessage(zcip ? "zcip client" : "dhcp client", "skipping resetting IP address to 0.0.0.0");
 	} else
 		ifconfig(wan_ifname, IFUP, "0.0.0.0", NULL);
 
@@ -102,6 +107,9 @@ bound(void)
 	int changed = 0;
 	int gateway = 0;
 
+#ifdef DHCP_ZEROCONF
+	killall("zcip", SIGTERM);
+#endif
 	/* Figure out nvram variable name prefix for this i/f */
 	if ((ifunit = wan_prefix(wan_ifname, wanprefix)) < 0)
 		return -1;
@@ -140,7 +148,6 @@ bound(void)
 #ifdef RTCONFIG_IPV6
 	if ((value = getenv("ip6rd"))) {
 		char ip6rd[sizeof("32 128 FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF 255.255.255.255 ")];
-		char addrstr[INET6_ADDRSTRLEN];
 		char *values[4];
 		int i;
 
@@ -173,14 +180,20 @@ bound(void)
 	}
 
 	/* Clean nat conntrack for this interface,
-	 * but skip physical VPN subinterface */
-	if (changed && !(unit < 0))
+	 * but skip physical VPN subinterface for PPTP/L2TP */
+	if (changed && !(unit < 0 &&
+	    (nvram_match(strcat_r(wanprefix, "proto", tmp), "l2tp") ||
+	     nvram_match(strcat_r(wanprefix, "proto", tmp), "pptp"))))
 		ifconfig(wan_ifname, IFUP, "0.0.0.0", NULL);
 	ifconfig(wan_ifname, IFUP,
 		 nvram_safe_get(strcat_r(prefix, "ipaddr", tmp)),
 		 nvram_safe_get(strcat_r(prefix, "netmask", tmp)));
 
 	wan_up(wan_ifname);
+
+	logmessage("dhcp client", "bound %s via %s",
+		nvram_safe_get(strcat_r(prefix, "ipaddr", tmp)),
+		nvram_safe_get(strcat_r(prefix, "gateway", tmp)));
 
 	_dprintf("udhcpc:: %s done\n", __FUNCTION__);
 	return 0;
@@ -203,6 +216,9 @@ renew(void)
 	int unit, ifunit;
 	int changed = 0;
 
+#ifdef DHCP_ZEROCONF
+	killall("zcip", SIGTERM);
+#endif
 	/* Figure out nvram variable name prefix for this i/f */
 	if ((ifunit = wan_prefix(wan_ifname, wanprefix)) < 0)
 		return -1;
@@ -251,6 +267,31 @@ renew(void)
 	return 0;
 }
 
+#ifdef DHCP_ZEROCONF
+static int
+leasefail(void)
+{
+	char *wan_ifname = safe_getenv("interface");
+	char tmp[100], prefix[] = "wanXXXXXXXXXX_";
+	char wanprefix[] = "wanXXXXXXXXXX_";
+	int unit, ifunit;
+
+	/* Figure out nvram variable name prefix for this i/f */
+	if ((ifunit = wan_prefix(wan_ifname, wanprefix)) < 0)
+		return -1;
+	if ((unit = wan_ifunit(wan_ifname)) < 0)
+		snprintf(prefix, sizeof(prefix), "wan%d_x", ifunit);
+	else	snprintf(prefix, sizeof(prefix), "wan%d_", ifunit);
+
+	if ((inet_network(nvram_safe_get(strcat_r(prefix, "ipaddr", tmp))) &
+	     inet_network(nvram_safe_get(strcat_r(prefix, "netmask", tmp)))) ==
+	     inet_network("169.254.0.0"))
+		return 0;
+
+	return start_zcip(wan_ifname);
+}
+#endif
+
 int
 udhcpc_wan(int argc, char **argv)
 {
@@ -258,13 +299,92 @@ udhcpc_wan(int argc, char **argv)
 	if (!argv[1])
 		return EINVAL;
 	else if (strstr(argv[1], "deconfig"))
-		return deconfig();
+		return deconfig(0);
 	else if (strstr(argv[1], "bound"))
 		return bound();
 	else if (strstr(argv[1], "renew"))
 		return renew();
-	else
+#ifdef DHCP_ZEROCONF
+	else if (strstr(argv[1], "leasefail"))
+		return leasefail();
+#endif
+/*	else if (strstr(argv[1], "nak")) */
+
+	return 0;
+}
+
+/*
+ * config: This argument is used when zcip moves to configured state.
+ * All of the paramaters are set in enviromental variables, the script
+ * should configure the interface.
+*/
+static int
+config(void)
+{
+	char *wan_ifname = safe_getenv("interface");
+	char *value;
+	char tmp[100], prefix[] = "wanXXXXXXXXXX_";
+	char wanprefix[] = "wanXXXXXXXXXX_";
+	int unit, ifunit;
+	int changed = 0;
+
+	/* Figure out nvram variable name prefix for this i/f */
+	if ((ifunit = wan_prefix(wan_ifname, wanprefix)) < 0)
+		return -1;
+	if ((unit = wan_ifunit(wan_ifname)) < 0)
+		snprintf(prefix, sizeof(prefix), "wan%d_x", ifunit);
+	else	snprintf(prefix, sizeof(prefix), "wan%d_", ifunit);
+
+	if ((value = getenv("ip"))) {
+		changed = nvram_invmatch(strcat_r(prefix, "ipaddr", tmp), trim_r(value));
+		nvram_set(strcat_r(prefix, "ipaddr", tmp), trim_r(value));
+	}
+	nvram_set(strcat_r(prefix, "netmask", tmp), "255.255.0.0");
+	nvram_set(strcat_r(prefix, "gateway", tmp), "");
+	nvram_set(strcat_r(prefix, "dns", tmp), "");
+	//nvram_set(strcat_r(prefix, "wins", tmp), "");
+	//nvram_set(strcat_r(prefix, "domain", tmp), "");
+
+	/* Clean nat conntrack for this interface,
+	 * but skip physical VPN subinterface for PPTP/L2TP */
+	if (changed && !(unit < 0 &&
+	    (nvram_match(strcat_r(wanprefix, "proto", tmp), "l2tp") ||
+	     nvram_match(strcat_r(wanprefix, "proto", tmp), "pptp"))))
+		ifconfig(wan_ifname, IFUP, "0.0.0.0", NULL);
+	ifconfig(wan_ifname, IFUP,
+		 nvram_safe_get(strcat_r(prefix, "ipaddr", tmp)),
+		 nvram_safe_get(strcat_r(prefix, "netmask", tmp)));
+
+	wan_up(wan_ifname);
+
+	logmessage("zcip client", "configured %s",
+		nvram_safe_get(strcat_r(prefix, "ipaddr", tmp)));
+
+	_dprintf("zcip:: %s done\n", __FUNCTION__);
+	return 0;
+}
+
+int
+zcip_wan(int argc, char **argv)
+{
+	_dprintf("%s:: %s\n", __FUNCTION__, argv[1]);
+	if (!argv[1])
 		return EINVAL;
+	else if (strstr(argv[1], "deconfig"))
+		return deconfig(1);
+	else if (strstr(argv[1], "config"))
+		return config();
+/*	else if (strstr(argv[1], "init")) */
+
+	return 0;
+}
+
+int
+start_zcip(char *wan_ifname)
+{
+	char *zcip_argv[] = { "zcip", "-q", wan_ifname, "/tmp/zcip", NULL };
+
+	return _eval(zcip_argv, NULL, 0, NULL);
 }
 
 static int
@@ -396,6 +516,7 @@ int dhcp6c_state_main(int argc, char **argv)
 	char prefix[INET6_ADDRSTRLEN];
 	struct in6_addr addr;
 	int i, r;
+	int wait_count;
 
 	TRACE_PT("begin\n");
 
@@ -422,8 +543,17 @@ int dhcp6c_state_main(int argc, char **argv)
 #else
 		add_ns(NULL);
 #endif
-//		dns_to_resolv();
-//		start_dnsmasq();	// (re)start
+	}
+
+	// wait for RA
+	if (!is_intf_up(get_wan6face())) return 0;
+	wait_count = 10;
+	while (!getifaddr(get_wan6face(), AF_INET6, 0) && (wait_count-- > 0))
+	{
+		if (is_intf_up(get_wan6face()))
+			sleep(1);
+		else
+			return 0;
 	}
 
 	// (re)start radvd and httpd
@@ -435,6 +565,15 @@ int dhcp6c_state_main(int argc, char **argv)
 	return 0;
 }
 
+static unsigned long pow(int m, int n)
+{
+	if (m == 1)
+		return n;
+	else if (m == 0)
+		return 1;
+	return pow(m - 1, n) * n ;
+}
+
 void start_dhcp6c(void)
 {
 	FILE *f;
@@ -442,6 +581,10 @@ void start_dhcp6c(void)
 	char *wan6face;
 	char *argv[] = { "dhcp6c", "-T", "LL", NULL, NULL, NULL };
 	int argc;
+	char iaid_str[9] = {0};
+	int i, j;
+	unsigned long iaid = 0;
+	char *mac;
 
 	TRACE_PT("begin\n");
 
@@ -451,7 +594,26 @@ void start_dhcp6c(void)
 	prefix_len = 64 - (nvram_get_int("ipv6_prefix_length") ? : 64);
 	if (prefix_len < 0)
 		prefix_len = 0;
-	wan6face = nvram_safe_get("wan0_ifname");
+	wan6face = get_wan6face();
+	// generate IAID from last 7 digits of WAN MAC addresss
+	mac = nvram_safe_get("wan0_hwaddr");
+	for (i = 7, j = 0; i < 17; i++) {
+		if (mac[i] != 0x3A) { // skip :
+			iaid_str[j] = mac[i];
+			j++;
+		}
+	}
+	for (i = 0; i < 7; i++) {
+		unsigned long var = 0;
+		if (iaid_str[i] >= 0x30 && iaid_str[i] <= 0x39) //0-9
+			var = iaid_str[i] - 0x30;
+		else if (iaid_str[i] >= 0x41 && iaid_str[i] <= 0x46) //A-F
+			var = 10 + (iaid_str[i] - 0x41);
+		else if (iaid_str[i] >= 0x61 && iaid_str[i] <= 0x66) //a-f
+			var = 10 + (iaid_str[i] - 0x61);
+		var = var * pow(6 - i, 16);
+		iaid += var;
+	}
 
 	nvram_set("ipv6_get_dns", "");
 	nvram_set("ipv6_rtr_addr", "");
@@ -461,21 +623,24 @@ void start_dhcp6c(void)
 	if ((f = fopen("/etc/dhcp6c.conf", "w"))) {
 		fprintf(f,
 			"interface %s {\n"
-			" send ia-pd 0;\n"
+			" send ia-pd %d;\n"
 			" send rapid-commit;\n"
 			" request domain-name-servers;\n"
 			" script \"/sbin/dhcp6c-state\";\n"
 			"};\n"
-			"id-assoc pd 0 {\n"
+			"id-assoc pd %d {\n"
 			" prefix-interface %s {\n"
-			"  sla-id 0;\n"
+			"  sla-id 1;\n"
 			"  sla-len %d;\n"
 			" };\n"
 			"};\n"
-			"id-assoc na 0 { };\n",
+			"id-assoc na %d { };\n",
 			wan6face,
+			iaid,
+			iaid,
 			nvram_safe_get("lan_ifname"),
-			prefix_len);
+			prefix_len,
+			iaid);
 		fclose(f);
 	}
 
@@ -495,6 +660,7 @@ void stop_dhcp6c(void)
 
 	killall("dhcp6c-event", SIGTERM);
 	killall_tk("dhcp6c");
+
 	nvram_set("ipv6_get_dns", "");
 
 	TRACE_PT("end\n");

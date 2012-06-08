@@ -1,4 +1,4 @@
-﻿/* CSS Document */
+/* CSS Document */
 .buttonok {width:52px; font-family:Verdana; font-size:11px; line-height:25px; text-align:center;}
 .buttonok a {height:28px; text-decoration: none;}
 .buttonok a:link, .buttonok a:visited {
@@ -86,7 +86,7 @@
 }
 
 .FormTitle_firefox{
-	margin-top:-105px;
+	margin-top:-100px;
 	line-height:160%;
 	font-size:12px;
 	font-family:Arial, Verdana, Arial, Helvetica, sans-serif;
@@ -310,14 +310,15 @@
 
 .input_option_lang{
 	margin-top:13px;
-	margin-left:160px;
+	margin-left:175px;
 	height:25px;
-	width:130px;
 	background-color:#222;
+	*background-color:#FFF;
 	border-top-width:1px; 
 	border-bottom-width:1px; 
 	border-color:#888;
 	color:#FFFFFF;
+	*color:#000;
 	font-size:13px;
 	font-family: Lucida Console;
 }
@@ -340,7 +341,7 @@
 	padding-left:0.4em;
 	height:23px;
 	width:345px;
-	line-height:23px \9;	/*IE*/
+	line-height:23px;	/*IE*/
 	font-size:12px;
 	font-family: Lucida Console;
 	background-image:url(/images/New_ui/inputbg.png);
@@ -352,7 +353,7 @@
 	padding-left:0.4em;
 	height:23px;
 	width:235px;
-	line-height:23px \9;	/*IE*/
+	line-height:23px;	/*IE*/
 	font-size:12px;
 	font-family: Lucida Console;
 	background-image:url(/images/New_ui/inputbg.png);
@@ -364,7 +365,7 @@
 	padding-left:0.4em;
 	height:23px;
 	width:180px;
-	line-height:23px \9;	/*IE*/
+	line-height:23px;	/*IE*/
 	font-size:12px;
 	font-family: Lucida Console;
 	background-image:url(/images/New_ui/inputbg.png);
@@ -376,7 +377,7 @@
 	padding-left:0.4em;
 	height:23px;
 	width:120px;
-	line-height:23px \9;	/*IE*/
+	line-height:23px;	/*IE*/
 	font-size:12px;
 	font-family: Lucida Console;
 	background-image:url(/images/New_ui/inputbg.png);
@@ -388,7 +389,7 @@
 	padding-left:0.4em;
 	height:23px;
 	width:90px;
-	line-height:23px \9;	/*IE*/
+	line-height:23px;	/*IE*/
 	font-size:12px;
 	font-family: Lucida Console;
 	background-image:url(/images/New_ui/inputbg.png);
@@ -400,7 +401,7 @@
 	padding-left:0.4em;
 	height:23px;
 	width:50px;
-	line-height:23px \9;	/*IE*/
+	line-height:23px;	/*IE*/
 	font-size:12px;
 	font-family: Lucida Console;
 	background-image:url(/images/New_ui/inputbg.png);
@@ -412,7 +413,7 @@
 	padding-left:0.4em;
 	height:23px;
 	width:28px;
-	line-height:23px \9;	/*IE*/
+	line-height:23px;	/*IE*/
 	font-size:12px;
 	font-family: Lucida Console;
 	background-image:url(/images/New_ui/inputbg.png);
@@ -424,7 +425,7 @@
 	padding-left:0.4em;
 	height:23px;
 	width:125px;
-	line-height:23px \9;	/*IE*/
+	line-height:23px;	/*IE*/
 	font-size:12px;
 	font-family: Lucida Console;
 	background-image:url(/images/New_ui/inputbg.png);
@@ -434,17 +435,19 @@
 
 /*	Viz add	start */
 .titledownbutton{
-  	background: transparent url(/images/New_ui/contentbt_normal.png) no-repeat scroll center top;
-  	border:0;
-  	color: #FFFFFF;
+	text-shadow:0px 1px 1px black;
+	font-weight: bolder;
+ 	background: transparent url(/images/New_ui/contentbt_normal.png) no-repeat scroll center top;
+ 	border:0;
+ 	color: #FFFFFF;
 	height:34px;
 	font-family:Verdana;
 	font-size:12px;
 	/*margin-right:5px;
 	margin-left:5px;*/
-  	padding:0 .70em 0 .70em;  
+ 	padding:0 .70em 0 .70em;  
  	width:122px;
-  	overflow:visible;
+ 	overflow:visible;
 }
 .titledownbutton:hover		/*, .button:active*/{
 	background:url(/images/New_ui/contentbt_over.png) no-repeat;
@@ -457,6 +460,8 @@
 	cursor:pointer;
 }
 .button_gen{
+	font-weight: bolder;
+	text-shadow:0px 1px 1px black;
   background: transparent url(/images/New_ui/contentbt_normal.png) no-repeat scroll center top;
   _background: transparent url(/images/New_ui/contentbt_normal_ie6.png) no-repeat scroll center top;
   border:0;
@@ -470,6 +475,7 @@
 	cursor:pointer;
 }
 .button_gen:hover{
+	font-weight: bolder;
 	background:url(/images/New_ui/contentbt_over.png) no-repeat;
 	height:33px;
  	width:122px;
@@ -478,6 +484,8 @@
 	cursor:pointer;
 }
 .button_gen_dis{
+	font-weight: bolder;
+	text-shadow:0px 1px 1px black;
   background: transparent url(/images/New_ui/contentbt_normal.png) no-repeat scroll center top;
   _background: transparent url(/images/New_ui/contentbt_normal_ie6.png) no-repeat scroll center top;
   border:0;
@@ -508,10 +516,12 @@
 	cursor:pointer;
 }
 .button_gen_long{
+	font-weight: bolder;
+	text-shadow:0px 1px 1px black;
   background: transparent url(/images/New_ui/logout_bt.png) no-repeat scroll center top;
   border:0;
   color: #FFFFFF;
-	height:33px;
+	height:34px;
 	font-family:Verdana;
 	font-size:12px;
  	width:150px;
@@ -522,7 +532,7 @@
   background: transparent url(/images/New_ui/logout_btover.png) no-repeat scroll center top;
   border:0;
   color: #FFFFFF;
-	height:33px;
+	height:34px;
 	font-family:Verdana;
 	font-size:12px;
  	width:150px;
@@ -564,11 +574,12 @@ form{
 textarea{
 	width:99%;	
 }
+
 .textarea_ssh_table{
         margin-left:2px;
         padding-left:0.4em;
         width: 500px;
-        line-height:23px \9;    /*IE*/
+        line-height:23px;    /*IE*/
         font-size:12px;
         font-family: Lucida Console;
         background: #576D73;       
@@ -880,23 +891,16 @@ textarea{
 	color:#000;
 }
 
-.formfontcontent{
-font:Arial, Helvetica, sans-serif;
-font-size:12px;
-color:#FFFFFF;
-padding-top:1px;
-}
-
 /* btns in table */
 .add_btn{
- 	background: transparent url(/images/New_ui/advancesetting/accountadd.png) no-repeat scroll center top;
+ 	background: transparent url(/images/New_ui/accountadd.png) no-repeat scroll center top;
  	border:0;
 	height:34px;
  	width:35px;
  	cursor:pointer;
 }
 .add_btn:hover, .add_btn:active{
- 	/*background: transparent url(/images/New_ui/advancesetting/UserAdd_0.png) no-repeat scroll center top;*/
+ 	/*background: transparent url(/images/New_ui/UserAdd_0.png) no-repeat scroll center top;*/
  	border:0;
 	height:34px;
  	width:35px;
@@ -904,14 +908,14 @@ padding-top:1px;
 }
 
 .remove_btn{
- 	background: transparent url(/images/New_ui/advancesetting/accountdelete.png) no-repeat scroll center top;
+ 	background: transparent url(/images/New_ui/accountdelete.png) no-repeat scroll center top;
 	border:0;
 	height:30px;
  	width:35px;
  	cursor:pointer;
 }
 .remove_btn:hover, .remove_btn:active{
- 	/*background: transparent url(/images/New_ui/advancesetting/UserDel_0.png) no-repeat scroll center top;*/
+ 	/*background: transparent url(/images/New_ui/UserDel_0.png) no-repeat scroll center top;*/
 	border:0;
 	height:30px;
  	width:35px;
@@ -927,14 +931,14 @@ padding-top:1px;
 }
 
 .edit_btn{
-  background: transparent url(/images/New_ui/advancesetting/accountedit.png) no-repeat scroll center top;
+  background: transparent url(/images/New_ui/accountedit.png) no-repeat scroll center top;
   border:0;
 	height:34px;
  	width:35px;
  	cursor:pointer;
 }
 .edit_btn:hover, .edit_btn:active{
- 	/*background: transparent url(/images/New_ui/advancesetting/UserMod_0.png) no-repeat scroll center top;*/
+ 	/*background: transparent url(/images/New_ui/UserMod_0.png) no-repeat scroll center top;*/
  	border:0;
 	height:34px;
  	width:35px;
@@ -1070,11 +1074,11 @@ color:#FFFFFF;
 }
 
 .tab:hover{
-	background-position:right -73px;/*Viz 2011.04*/
+	background-position:right -73px;
 	cursor: pointer;
 }	
 .tab:hover span{
-	background-position:left -73px;/*Viz 2011.04*/	
+	background-position:left -73px;
 	cursor: pointer;
 } 
 .tab {	
@@ -1087,20 +1091,20 @@ color:#FFFFFF;
 	text-align:center;
 	text-decoration: none;
 	font-family: Verdana;
-	max-width: 300px;	/*Viz 2011.04*/
 	z-index: -1;
 }
 .tab span {
-	background: transparent url(/images/New_ui/hightabspan.png) no-repeat;	/*Viz 2011.04*/															
+	background: transparent url(/images/New_ui/hightabspan.png) no-repeat;
 	height: 40px;
 	padding-left: 6px;
+	padding-top: 10px;
 	line-height: 15px;
-	line-height: 40px \9;
 	font-family: Verdana;
 	font-size: 12px;
 	vertical-align: middle;
 	display: table-cell;
-	display: inline-block \9;
+	display: inline-block;
+	width: auto;
 	z-index: -1;
 }
 .tabclick {	   
@@ -1113,55 +1117,55 @@ color:#FFFFFF;
 	text-align: center;
 	text-decoration: none;
 	font-family: Verdana;
-	max-width: 300px;	/*Viz 2011.04*/
 }
 .tabclick span {
-	background: transparent url(/images/New_ui/hightabclickspan.png) repeat;	/*Viz 2011.04*/
+	background: transparent url(/images/New_ui/hightabclickspan.png) repeat;
 	height: 40px;
 	padding-left: 6px;
+	padding-top: 10px;
 	line-height: 15px;
-	line-height: 40px \9;
 	font-family: Verdana;
 	font-size: 12px; 
 	vertical-align: middle;
 	display: table-cell;
-	display: inline-block \9;
+	display: inline-block;
+	width: auto;
 }	
 div.tabclick {
 	height: 40px !important;
 }
 
 .tab_NW {	
-      background: transparent url(images/New_ui/taba.png) no-repeat scroll right top;
-      color: White;
-      display: block;
-      float: left;
-      height: 28px;
-      padding-right: 8px;      
-      margin-right:2px;
-      text-decoration: none;
-      text-align:center;
-	 max-width:130px;
-    }
+	font-weight: bolder;
+	background: transparent url(images/New_ui/taba.png) no-repeat scroll right top;
+	color: White;
+	display: block;
+	float: left;
+	height: 28px;
+	padding-right: 8px;      
+	margin-right:2px;
+	text-decoration: none;
+	text-align:center;
+	max-width:130px;
+}
 .tab_NW span {
-      background: transparent url(images/New_ui/tabspan.png) no-repeat;
-
-      display: block;
-      padding: 5px 4px 5px 12px;
-      line-height: 20px;	  
-      font-family: Arial, Helvetica, sans-serif;
+	font-weight: bolder;
+	background: transparent url(images/New_ui/tabspan.png) no-repeat;
+	display: block;
+	padding: 5px 4px 5px 12px;
+	line-height: 20px;	  
+	font-family: Arial, Helvetica, sans-serif;
 	font-size: 13px;
 }
 .tab_NW:hover{
-	background-position:right -28px;
-	
+	background-position:right -28px;	
 }	
 .tab_NW:hover span{
 	background-position:left -28px;
-	
 } 
 
 .tabclick_NW {	   
+			font-weight: bolder;
       background: transparent url(images/New_ui/tabclicka.png) no-repeat scroll right top;
 			font-family: Verdana;	
       color: White;
@@ -1175,6 +1179,7 @@ div.tabclick {
 	 		max-width:130px;
     }
 .tabclick_NW span {
+		font-weight: bolder;
 	  background: transparent url(images/New_ui/tabclickspan.png) no-repeat;
 		font-family: Verdana;	 
     display: block;
@@ -1314,7 +1319,8 @@ margin-top:5px;
 }
 
 .formfonttitle{
-font:Arial, Helvetica, sans-serif;
+text-shadow:1px 1px 1px black;
+font-family:Arial, Helvetica, sans-serif;
 font-size:16px;
 color:#FFFFFF;
 margin-left:5px;
@@ -1322,7 +1328,7 @@ margin-bottom:10px;
 font-weight: bolder;
 }
 .formfonttitle_nwm{
-font:Arial, Helvetica, sans-serif;
+font-family:Arial, Helvetica, sans-serif;
 font-size:12px;
 color:#FFFFFF;
 margin-left:5px;
@@ -1331,45 +1337,49 @@ font-weight: bolder;
 }
 
 .formfontcontent{
-font:Arial, Helvetica, sans-serif;
+font-family:Arial, Helvetica, sans-serif;
 font-size:12px;
 color:#FFFFFF;
 padding-top:1px;
 }
 
 .formfontdesc{
-font:Arial, Helvetica, sans-serif;
-font-size:12px;
-color:#FFFFFF;
-margin-left:5px;
-margin-bottom:10px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:13px;
+	color:#FFFFFF;
+	margin-left:5px;
+	margin-bottom:10px;
 }
 
 .formlinkfont{
-font:Arial, Helvetica, sans-serif;
-font-size:12px;
-color:#FFFFFF;
-text-decoration:underline;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:13px;
+	color:#FFFFFF;
+	text-decoration:underline;
 }
 
 .input_2{
-height:23px;
-width:104px;
-background-image:url(images/New_ui/inputbg_2.png);
-border:0px;
+	height:23px;
+	width:104px;
+	background-image:url(images/New_ui/inputbg_2.png);
+	border:0px;
 }
 
 .contentbt{
-font:Arial, Helvetica, sans-serif;
-background-image:url(images/New_ui/contentbt_normal.png);
-color:#FFFFFF;
-font-size:12px;
+	font-weight: bolder;
+	text-shadow:0px 1px 1px black;
+	font:Arial, Helvetica, sans-serif;
+	background-image:url(images/New_ui/contentbt_normal.png);
+	color:#FFFFFF;
+	font-size:12px;
 }
 .contentbt:link{
-font:Arial, Helvetica, sans-serif;
-background-image:url(images/New_ui/contentbt_normal.png);
-color:#FFFFFF;
-font-size:12px;
+	font-weight: bolder;
+	text-shadow:0px 1px 1px black;
+	font:Arial, Helvetica, sans-serif;
+	background-image:url(images/New_ui/contentbt_normal.png);
+	color:#FFFFFF;
+	font-size:12px;
 }
 .contentbt:hover{
 	background-image:url(images/New_ui/contentbt_over.png);
@@ -1391,6 +1401,24 @@ font-size:12px;
 	width:30px;
 	cursor: pointer;
 }
+
+.wifihwswstatuson{
+	background-image:url(/images/wifi_hw_sw.png);
+	background-repeat:no-repeat;	
+	background-position:2px 2px;
+	height:29px;
+	width:30px;
+	cursor: pointer;
+}
+.wifihwswstatusoff{
+	background-image:url(/images/wifi_hw_sw.png);
+	background-repeat:no-repeat;	
+	background-position:2px -48px;
+	height:29px;
+	width:30px;
+	cursor: pointer;
+}
+
 .guestnetworkstatuson{
 	background-image:url(/images/New_ui/multiplessidstatus.png);
 	background-repeat:no-repeat;	
@@ -1520,47 +1548,3 @@ font-size:12px;
 	position:relative;
 	background-color:#4d595d;
 }
-
-ul#navigation-1
-	{ list-style:none; font:normal 8pt verdana, arial, helvetica;}
-ul#navigation-1 li
-	{ margin:0; padding:0; display:block; float:left; position:relative; width:148px; }
-ul#navigation-1 li a:link,
-ul#navigation-1 li a:visited
-	{ padding:0px 0; display:block; text-align:center; text-decoration:none; background-image:url("/images/New_ui/dropdown_bt.png"); color:#ffffff; width:148px; height:32px;}
-ul#navigation-1 li:hover a,
-ul#navigation-1 li a:hover,
-ul#navigation-1 li a:active
-	{ padding:0px 0; display:block; text-align:center; text-decoration:none; background-image:url("/images/New_ui/dropdown_btover.png"); color:#ffffff; width:148px; height:32px;}
-	
-ul#navigation-1 li ul.navigation-2
-	{ margin:0; padding:1px 1px 0; list-style:none; display:none; width:146px; position:absolute; left:-1px; }
-ul#navigation-1 li:hover ul.navigation-2
-	{ display:block; }
-ul#navigation-1 li ul.navigation-2 li
-	{ width:146px; clear:left; width:146px; }
-
-ul#navigation-1 li ul.navigation-2 li a:link,
-ul#navigation-1 li ul.navigation-2 li a:visited
-	{ clear:left; background:#222; padding:4px 0; width:135px; height:20px; border:none; position:relative; z-index:1000; margin-left:5px;}
-ul#navigation-1 li ul.navigation-2 li:hover a,
-ul#navigation-1 li ul.navigation-2 li a:active,
-ul#navigation-1 li ul.navigation-2 li a:hover
-	{ clear:left; background-image:url("/images/New_ui/dropdown_highlight.gif"); padding:4px 0; width:135px; height:20px; border:none; position:relative; z-index:1000; margin-left:5px;}
-
-ul#navigation-1 li ul.navigation-2 li ul.navigation-3
-	{ display:none; margin:0; padding:0; list-style:none; position:absolute; left:145px; top:-2px; padding:1px 1px 0 1px; background:#ffffff; z-index:900; }
-ul#navigation-1 li ul.navigation-2 li:hover ul.navigation-3
-	{ display:block; }
-ul#navigation-1 li ul.navigation-2 li ul.navigation-3 li a:link,
-ul#navigation-1 li ul.navigation-2 li ul.navigation-3 li a:visited
-	{ background:#b9121b; }
-ul#navigation-1 li ul.navigation-2 li ul.navigation-3 li:hover a,
-ul#navigation-1 li ul.navigation-2 li ul.navigation-3 li a:hover,
-ul#navigation-1 li ul.navigation-2 li ul.navigation-3 li a:active
-	{ background:#ec454e; }
-ul#navigation-1 li ul.navigation-2 li a span
-	{ position:absolute; top:0; left:132px; font-size:12pt; color:#fe676f; }
-ul#navigation-1 li ul.navigation-2 li:hover a span,
-ul#navigation-1 li ul.navigation-2 li a:hover span
-	{ position:absolute; top:0; left:132px; font-size:12pt; color:#ffffff; }

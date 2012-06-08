@@ -51,6 +51,10 @@ static struct switch_config {
 	SWCFG_INIT(SWCFG_STB12,   SW_CPU|            SW_L3|SW_L4,        SW_CPU|SW_WAN|SW_L1|SW_L2),
 	SWCFG_INIT(SWCFG_STB34,   SW_CPU|SW_L1|SW_L2,                    SW_CPU|SW_WAN|SW_L3|SW_L4),
 	SWCFG_INIT(SWCFG_BRIDGE,  SW_CPU|SW_L1|SW_L2|SW_L3|SW_L4|SW_WAN, SW_CPU),
+	SWCFG_INIT(WAN1PORT1, SW_CPU|SW_L2|SW_L3|SW_L4, SW_CPU|SW_L1),
+	SWCFG_INIT(WAN1PORT2, SW_CPU|SW_L1|SW_L3|SW_L4, SW_CPU|SW_L2),
+	SWCFG_INIT(WAN1PORT3, SW_CPU|SW_L1|SW_L2|SW_L4, SW_CPU|SW_L3),
+	SWCFG_INIT(WAN1PORT4, SW_CPU|SW_L1|SW_L2|SW_L3, SW_CPU|SW_L4)
 };
 
 /* Generates switch ports config string
@@ -104,6 +108,38 @@ void switch_gen_config(char *buf, const int ports[SWPORT_COUNT], int index, int 
 
 	mask = wan ? sw_config[index].wanmask : sw_config[index].lanmask;
 	_switch_gen_config(buf, ports, mask, cputag);
+}
+
+void gen_lan_ports(char *buf, const int sample[SWPORT_COUNT], int index, int index1, char *cputag){
+	struct {
+		int port;
+		char *tag;
+	} res[SWPORT_COUNT];
+	int i, n, count;
+	int mask, mask1;
+	char *ptr;
+
+	mask = sw_config[index].lanmask;
+	if(index1 >= SWCFG_DEFAULT){
+		mask1 = sw_config[index1].lanmask;
+		mask &= mask1;
+	}
+
+	if (!cputag)
+		mask &= ~SW_CPU;
+
+	for (i = count = 0; i < SWPORT_COUNT && mask; mask >>= 1, i++) {
+		if ((mask & 1U) == 0)
+			continue;
+		for (n = count; n > 0 && sample[i] < res[n - 1].port; n--)
+			res[n] = res[n - 1];
+		res[n].port = sample[i];
+		res[n].tag = (i == SWPORT_CPU) ? cputag : "";
+		count++;
+	}
+
+	for (i = 0, ptr = buf; ptr && i < count; i++)
+		ptr += sprintf(ptr, i ? " %d%s" : "%d%s", res[i].port, res[i].tag);
 }
 
 #define sin_addr(s) (((struct sockaddr_in *)(s))->sin_addr)
@@ -336,7 +372,7 @@ int start_vlan(void)
 	close(s);
 
 #ifdef CONFIG_BCMWL5
-	if(nvram_invmatch("switch_wantag", "none"))
+	if(!nvram_match("switch_wantag", "none")&&!nvram_match("switch_wantag", ""))
 		set_wan_tag(&ifr.ifr_name);
 #endif
 #if 0

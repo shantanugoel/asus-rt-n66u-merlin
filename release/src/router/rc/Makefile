@@ -38,8 +38,11 @@ ifeq ($(RTCONFIG_FANCTRL),y)
 OBJS += phy_tempsense.o
 endif
 
-ifeq ($(CONFIG_RALINK),y)
+ifeq ($(RTCONFIG_RALINK),y)
 OBJS += init-ralink.o wps-ralink.o ralink.o wpsfix.o
+ifeq ($(RTCONFIG_DSL),y)
+OBJS += init-ralink-dsl.o 
+endif
 else
 OBJS += init-broadcom.o wps-broadcom.o broadcom.o
 endif
@@ -153,7 +156,12 @@ ifeq ($(RTCONFIG_CIFS),y)
 endif
 
 ifeq ($(RTCONFIG_RALINK),y)
+ifeq ($(RTCONFIG_DSL),y)
+	@cd $(INSTALLDIR)/sbin && ln -sf rc 8367r
+	@cd $(INSTALLDIR)/sbin && ln -sf rc convert_dsl_wan_settings
+else
 	@cd $(INSTALLDIR)/sbin && ln -sf rc 8367m
+endif
 endif
 
 	@cd $(INSTALLDIR)/sbin && ln -sf rc wanduck
@@ -166,6 +174,7 @@ ifeq ($(RTCONFIG_USB),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc asus_sg
 	@cd $(INSTALLDIR)/sbin && ln -sf rc asus_sr
 	@cd $(INSTALLDIR)/sbin && ln -sf rc asus_tty
+	@cd $(INSTALLDIR)/sbin && ln -sf rc asus_usbbcm
 	@cd $(INSTALLDIR)/sbin && ln -sf rc asus_usb_interface
 	@cd $(INSTALLDIR)/sbin && ln -sf rc ejusb
 endif
@@ -181,6 +190,8 @@ endif
 	@cd $(INSTALLDIR)/sbin && ln -sf rc wlcconnect
 	@cd $(INSTALLDIR)/sbin && ln -sf rc setup_dnsmq
 	@cd $(INSTALLDIR)/sbin && ln -sf rc add_multi_routes
+
+	@cd $(INSTALLDIR)/sbin && ln -sf rc free_caches
 
 clean:
 	rm -f rc *.o .*.depend

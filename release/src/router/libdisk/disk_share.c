@@ -381,7 +381,7 @@ extern int initial_var_file(const char *const account, const char *const mount_p
 	int sh_num;
 	char **folder_list;
 	int samba_right, ftp_right, dms_right;
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 	int webdav_right;
 #endif
 	
@@ -407,7 +407,7 @@ extern int initial_var_file(const char *const account, const char *const mount_p
 		samba_right = DEFAULT_SAMBA_RIGHT;
 		ftp_right = DEFAULT_FTP_RIGHT;
 		dms_right = DEFAULT_DMS_RIGHT;
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 		webdav_right = DEFAULT_WEBDAV_RIGHT;
 #endif
 	}
@@ -415,7 +415,7 @@ extern int initial_var_file(const char *const account, const char *const mount_p
 		samba_right = 0;
 		ftp_right = 0;
 		dms_right = 0;
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 		webdav_right = 0;
 #endif
 	}
@@ -433,7 +433,7 @@ extern int initial_var_file(const char *const account, const char *const mount_p
 		
 		if(i != -1)
 			fprintf(fp, "%s", folder_list[i]);
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 		fprintf(fp, "=%d%d%d%d\n", samba_right, ftp_right, dms_right, webdav_right);
 #else
 		fprintf(fp, "=%d%d%d\n", samba_right, ftp_right, dms_right);
@@ -567,7 +567,7 @@ extern int modify_if_exist_new_folder(const char *const account, const char *con
 	char *var_file;
 	FILE *fp;
 	int samba_right, ftp_right, dms_right;
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 	int webdav_right;
 #endif
 	
@@ -610,7 +610,7 @@ extern int modify_if_exist_new_folder(const char *const account, const char *con
 			samba_right = DEFAULT_SAMBA_RIGHT;
 			ftp_right = DEFAULT_FTP_RIGHT;
 			dms_right = DEFAULT_DMS_RIGHT;
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 			webdav_right = DEFAULT_WEBDAV_RIGHT;
 #endif
 		}
@@ -618,7 +618,7 @@ extern int modify_if_exist_new_folder(const char *const account, const char *con
 			samba_right = 0;
 			ftp_right = 0;
 			dms_right = 0;
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 			webdav_right = 0;
 #endif
 		}
@@ -633,7 +633,7 @@ extern int modify_if_exist_new_folder(const char *const account, const char *con
 			return -1;
 		}
 		
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 		fprintf(fp, "%s%d%d%d%d\n", target, samba_right, ftp_right, dms_right, webdav_right);
 #else
 		fprintf(fp, "%s%d%d%d\n", target, samba_right, ftp_right, dms_right);
@@ -717,7 +717,7 @@ extern int get_permission(const char *const account,
 		result = follow_info[1]-'0';
 	else if (!strcmp(protocol, PROTOCOL_MEDIASERVER))
 		result = follow_info[2]-'0';
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 	else if (!strcmp(protocol, PROTOCOL_WEBDAV))
 		result = follow_info[3]-'0';
 #endif
@@ -813,7 +813,7 @@ extern int set_permission(const char *const account,
 		free(target);
 		
 		// 5.1 change the right of folder
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 		if (!strcmp(protocol, PROTOCOL_CIFS))
 			fprintf(fp, "%d%d%d%d\n", flag, 0, DEFAULT_DMS_RIGHT, DEFAULT_WEBDAV_RIGHT);
 		else if (!strcmp(protocol, PROTOCOL_FTP))
@@ -860,7 +860,7 @@ extern int set_permission(const char *const account,
 		follow_info += PROTOCOL_FTP_BIT;
 	else if(!strcmp(protocol, PROTOCOL_MEDIASERVER))
 		follow_info += PROTOCOL_MEDIASERVER_BIT;
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 	else if(!strcmp(protocol, PROTOCOL_WEBDAV))
 		follow_info += PROTOCOL_WEBDAV_BIT;
 #endif
@@ -1042,7 +1042,7 @@ extern int del_account(const char *const account){
 	if(i <= 0){
 		nvram_set("st_samba_mode", "1");
 		nvram_set("st_ftp_mode", "1");
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 		nvram_set("st_webdav_mode", "1");
 #endif
 	}
@@ -1238,7 +1238,7 @@ extern int add_folder(const char *const account, const char *const mount_path, c
 	char *target;
 	FILE *fp;
 	int samba_right, ftp_right, dms_right;
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 	int webdav_right;
 #endif
 	char *full_path;
@@ -1347,7 +1347,7 @@ extern int add_folder(const char *const account, const char *const mount_path, c
 			samba_right = DEFAULT_SAMBA_RIGHT;
 			ftp_right = DEFAULT_FTP_RIGHT;
 			dms_right = DEFAULT_DMS_RIGHT;
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 			webdav_right = DEFAULT_WEBDAV_RIGHT;
 #endif
 		}
@@ -1355,7 +1355,7 @@ extern int add_folder(const char *const account, const char *const mount_path, c
 			samba_right = DEFAULT_SAMBA_RIGHT;
 			ftp_right = DEFAULT_FTP_RIGHT;
 			dms_right = DEFAULT_DMS_RIGHT;
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 			webdav_right = DEFAULT_WEBDAV_RIGHT;
 #endif
 		}
@@ -1363,12 +1363,12 @@ extern int add_folder(const char *const account, const char *const mount_path, c
 			samba_right = 0;
 			ftp_right = 0;
 			dms_right = 0;
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 			webdav_right = 0;
 #endif
 		}
 		
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 		fprintf(fp, "%s%d%d%d%d\n", target, samba_right, ftp_right, dms_right, webdav_right);
 #else
 		fprintf(fp, "%s%d%d%d\n", target, samba_right, ftp_right, dms_right);

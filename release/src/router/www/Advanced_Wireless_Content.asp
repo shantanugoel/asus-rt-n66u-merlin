@@ -9,7 +9,7 @@
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
 
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_1_1#></title>
+<title><#Web_Title#> - <#menu5_1_1#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="usp_style.css">
@@ -30,24 +30,27 @@ var wireless = [<% wl_auth_list(); %>];	// [[MAC, associated, authorized], ...]
 
 function initial(){
 	show_menu();	
-	load_body();
+	load_body();	
 
 	if(sw_mode == 2 && '<% nvram_get("wl_unit"); %>' == '<% nvram_get("wlc_band"); %>' && '<% nvram_get("wl_subunit"); %>' != '1'){
 		_change_wl_unit('<% nvram_get("wl_unit"); %>');
 	}
 
-	insertExtChannelOption();		
+	insertExtChannelOption();
 	wl_auth_mode_change(1);
 	//mbss_display_ctrl();
-
-	document.form.wl_ssid.value = decodeURIComponent(document.form.wl_ssid_org.value);
-	document.form.wl_wpa_psk.value = decodeURIComponent(document.form.wl_wpa_psk_org.value);
-	document.form.wl_key1.value = decodeURIComponent(document.form.wl_key1_org.value);
-	document.form.wl_key2.value = decodeURIComponent(document.form.wl_key2_org.value);
-	document.form.wl_key3.value = decodeURIComponent(document.form.wl_key3_org.value);
-	document.form.wl_key4.value = decodeURIComponent(document.form.wl_key4_org.value);
-	document.form.wl_phrase_x.value = decodeURIComponent(document.form.wl_phrase_x_org.value);
+	
+	document.form.wl_ssid.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl_ssid"); %>');
+	document.form.wl_wpa_psk.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl_wpa_psk"); %>');
+	document.form.wl_key1.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl_key1"); %>');
+	document.form.wl_key2.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl_key2"); %>');
+	document.form.wl_key3.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl_key3"); %>');
+	document.form.wl_key4.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl_key4"); %>');
+	document.form.wl_phrase_x.value = decodeURIComponent('<% nvram_char_to_ascii("", "wl_phrase_x"); %>');
 	document.form.wl_channel.value = document.form.wl_channel_orig.value;
+	
+	if(document.form.wl_wpa_psk.value.length <= 0)
+		document.form.wl_wpa_psk.value = Untranslated.wireless_psk_fillin;
 
 	if(document.form.wl_unit[0].selected == true)
 		$("wl_gmode_checkbox").style.display = "";
@@ -68,7 +71,9 @@ function initial(){
 		$("wl_unit_field").style.display = "none";
 
 	if(sw_mode == 2)
-		document.form.wl_subunit.value = ('<% nvram_get("wl_unit"); %>' == '<% nvram_get("wlc_band"); %>') ? 1 : -1;
+		document.form.wl_subunit.value = ('<% nvram_get("wl_unit"); %>' == '<% nvram_get("wlc_band"); %>') ? 1 : -1;	
+		
+	automode_hint();	
 }
 
 function mbss_display_ctrl(){
@@ -99,7 +104,7 @@ function add_options_value(o, arr, orig){
 function applyRule(){
 	var auth_mode = document.form.wl_auth_mode_x.value;
 	
-	if(document.form.wl_wpa_psk.value == "Please type Password")
+	if(document.form.wl_wpa_psk.value == Untranslated.wireless_psk_fillin)
 		document.form.wl_wpa_psk.value = "";
 
 	if(validForm()){
@@ -236,8 +241,6 @@ function _change_wl_unit(val){
 <input type="hidden" name="firmver" value="<% nvram_get("firmver"); %>">
 <input type="hidden" name="wps_mode" value="<% nvram_get("wps_mode"); %>">
 <input type="hidden" name="wps_config_state" value="<% nvram_get("wps_config_state"); %>">
-<input type="hidden" name="wl_ssid_org" value="<% nvram_char_to_ascii("WLANConfig11b", "wl_ssid"); %>">
-<input type="hidden" name="wlc_ure_ssid_org" value="<% nvram_char_to_ascii("WLANConfig11b", "wlc_ure_ssid"); %>" disabled>
 <input type="hidden" name="wl_wpa_mode" value="<% nvram_get("wl_wpa_mode"); %>">
 <input type="hidden" name="wl_wpa_psk_org" value="<% nvram_char_to_ascii("WLANConfig11b", "wl_wpa_psk"); %>">
 <input type="hidden" name="wl_key1_org" value="<% nvram_char_to_ascii("WLANConfig11b", "wl_key1"); %>">
@@ -326,7 +329,7 @@ function _change_wl_unit(val){
 					<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(0, 4);"><#WLANConfig11b_x_Mode11g_itemname#></a></th>
 					<td>									
 						<select name="wl_nmode_x" class="input_option" onChange="return change_common(this, 'WLANConfig11b', 'wl_nmode_x');">
-							<option value="0" <% nvram_match("wl_nmode_x", "0","selected"); %>>Auto</option>
+							<option value="0" <% nvram_match("wl_nmode_x", "0","selected"); %>><#Auto#></option>
 							<option value="1" <% nvram_match("wl_nmode_x", "1","selected"); %>>N Only</option>
 							<option value="2" <% nvram_match("wl_nmode_x", "2","selected"); %>>Legacy</option>
 						</select>
@@ -453,7 +456,7 @@ function _change_wl_unit(val){
 			  
 			  	<tr>
 					<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(0, 11);"><#WLANConfig11b_x_Rekey_itemname#></a></th>
-					<td><input type="text" maxlength="7" name="wl_wpa_gtk_rekey" class="input_6_table"  value="<% nvram_get("wl_wpa_gtk_rekey"); %>" onKeyPress="return is_number(this,event);" onblur="validate_number_range(this, 0, 259200)"></td>
+					<td><input type="text" maxlength="7" name="wl_wpa_gtk_rekey" class="input_6_table"  value="<% nvram_get("wl_wpa_gtk_rekey"); %>" onKeyPress="return is_number(this,event);"></td>
 			  	</tr>
 		  	</table>
 			  

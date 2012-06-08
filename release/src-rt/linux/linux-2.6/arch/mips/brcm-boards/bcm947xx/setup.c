@@ -276,33 +276,6 @@ plat_mem_setup(void)
 }
 
 #ifdef CONFIG_MTD_PARTITIONS
-
-enum {
-	RT_UNKNOWN,
-	RT_DIR320,	// D-Link DIR-320
-	RT_WNR3500L,	// Netgear WNR3500v2/U/L
-	RT_WNR2000V2	// Netgear WNR2000v2
-};
-
-static int get_router(void)
-{
-	uint boardnum = bcm_strtoul(nvram_safe_get("boardnum"), NULL, 0);
-	uint boardrev = bcm_strtoul(nvram_safe_get("boardrev"), NULL, 0);
-	uint boardtype = bcm_strtoul(nvram_safe_get("boardtype"), NULL, 0);
-
-	if ((boardnum == 1 || boardnum == 3500) && boardtype == 0x4CF && (boardrev == 0x1213 || boardrev == 2)) {
-		return RT_WNR3500L;
-	}
-	else if (boardnum == 1 && boardtype == 0xE4CD && boardrev == 0x1700) {
-		return RT_WNR2000V2;
-	}
-	else if (boardnum == 0 && boardtype == 0x48E && boardrev == 0x35) {
-		return RT_DIR320;
-	}
-
-	return RT_UNKNOWN;
-}
-
 static size_t get_erasesize(struct mtd_info *mtd, size_t offset, size_t size)
 {
 	int i;
@@ -312,7 +285,7 @@ static size_t get_erasesize(struct mtd_info *mtd, size_t offset, size_t size)
 	if (mtd->numeraseregions > 1) {
 		regions = mtd->eraseregions;
 
-		// Find the first erase regions which is part of this partition
+		/* Find the first erase regions which is part of this partition */
 		for (i = 0; i < mtd->numeraseregions && offset >= regions[i].offset; i++);
 
 		for (i--; i < mtd->numeraseregions && offset + size > regions[i].offset; i++) {
@@ -333,17 +306,11 @@ static size_t get_erasesize(struct mtd_info *mtd, size_t offset, size_t size)
 	+--------------+
 	| boot         |
 	+---+----------+	< search for HDR0
-	|   |          |
-	|   | (kernel) |
-	| l |          |
+	| l | kernel   |
 	| i +----------+	< + trx->offset[1]
-	| n |          |
-	| u | rootfs   |
-	| x |          |
-	+   +----------+	< + trx->len
-	|   | jffs2    |
-	+---+----------+	< size - NVRAM_SPACE - board_data_size()
-	| board_data   |
+	| n | rootfs   |
+	+ u +----------+	< + trx->len + gap
+	| x | jffs2    |
 	+--------------+ 	< size - NVRAM_SPACE
 	| nvram        |
 	+--------------+	< size
@@ -353,69 +320,45 @@ static struct mtd_partition bcm947xx_parts[] = {
 	{ name: "pmon", offset: 0, size: 0, },
 	{ name: "linux", offset: 0, size: 0, },
 	{ name: "rootfs", offset: 0, size: 0, mask_flags: MTD_WRITEABLE, },
-	{ name: "jffs2", offset: 0, size: 0, },
 	{ name: "nvram", offset: 0, size: 0, },
-	{ name: "board_data", offset: 0, size: 0, },
+	{ name: "jffs2", offset: 0, size: 0, },
 	{ name: NULL, },
 };
 
-#define PART_BOOT	0
-#define PART_LINUX	1
-#define PART_ROOTFS	2
-#define PART_JFFS2	3
-#define PART_NVRAM	4
-#define PART_BOARD	5
+enum {
+	PART_BOOT = 0,
+	PART_LINUX,
+	PART_ROOTFS,
+	PART_NVRAM,
+	PART_JFFS2,
+	PART_COUNT
+};
+
+#define PART_JFFS2_MIN 5
+#define PART_JFFS2_GAP 0x40000UL /* 256K, power of 2 */
 
 struct mtd_partition *
 init_mtd_partitions(struct mtd_info *mtd, size_t size)
 {
-	int router;
 	struct trx_header *trx;
 	unsigned char buf[512];
 	size_t off, trxoff, boardoff;
-	size_t crclen;
 	size_t len;
 	size_t trxsize;
-
-	crclen = 0;
 
 	/* Find and size nvram */
 	bcm947xx_parts[PART_NVRAM].size = ROUNDUP(NVRAM_SPACE, mtd->erasesize);
 	bcm947xx_parts[PART_NVRAM].offset = size - bcm947xx_parts[PART_NVRAM].size;
 
+	/* Fine-tune nvram size */
+	len = get_erasesize(mtd, bcm947xx_parts[PART_NVRAM].offset, bcm947xx_parts[PART_NVRAM].size);
+	if (len < mtd->erasesize) {
+		bcm947xx_parts[PART_NVRAM].size = ROUNDUP(NVRAM_SPACE, len);
+		bcm947xx_parts[PART_NVRAM].offset = size - bcm947xx_parts[PART_NVRAM].size;
+	}
+
 	/* Size board_data */
 	boardoff = bcm947xx_parts[PART_NVRAM].offset;
-	router = get_router();
-	switch (router) {
-	case RT_DIR320:
-		if (get_erasesize(mtd, bcm947xx_parts[PART_NVRAM].offset, bcm947xx_parts[PART_NVRAM].size) == 0x2000) {
-			bcm947xx_parts[PART_NVRAM].size = ROUNDUP(NVRAM_SPACE, 0x2000);
-			bcm947xx_parts[PART_NVRAM].offset = size - bcm947xx_parts[PART_NVRAM].size;
-			bcm947xx_parts[PART_BOARD].size = 0x2000; // 8 KB
-			bcm947xx_parts[PART_BOARD].offset = bcm947xx_parts[PART_NVRAM].offset - bcm947xx_parts[PART_BOARD].size;
-		}
-		else bcm947xx_parts[PART_BOARD].name = NULL;
-		break;
-	case RT_WNR3500L:
-	case RT_WNR2000V2:
-		bcm947xx_parts[PART_BOARD].size = mtd->erasesize;
-		boardoff -= bcm947xx_parts[PART_BOARD].size;
-		bcm947xx_parts[PART_BOARD].offset = boardoff;
-		boardoff -= 5 * mtd->erasesize;
-		if (size <= 4 * 1024 * 1024) {
-			// 4MB flash
-			bcm947xx_parts[PART_JFFS2].offset = boardoff;
-			bcm947xx_parts[PART_JFFS2].size = bcm947xx_parts[PART_BOARD].offset - bcm947xx_parts[PART_JFFS2].offset;
-		}
-		else {
-			// 8MB or larger flash, exclude 1 block for Netgear CRC
-			crclen = mtd->erasesize;
-		}
-		break;
-	default:
-		bcm947xx_parts[PART_BOARD].name = NULL;
-		break;
-	}
 
 	trxsize = 0;
 	trx = (struct trx_header *) buf;
@@ -431,24 +374,38 @@ init_mtd_partitions(struct mtd_info *mtd, size_t size)
 			/* Size pmon */
 			bcm947xx_parts[PART_BOOT].size = off;
 
-			/* Size linux (kernel and rootfs) */
+			/* Size linux (kernel and rootfs, including any remaining space) */
 			bcm947xx_parts[PART_LINUX].offset = off;
 			bcm947xx_parts[PART_LINUX].size = boardoff - off;
 
-			trxsize = ROUNDUP(le32_to_cpu(trx->len), mtd->erasesize);	// kernel + rootfs
-
 			/* Find and size rootfs */
 			trxoff = (le32_to_cpu(trx->offsets[2]) > off) ? trx->offsets[2] : trx->offsets[1];
+			trxsize = ROUNDUP(le32_to_cpu(trx->len), mtd->erasesize); /* kernel + rootfs */
 			bcm947xx_parts[PART_ROOTFS].offset = trxoff + off;
 			bcm947xx_parts[PART_ROOTFS].size = trxsize - trxoff;
 
 			/* Find and size jffs2 */
-			if (bcm947xx_parts[PART_JFFS2].size == 0) {
-				bcm947xx_parts[PART_JFFS2].offset = off + trxsize;
-				if ((boardoff - crclen) > bcm947xx_parts[PART_JFFS2].offset) {
-					bcm947xx_parts[PART_JFFS2].size = boardoff - crclen - bcm947xx_parts[PART_JFFS2].offset;
-				}
+			if (boardoff > off + trxsize)
+				bcm947xx_parts[PART_JFFS2].size = boardoff - off - trxsize;
+			len = PART_JFFS2_MIN * mtd->erasesize;
+			if (bcm947xx_parts[PART_JFFS2].size >= len) {
+#if 0 /* Gap jffs2 from rootfs up to 256K */
+				bcm947xx_parts[PART_JFFS2].size -= len;
+				bcm947xx_parts[PART_JFFS2].size &= ~(PART_JFFS2_GAP - 1); // round down
+				bcm947xx_parts[PART_JFFS2].size += len;
+#else /* Temporary compatibility for Boyau */
+				bcm947xx_parts[PART_JFFS2].size = len;
+#endif
+			} else {
+				/* We have 3 variants here:
+				 * 1. hide jffs2 partition
+				bcm947xx_parts[PART_JFFS2].name = NULL;
+				 * 2. set size to zero
+				bcm947xx_parts[PART_JFFS2].size = 0;
+				 * 3. leave it erasesize-aligned with any size, by default
+				 */
 			}
+			bcm947xx_parts[PART_JFFS2].offset = boardoff - bcm947xx_parts[PART_JFFS2].size;
 
 			break;
 		}
@@ -565,16 +522,6 @@ init_mtd_partitions(struct mtd_info *mtd, size_t size)
 			goto done;
 		}
 
-		/* squashfs is at block zero too */
-                if (squashfsb->s_magic == SQUASHFS_MAGIC
-			|| squashfsb->s_magic == SQUASHFS_MAGIC_LZMA) {
-                        printk(KERN_NOTICE
-                               "%s: squashfs filesystem found at block %d\n",
-                               mtd->name, off / BLOCK_SIZE);
-                        goto done;
-                }
-
-
 		/* so is cramfs */
 		if (cramfsb->magic == CRAMFS_MAGIC) {
 			printk(KERN_NOTICE
@@ -583,6 +530,14 @@ init_mtd_partitions(struct mtd_info *mtd, size_t size)
 			goto done;
 		}
 
+		/* squashfs is at block zero too */
+		if (squashfsb->s_magic == SQUASHFS_MAGIC
+			|| squashfsb->s_magic == SQUASHFS_MAGIC_LZMA) {
+			printk(KERN_NOTICE
+			       "%s: squashfs filesystem found at block %d\n",
+			       mtd->name, off / BLOCK_SIZE);
+			goto done;
+                }
 	}
 
 	printk(KERN_NOTICE
@@ -621,5 +576,3 @@ init_mtd_partitions(struct mtd_info *mtd, size_t size)
 EXPORT_SYMBOL(init_mtd_partitions);
 
 #endif
-
-

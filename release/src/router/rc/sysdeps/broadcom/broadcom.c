@@ -55,9 +55,23 @@ char cmd[32];
 int 
 setCommit(void)
 {
+	FILE *fp;
+	char line[32];
+	eval("rm", "-f", "/var/log/commit_ret");
         eval("nvram", "set", "asuscfecommit=");
         eval("nvram", "commit");
-	puts("1");
+	sleep(1);
+	if((fp = fopen("/var/log/commit_ret", "r"))!=NULL) {
+		while(fgets(line, sizeof(line), fp)){
+			if(strstr(line, "OK")) {
+				puts("1");
+				return 1;
+			}
+		}
+	}
+	
+	puts("0");
+
 	return 1;
 }
 
@@ -65,17 +79,45 @@ int
 setMAC_2G(const char *mac)
 {
 	char cmd_l[64];
+	int model;
 
 	if( mac==NULL || !isValidMacAddr(mac) )
 		return 0;
 
+	// generate nvram nvram according to system setting
+	model = get_model();
+
 	eval("killall", "wsc");
-	memset(cmd_l, 0, 64);
-	sprintf(cmd_l, "asuscfeet0macaddr=%s", mac);
-	eval("nvram", "set", cmd_l );
-	sprintf(cmd_l, "asuscfepci/1/1/macaddr=%s", mac);
-	eval("nvram", "set", cmd_l );
-	puts(nvram_safe_get("et0macaddr"));
+
+	switch(model) {
+		case MODEL_RTN12:
+		case MODEL_RTN12B1:
+		case MODEL_RTN12C1:
+		case MODEL_RTN53:
+		case MODEL_RTN15U:
+		case MODEL_RTN10U:
+		case MODEL_RTN16:
+		{
+			memset(cmd_l, 0, 64);
+			sprintf(cmd_l, "asuscfeet0macaddr=%s", mac);
+			eval("nvram", "set", cmd_l );
+			sprintf(cmd_l, "asuscfesb/1/macaddr=%s", mac);
+			eval("nvram", "set", cmd_l );
+			puts(nvram_safe_get("et0macaddr"));
+ 			break;
+		}
+
+		case MODEL_RTN66U:
+		{
+			memset(cmd_l, 0, 64);
+			sprintf(cmd_l, "asuscfeet0macaddr=%s", mac);
+			eval("nvram", "set", cmd_l );
+			sprintf(cmd_l, "asuscfepci/1/1/macaddr=%s", mac);
+			eval("nvram", "set", cmd_l );
+			puts(nvram_safe_get("et0macaddr"));
+ 			break;
+		}
+	}
 	return 1;
 }
 
@@ -83,14 +125,35 @@ int
 setMAC_5G(const char *mac)
 {
 	char cmd_l[64];
+	int model;
+
 	if( mac==NULL || !isValidMacAddr(mac) )
 		return 0;
 
+	// generate nvram nvram according to system setting
+	model = get_model();
+
 	eval("killall", "wsc");
-	memset(cmd_l, 0, 32);
-	sprintf(cmd_l, "asuscfepci/2/1/macaddr=%s", mac);
-	eval("nvram", "set", cmd_l );
-	puts(nvram_safe_get("pci/2/1/macaddr"));
+
+	switch(model) {
+		case MODEL_RTN53:
+		{
+			memset(cmd_l, 0, 64);
+			sprintf(cmd_l, "asuscfe0:macaddr=%s", mac);
+			eval("nvram", "set", cmd_l );
+			puts(nvram_safe_get("0:macaddr"));
+ 			break;
+		}
+
+		case MODEL_RTN66U:
+		{
+			memset(cmd_l, 0, 64);
+			sprintf(cmd_l, "asuscfepci/2/1/macaddr=%s", mac);
+			eval("nvram", "set", cmd_l );
+			puts(nvram_safe_get("pci/2/1/macaddr"));
+ 			break;
+		}
+	}
 	return 1;
 }
 
@@ -125,28 +188,76 @@ setCountryCode_5G(const char *cc)
 int
 setRegrev_2G(const char *regrev)
 {
+	int model;
+
 	if( regrev==NULL || !isValidRegrev(regrev) )
 		return 0;
 
-        eval("killall", "wsc");
-        memset(cmd, 0, 32);
-        sprintf(cmd, "asuscfepci/1/1/regrev=%s", regrev);
-        eval("nvram", "set", cmd );
-	puts(nvram_safe_get("pci/1/1/regrev"));
+	// generate nvram nvram according to system setting
+	model = get_model();
+
+	eval("killall", "wsc");
+
+	switch(model) {
+		case MODEL_RTN12:
+		case MODEL_RTN12B1:
+		case MODEL_RTN12C1:
+		case MODEL_RTN53:
+		case MODEL_RTN15U:
+		case MODEL_RTN10U:
+		case MODEL_RTN16:
+		{
+			memset(cmd, 0, 32);
+			sprintf(cmd, "asuscfesb/1/regrev=%s", regrev);
+			eval("nvram", "set", cmd );
+			puts(nvram_safe_get("sb/1/regrev"));
+			break;
+		}
+
+		case MODEL_RTN66U:
+		{
+			memset(cmd, 0, 32);
+			sprintf(cmd, "asuscfepci/1/1/regrev=%s", regrev);
+			eval("nvram", "set", cmd );
+			puts(nvram_safe_get("pci/1/1/regrev"));
+			break;
+		}
+	}
 	return 1;
 }
 
 int
 setRegrev_5G(const char *regrev)
 {
-        if( regrev==NULL || !isValidRegrev(regrev) )
-                return 0;
+	int model;
 
-        eval("killall", "wsc");
-        memset(cmd, 0, 32);
-        sprintf(cmd, "asuscfepci/2/1/regrev=%s", regrev);
-        eval("nvram", "set", cmd );
-        puts(nvram_safe_get("pci/2/1/regrev"));
+	if( regrev==NULL || !isValidRegrev(regrev) )
+		return 0;
+
+	// generate nvram nvram according to system setting
+	model = get_model();
+
+	eval("killall", "wsc");
+
+	switch(model) {
+		case MODEL_RTN53:
+		{
+			memset(cmd, 0, 32);
+			sprintf(cmd, "asuscfe0:regrev=%s", regrev);
+			eval("nvram", "set", cmd );
+			puts(nvram_safe_get("0:regrev"));
+			break;
+		}
+
+		case MODEL_RTN66U:
+		{
+			memset(cmd, 0, 32);
+			sprintf(cmd, "asuscfepci/2/1/regrev=%s", regrev);
+			eval("nvram", "set", cmd );
+			puts(nvram_safe_get("pci/2/1/regrev"));
+			break;
+		}
+	}
 	return 1;
 }
 
@@ -399,13 +510,34 @@ getMAC_2G() {
 
 int
 getMAC_5G() {
-        puts(nvram_safe_get("pci/2/1/macaddr"));
-        return 0;
+	int model;
+
+	// generate nvram nvram according to system setting
+	model = get_model();
+
+	switch(model) {
+		case MODEL_RTN53:
+		{
+			puts(nvram_safe_get("0:macaddr"));
+			break;
+		}
+
+		case MODEL_RTN66U:
+		{
+			puts(nvram_safe_get("pci/2/1/macaddr"));
+			break;
+		}
+	}
+	return 0;
 }
 
 int 
 getBootVer(void) {
-	puts(nvram_safe_get("bl_version"));
+	char buf[32];
+	memset(buf, 0, 32);
+	
+	sprintf(buf,"%s-%s",nvram_safe_get("productid"),nvram_safe_get("bl_version"));
+	puts(buf);
 	return 0;
 }
 
@@ -429,13 +561,53 @@ getCountryCode_5G(void) {
 
 int 
 getRegrev_2G(void) {
-	puts(nvram_safe_get("pci/1/1/regrev"));
+	int model;
+
+	// generate nvram nvram according to system setting
+	model = get_model();
+
+	switch(model) {
+		case MODEL_RTN12:
+		case MODEL_RTN12B1:
+		case MODEL_RTN12C1:
+		case MODEL_RTN53:
+		case MODEL_RTN15U:
+		case MODEL_RTN10U:
+		case MODEL_RTN16:
+		{
+			puts(nvram_safe_get("sb/1/regrev"));
+			break;
+		}
+
+		case MODEL_RTN66U:
+		{
+			puts(nvram_safe_get("pci/1/1/regrev"));
+			break;
+		}
+	}
 	return 0;
 }
 
 int
 getRegrev_5G(void) {
-        puts(nvram_safe_get("pci/2/1/regrev"));
+	int model;
+
+	// generate nvram nvram according to system setting
+	model = get_model();
+
+	switch(model) {
+		case MODEL_RTN53:
+		{
+			puts(nvram_safe_get("0:regrev"));
+			break;
+		}
+
+		case MODEL_RTN66U:
+		{
+			puts(nvram_safe_get("pci/2/1/regrev"));
+			break;
+		}
+	}
 	return 0;
 }
 
@@ -509,5 +681,53 @@ Get_SD_Card_Folder(void)
                 puts("N/A");
 
         return 1;
+}
+
+int setSN(const char *SN)
+{
+	char cmd_l[64];
+
+	if(SN==NULL || !isValidSN(SN))
+		return 0;
+
+        memset(cmd_l, 0, 64);
+        sprintf(cmd_l, "asuscfeserial_no=%s", SN);
+        eval("nvram", "set", cmd_l );
+        puts(nvram_safe_get("serial_no"));
+        return 1;
+}
+
+int getSN(void)
+{
+	puts(nvram_safe_get("serial_no"));
+	return 0;
+}
+
+void
+Get_fail_ret(void)
+{
+	puts(nvram_safe_get("Ate_power_on_off_ret"));
+}
+
+void
+Get_fail_reboot_log(void)
+{
+	puts(nvram_safe_get("Ate_fail_reboot_log"));
+}
+
+void
+Get_fail_dev_log(void)
+{
+	puts(nvram_safe_get("Ate_fail_dev_log"));
+}
+
+
+void ate_commit_bootlog(char *err_code) {
+	nvram_set("Ate_power_on_off_enable", err_code);
+	nvram_commit();
+	nvram_set("asuscfeAte_power_on_off_ret", err_code);
+	nvram_set("asuscfeAte_fail_reboot_log", nvram_get("Ate_reboot_log"));
+	nvram_set("asuscfeAte_fail_dev_log", nvram_get("Ate_dev_log"));
+	nvram_set("asuscfecommit=", "1");
 }
 

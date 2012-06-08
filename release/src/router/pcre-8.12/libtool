@@ -2,7 +2,7 @@
 
 # libtool - Provide generalized library-building support services.
 # Generated automatically by config.status (pcre) 8.12
-# Libtool was configured on host wireless-pub1:
+# Libtool was configured on host ubuntu-dev:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
 #   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,
@@ -77,7 +77,7 @@ host_os=linux-gnu
 
 # The build system.
 build_alias=
-build=i686-pc-linux-uclibc
+build=x86_64-unknown-linux-uclibc
 build_os=linux-uclibc
 
 # A sed program that does not truncate output.
@@ -102,7 +102,7 @@ NM="mipsel-uclibc-nm"
 LN_S="ln -s"
 
 # What is the maximum length of a command?
-max_cmd_len=805306365
+max_cmd_len=3458764513820540925
 
 # Object file suffix (normally "o").
 objext=o
@@ -243,10 +243,10 @@ finish_eval=""
 hardcode_into_libs=yes
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/home/gitserv_asus/project/asuswrt/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/lib/gcc/mipsel-linux-uclibc/4.2.4 /home/gitserv_asus/project/asuswrt/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/lib/gcc /home/gitserv_asus/project/asuswrt/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/mipsel-linux-uclibc/lib "
+sys_lib_search_path_spec="/root/git/asus-rt-n66u-merlin/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/lib/gcc/mipsel-linux-uclibc/4.2.4 /root/git/asus-rt-n66u-merlin/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/lib/gcc /root/git/asus-rt-n66u-merlin/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/mipsel-linux-uclibc/lib "
 
 # Run-time system search path for libraries.
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/fglrx /lib/i386-linux-gnu /usr/lib/i386-linux-gnu /lib/i686-linux-gnu /usr/lib/i686-linux-gnu /usr/lib/alsa-lib /usr/local/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/mesa /usr/lib32/mesa /usr/lib32/alsa-lib /usr/lib/alsa-lib /usr/local/lib /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu "
 
 # Whether dlopen is supported.
 dlopen_support=unknown
@@ -9396,17 +9396,17 @@ file_list_spec=""
 hardcode_action=immediate
 
 # The directories searched by this compiler when creating a shared library.
-compiler_lib_search_dirs="/home/gitserv_asus/project/asuswrt/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4 /home/gitserv_asus/project/asuswrt/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc /home/gitserv_asus/project/asuswrt/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4/../../../../mipsel-linux-uclibc/lib"
+compiler_lib_search_dirs="/root/git/asus-rt-n66u-merlin/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4 /root/git/asus-rt-n66u-merlin/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc /root/git/asus-rt-n66u-merlin/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4/../../../../mipsel-linux-uclibc/lib"
 
 # Dependencies to place before and after the objects being linked to
 # create a shared library.
-predep_objects="/home/gitserv_asus/project/asuswrt/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4/../../../../mipsel-linux-uclibc/lib/crti.o /home/gitserv_asus/project/asuswrt/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4/crtbeginS.o"
-postdep_objects="/home/gitserv_asus/project/asuswrt/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4/crtendS.o /home/gitserv_asus/project/asuswrt/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4/../../../../mipsel-linux-uclibc/lib/crtn.o"
+predep_objects="/root/git/asus-rt-n66u-merlin/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4/../../../../mipsel-linux-uclibc/lib/crti.o /root/git/asus-rt-n66u-merlin/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4/crtbeginS.o"
+postdep_objects="/root/git/asus-rt-n66u-merlin/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4/crtendS.o /root/git/asus-rt-n66u-merlin/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4/../../../../mipsel-linux-uclibc/lib/crtn.o"
 predeps=""
 postdeps="-lstdc++ -lm -lgcc_s -lc -lgcc_s"
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path="-L/home/gitserv_asus/project/asuswrt/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4 -L/home/gitserv_asus/project/asuswrt/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc -L/home/gitserv_asus/project/asuswrt/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4/../../../../mipsel-linux-uclibc/lib"
+compiler_lib_search_path="-L/root/git/asus-rt-n66u-merlin/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4 -L/root/git/asus-rt-n66u-merlin/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc -L/root/git/asus-rt-n66u-merlin/tools/brcm/K26/hndtools-mipsel-uclibc-4.2.4/bin/../lib/gcc/mipsel-linux-uclibc/4.2.4/../../../../mipsel-linux-uclibc/lib"
 
 # ### END LIBTOOL TAG CONFIG: CXX

@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_6_1_title#></title>
+<title><#Web_Title#> - <#menu5_6_1_title#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="usp_style.css">
@@ -32,7 +32,7 @@ function initial(){
 	setScenerion(sw_mode);
 	Senario_shift();
 	if(repeater_support < 0)
-		$("repeaterMode").style.display = "none";
+			$("repeaterMode").style.display = "none";
 }
 
 function Senario_shift(){
@@ -44,7 +44,7 @@ function Senario_shift(){
 
 function saveMode(){
 	if('<% nvram_get("sw_mode"); %>' == document.form.sw_mode.value){
-		alert("<#Web_Title#> <#op_already_configured#>");
+		alert("<#Web_Title2#> <#op_already_configured#>");
 		return false;
 	}
 
@@ -53,7 +53,10 @@ function saveMode(){
 		return false;
 	}
 	else if(document.form.sw_mode.value == 2){
-		parent.location.href = '/QIS_wizard.htm?flag=sitesurvey';
+		if(sw_mode == 3)
+			parent.location.href = '/QIS_wizard.htm?flag=sitesurvey';
+		else
+			parent.location.href = 'http://www.asusnetwork.net/QIS_wizard.htm?flag=sitesurvey';
 		return false;
 	}
 	else{ // default router
@@ -118,7 +121,7 @@ $j("#Senario").css("background", "url(/images/New_ui/ap.jpg) center");
 		$j("#Internet_span").css("display", "block");
 		$j("#ap-line").css("display", "none");
 		$j("#AP").html("<#Device_type_02_RT#>");
-		$j("#mode_desc").html('<#OP_AP_desc#><br/>'+Untranslated.deviceDiscorvy);
+		$j("#mode_desc").html("<#OP_AP_desc#><br/><span style=\"color:#FC0\"><#deviceDiscorvy#></span>");
 		$j("#nextButton").attr("value","<#CTL_next#>");
 		clearTimeout(id_WANunplungHint);
 		$j("#Unplug-hint").css("display", "none");

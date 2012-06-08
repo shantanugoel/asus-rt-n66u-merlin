@@ -4,6 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
+<script type="text/javascript" src="/help.js"></script>
 <link type="text/css" rel="stylesheet" href="/qis/qis_style.css">
 <link type="text/css" rel="stylesheet" href="/form_style.css">
 <style>
@@ -12,7 +13,6 @@
 	font-size:13px;
 	font-weight:bolder;
 	color:#FFFFFF;
-	/*background-color:#C0DAE4;*/
 }
 </style>
 <script type="text/JavaScript" src="/jquery.js"></script>
@@ -28,7 +28,7 @@ var RetryCountDown_fail = 5;
 
 function QKDetect_load_body(){
 	parent.set_step("t1");
-	parent.document.title = "ASUS Wireless Router <#Web_Title#> - <#QKSet_detect_sanglass#>";
+	parent.document.title = "<#Web_Title#> - <#QKSet_detect_sanglass#>";
 	getWANStatus();
 }
 
@@ -58,7 +58,7 @@ function getWANStatus(){
 					--RetryCountDown;
 
 				if(RetryCountDown < 1){
-					if(confirm("Detect time out! Do you want to restart internet detector?")){
+					if(confirm(Untranslated.QKSet_detect_timeout)){
 						RetryCountDown = 5;
 						getWANStatus();
 					}

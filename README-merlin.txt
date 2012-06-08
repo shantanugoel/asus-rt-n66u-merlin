@@ -1,4 +1,4 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.108.7 (27-May-2012)
+Asus RT-N66U Modded Firmware - build 3.0.0.3.130.8 (XX-Jun-2012)
 ================================================================
 
 About
@@ -21,7 +21,7 @@ The list of changes (so far):
 - Added SSHD (dropbear, configurable under Administration->Advanced->System)
 - Clicking on the MAC address of an unidentified client will do a lookup in
   the OUI database (ported from DD-WRT).
-- Enabled HTTPS access to web interface (with certain limitations)
+- Enabled HTTPS access to web interface
 - Start crond at boot time
 - Optionally turn the WPS button into a radio enable/disable switch
 - Optionally save traffic stats to disk (USB or JFFS partition)
@@ -107,11 +107,6 @@ I re-enabled HTTPS access in the firmware.  From the Administration->System
 page you can configure your router so it accepts connections on http, https 
 or both.  You can also change the https port to a different one 
 (default is 8443).
-
-There's currently an issue preventing you from flashing the FW or 
-restoring your settings from a saved file over https - you have 
-to use the regular http webui for now.  This is a bug in 
-Asus' original code that I have been unable to fix so far.
 
 
 * WPS button mode - toggle radio *
@@ -203,6 +198,29 @@ The "merlin" branch contains my modifications to the Asus firmware.
 
 History
 -------
+
+3.0.0.3.130.8:
+*** Reverting to factory defaults BEFORE and AFTER flashing
+this version is strongly recommended!  The newer Asus code base 
+seems to have changed quite a few settings, so you'll want to 
+not only start with the new default values, but also get rid 
+of obsolete settings.  Otherwise you will be wasting a 
+good amount of the limited nvram available! ***
+
+   - NEW: Rebased patches on 3.0.0.4.130 (RT-N53U sources).
+          Build 130 brings various code changes to IPv6, not sure 
+          what else (as I have no changelog between 108 and 130).
+   - NEW: Added "diff" utility
+   - FIXED: Firmware/settings can now be uploaded over HTTPS
+            (bug fixed by Asus)
+   - FIXED: Buffer overflow in networkmap that would cause garbled 
+            device names to appear on the clists list (bug in
+            Asus's code)
+   - FIXED: Firewall would break when applying a game preset that 
+            had multiple ports separated by a "," (bug in Asus's
+            code)
+   - FIXED: WOL through webui wasn't working when IPv6 is enabled
+
 
 3.0.0.3.108.7:
    - NEW: Added no-ip.com support to DDNS (patch submitted by Igor Pavlov)

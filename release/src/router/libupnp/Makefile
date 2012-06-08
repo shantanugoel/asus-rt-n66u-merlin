@@ -30,8 +30,13 @@ SRCFILES = upnp.c upnp_ssdp.c upnp_http.c upnp_gena.c upnp_soap.c \
 
 OBJFILES = ${SRCFILES:.c=.o}
 
+ifneq ($(wildcard ./prebuilt),)
+all:
+	cp -f ./prebuilt/$(UPNPLIB_NAME) .
+else
 all: $(OBJFILES)
 	$(LD) -shared -o $(UPNPLIB_NAME) $^
+endif
 
 install: all
 	install -d $(INSTALLDIR)/usr/lib

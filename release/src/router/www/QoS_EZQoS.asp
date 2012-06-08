@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -7,7 +7,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#EZQoS#></title>
+<title><#Web_Title#> - <#EZQoS#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="usp_style.css">
@@ -78,21 +78,28 @@ function switchPage(page){
 }
 
 function submitQoS(){
-
 	if(document.form.qos_enable.value == 1){
-			if(document.form.qos_obw.value < 0 || document.form.qos_ibw.value < 0)
-			return false;
-			
-			if($("qos_obw_scale").value == "Mb/s")
-					document.form.qos_obw.value = Math.round(document.form.qos_obw.value*1024);
-
-			if($("qos_ibw_scale").value == "Mb/s")
-					document.form.qos_ibw.value = Math.round(document.form.qos_ibw.value*1024);
-					
+		// Jieming To Do: please add a hint here when error occurred, and qos_ibw & qos_obw should allow number only.
+		if(document.form.qos_obw.value.length == 0 || document.form.qos_obw.value == 0){
+				alert("<#JS_fieldblank#>");
+				document.form.qos_obw.focus();
+				return;
+		}
+		if(document.form.qos_ibw.value.length == 0 || document.form.qos_ibw.value == 0){
+				alert("<#JS_fieldblank#>");
+				document.form.qos_ibw.focus();
+				return;
+		}
+		// end
   }	
+
+	if($("qos_obw_scale").value == "Mb/s")
+		document.form.qos_obw.value = Math.round(document.form.qos_obw.value*1024);
+	if($("qos_ibw_scale").value == "Mb/s")
+		document.form.qos_ibw.value = Math.round(document.form.qos_ibw.value*1024);
   
 	if(document.form.qos_enable.value != document.form.qos_enable_orig.value)
-    	FormActions("start_apply.htm", "apply", "reboot", "30");
+    	FormActions("start_apply.htm", "apply", "reboot", "<% get_default_reboot_time(); %>");
 			
 	parent.showLoading();
 	document.form.submit();	
@@ -110,7 +117,6 @@ function submitQoS(){
 <form method="post" name="form" action="/start_apply.htm" target="hidden_frame">
 <input type="hidden" name="preferred_lang" id="preferred_lang" value="<% nvram_get("preferred_lang"); %>">
 <input type="hidden" name="firmver" value="<% nvram_get("firmver"); %>">
-
 <input type="hidden" name="current_page" value="QoS_EZQoS.asp">
 <input type="hidden" name="next_page" value="QoS_EZQoS.asp">
 <input type="hidden" name="group_id" value="">

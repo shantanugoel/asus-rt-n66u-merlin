@@ -51,19 +51,21 @@ int check_process_exist(int pid){
 	return test_if_dir(path);
 }
 
-int start_pppd(char *prefix)
+int start_pppd(int unit)
 {
-	int ret, unit;
+	int ret;
+	
 	FILE *fp;
 	char options[80];
-	char *pppd_argv[] = { "/usr/sbin/pppd", "file", options, "nodetach", NULL};
-	char tmp[100], tmp1[32];
+	char *pppd_argv[] = { "/usr/sbin/pppd", "file", options, NULL};
+	char *l2tpd_argv[] = { "/usr/sbin/l2tpd", "-f", NULL};
+	char tmp[100], tmp1[32], prefix[] = "wanXXXXXXXXXX_";
 	mode_t mask;
 	int pid;
 
-_dprintf("%s: prefix=%s.\n", __FUNCTION__, prefix);
+_dprintf("%s: unit=%d.\n", __FUNCTION__, unit);
 
-	unit = nvram_get_int(strcat_r(prefix, "unit", tmp));
+	snprintf(prefix, sizeof(prefix), "wan%d_", unit);
 	sprintf(options, "/tmp/ppp/options.wan%d", unit);
 
 	mask = umask(0000);
@@ -115,6 +117,13 @@ _dprintf("%s: prefix=%s.\n", __FUNCTION__, prefix);
 
 	if (nvram_match(strcat_r(prefix, "proto", tmp), "pppoe"))
 	{
+#ifdef RTCONFIG_DSL	
+		FILE* fp_dsl_mac;
+		char buf_mac[32];
+		int trp_cnt;
+		int rm_cnt;
+#endif
+		
 		fprintf(fp, "plugin rp-pppoe.so");
 
 		if (nvram_invmatch(strcat_r(prefix, "pppoe_service", tmp), "")) {
@@ -132,25 +141,58 @@ _dprintf("%s: prefix=%s.\n", __FUNCTION__, prefix);
 		fprintf(fp, "mru %s mtu %s\n",
 			nvram_safe_get(strcat_r(prefix, "pppoe_mru", tmp)),
 			nvram_safe_get(strcat_r(prefix, "pppoe_mtu", tmp)));
+
+
+	// wait 10 seconds for DSL MAC address file ready
+#ifdef RTCONFIG_DSL
+		if (nvram_match("dsl0_proto", "pppoa"))
+		{
+			strcpy(buf_mac, "00:11:22:33:44:55");
+			for (trp_cnt = 0; trp_cnt < 10; trp_cnt++)
+			{
+				fp_dsl_mac = fopen("/tmp/adsl/tc_mac.txt","r");
+				if (fp_dsl_mac != NULL)
+				{
+					fgets(buf_mac,sizeof(buf_mac),fp_dsl_mac);
+					fclose(fp_dsl_mac);					 
+					break;
+				}
+				usleep(1000*1000);				
+			}
+			// remove cr lf in buf_mac
+            for (rm_cnt = 0; rm_cnt < sizeof(buf_mac); rm_cnt++)
+            {
+            	if (buf_mac[rm_cnt] == 0) break;
+            	if (buf_mac[rm_cnt] == 0x0a || buf_mac[rm_cnt] == 0x0d)
+            	{
+            		buf_mac[rm_cnt]=0;
+            		break;
+        		}
+            }			
+			fprintf(fp, "rp_pppoe_sess %d:%s\n", 154, buf_mac);									
+		}
+#endif		
+			
 	}
 
-	ret = nvram_get_int(strcat_r(prefix, "pppoe_idletime", tmp));
-	if (ret && nvram_match(strcat_r(prefix, "pppoe_demand", tmp), "1"))
-	{
-		fprintf(fp, "idle %d ", ret);
-		if (nvram_invmatch(strcat_r(prefix, "pppoe_txonly_x", tmp), "0"))
-			fprintf(fp, "tx_only ");
-		fprintf(fp, "demand\n");
+	if (nvram_invmatch(strcat_r(prefix, "proto", tmp), "l2tp")){
+		ret = nvram_get_int(strcat_r(prefix, "pppoe_idletime", tmp));
+		if (ret && nvram_match(strcat_r(prefix, "pppoe_demand", tmp), "1"))
+		{
+			fprintf(fp, "idle %d ", ret);
+			if (nvram_invmatch(strcat_r(prefix, "pppoe_txonly_x", tmp), "0"))
+				fprintf(fp, "tx_only ");
+			fprintf(fp, "demand\n");
+		}
+
+		fprintf(fp, "persist\n");
 	}
 
+	fprintf(fp, "holdoff %s\n", nvram_invmatch(strcat_r(prefix, "pppoe_holdoff", tmp), "")?nvram_safe_get(tmp):"10");	// pppd re-call-time(s)
 	fprintf(fp, "maxfail 0\n");
-	fprintf(fp, "holdoff 10\n");	// pppd re-call-time(s)
 
 	if (nvram_invmatch(strcat_r(prefix, "dnsenable_x", tmp), "0"))
 		fprintf(fp, "usepeerdns\n");
-
-	if (nvram_invmatch(strcat_r(prefix, "proto", tmp), "l2tp"))
-		fprintf(fp, "persist\n");
 
 	fprintf(fp, "ipcp-accept-remote ipcp-accept-local noipdefault\n");
 	fprintf(fp, "ktune\n");
@@ -168,11 +210,13 @@ _dprintf("%s: prefix=%s.\n", __FUNCTION__, prefix);
 	fprintf(fp, "lcp-echo-failure 10\n");
 
 	fprintf(fp, "unit %d\n", unit);
+	fprintf(fp, "linkname wan%d\n", unit);
 
 #ifdef RTCONFIG_IPV6
 	switch (get_ipv6_service()) {
 		case IPV6_NATIVE:
 		case IPV6_NATIVE_DHCP:
+		case IPV6_MANUAL:
 			fprintf(fp, "+ipv6\n");
 			break;
         }
@@ -184,10 +228,6 @@ _dprintf("%s: prefix=%s.\n", __FUNCTION__, prefix);
 
 	fclose(fp);
 
-	// backward compatbility to keep interface as unit
-	sprintf(tmp1, "ppp%d", unit);
-	nvram_set(strcat_r(prefix, "pppoe_ifname", tmp), tmp1);
-	
 	if (nvram_match(strcat_r(prefix, "proto", tmp), "l2tp"))
 	{
 		if (!(fp = fopen("/tmp/l2tp.conf", "w"))) {
@@ -225,9 +265,17 @@ _dprintf("%s: prefix=%s.\n", __FUNCTION__, prefix);
 		fclose(fp);
 
 		/* launch l2tp */
-		eval("/usr/sbin/l2tpd");
+		ret = _eval(l2tpd_argv, NULL, 0, &pid);
+		memset(tmp1, 0, 32);
+		sprintf(tmp1, "%d", pid);
+		nvram_set(strcat_r(prefix, "ppp_pid", tmp), tmp1);
 
-		sleep(1);
+		int retry = 3;
+		while(!pids("l2tpd") && retry--){
+			_dprintf("%s: wait l2tpd up at %d seconds...\n", __FUNCTION__, retry);
+			sleep(1);
+		}
+		sleep(1); // when the pid of l2tpd is existed, also need to wait a more second.
 
 		/* start-session */
 		ret = eval("/usr/sbin/l2tp-control", "start-session 0.0.0.0");
@@ -236,14 +284,20 @@ _dprintf("%s: prefix=%s.\n", __FUNCTION__, prefix);
 		/* nopcomp novj novjccomp file /tmp/ppp/options.l2tp */
 
 	} else{
-		char pppd_pid[8];
-		int orig_pid = nvram_get_int(strcat_r(prefix, "pppd_pid", tmp));
+		char pid_file[256], *value;
+		int orig_pid;
 		int wait_time = 0;
-		if(orig_pid > 1){
+
+		memset(pid_file, 0, 256);
+		snprintf(pid_file, 256, "/var/run/ppp-wan%d.pid", unit);
+
+		if((value = file2str(pid_file)) != NULL && (orig_pid = atoi(value)) > 1){
+_dprintf("%s: kill pppd(%d).\n", __FUNCTION__, orig_pid);
+			free(value);
 			kill(orig_pid, SIGHUP);
 			sleep(1);
 			while(check_process_exist(orig_pid) && wait_time < MAX_WAIT_FILE){
-TRACE_PT("kill pppd.\n");
+_dprintf("%s: kill pppd(%d).\n", __FUNCTION__, orig_pid);
 				++wait_time;
 				kill(orig_pid, SIGTERM);
 				sleep(1);
@@ -255,11 +309,7 @@ TRACE_PT("kill pppd.\n");
 			}
 		}
 
-		ret = _eval(pppd_argv, NULL, 0, &pid);
-
-		memset(pppd_pid, 0, 8);
-		sprintf(pppd_pid, "%d", pid);
-		nvram_set(strcat_r(prefix, "pppd_pid", tmp), pppd_pid);
+		ret = _eval(pppd_argv, NULL, 0, NULL);
 	}
 	
 	return 0;

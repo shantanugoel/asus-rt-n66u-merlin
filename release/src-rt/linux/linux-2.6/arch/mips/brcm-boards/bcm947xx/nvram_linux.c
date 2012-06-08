@@ -528,7 +528,6 @@ nvram_set(const char *name, const char *value)
 
 	spin_lock_irqsave(&nvram_lock, flags);
 
-	//printk("nvram_set: name = %s, value = %s!\n", name, value);
 #ifdef CFE_UPDATE //write back to default sector as well, Chen-I
         if(strncmp(name, CFE_NVRAM_PREFIX, strlen(CFE_NVRAM_PREFIX))==0)
         {

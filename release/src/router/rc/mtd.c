@@ -362,11 +362,8 @@ ERROR:
 
 	crc_done();
 
-#ifdef DEBUG_SIMULATE
 	set_action(ACT_IDLE);
-#endif
 
-	printf("%s\n",  error ? error : "Image successfully flashed");
 	_dprintf("%s\n",  error ? error : "Image successfully flashed");
 	return (error ? 1 : 0);
 }

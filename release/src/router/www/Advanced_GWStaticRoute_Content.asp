@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_2_3#></title>
+<title><#Web_Title#> - <#menu5_2_3#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script language="JavaScript" type="text/javascript" src="/state.js"></script>
@@ -206,8 +206,8 @@ function addRow_Group(upper){
 		addRow(document.form.sr_netmask_x_0, 0);
 		addRow(document.form.sr_gateway_x_0, 0);
 		addRow(document.form.sr_matric_x_0, 0);
-		addRow(document.form.sr_if_x_o, 0);
-		document.form.sr_if_x_o.value="LAN";
+		addRow(document.form.sr_if_x_0, 0);
+		document.form.sr_if_x_0.value="LAN";
 		showsr_rulelist();
 	}else{
 		return false;
@@ -221,7 +221,7 @@ function edit_Row(r){
 	document.form.sr_netmask_x_0.value = $('sr_rulelist_table').rows[i].cells[1].innerHTML; 
 	document.form.sr_gateway_x_0.value = $('sr_rulelist_table').rows[i].cells[2].innerHTML; 
 	document.form.sr_matric_x_0.value = $('sr_rulelist_table').rows[i].cells[3].innerHTML;
-	document.form.sr_if_x_o.value = $('sr_rulelist_table').rows[i].cells[3].innerHTML;
+	document.form.sr_if_x_0.value = $('sr_rulelist_table').rows[i].cells[4].innerHTML;
 	
   del_Row(r);	
 }
@@ -286,7 +286,7 @@ function showLANIPList(){
 			show_name = client_list_col[1];	
 
 		//client_list_col[]  0:type 1:device 2:ip 3:mac 4: 5: 6:
-		code += '<a href="#"><div onmouseover="over_var=1;" onmouseout="over_var=0;" onclick="setClientIP(\''+client_list_col[2]+'\');"><strong>'+client_list_col[2]+'</strong> ';
+		code += '<a><div onmouseover="over_var=1;" onmouseout="over_var=0;" onclick="setClientIP(\''+client_list_col[2]+'\');"><strong>'+client_list_col[2]+'</strong> ';
 		
 		if(show_name && show_name.length > 0)
 				code += '( '+show_name+')';
@@ -416,10 +416,10 @@ function pullLANIPList(obj){
 					<td width="18%"><input type="text" maxlength="15" class="input_15_table" name="sr_gateway_x_0" onKeyPress="return is_ipaddr(this, event)" ></td>
 					<td width="8%"><input type="text" maxlength="3" class="input_3_table" name="sr_matric_x_0"  onKeyPress="return is_number(this, event);"></td>
 					<td width="10%">
-						<select name="sr_if_x_o" class="input_option" style="width:62px;">
-							<option  <% nvram_match_list_x("RouterConfig","sr_if_x", "LAN","selected", 0); %> value="LAN">LAN</option>
-							<option  <% nvram_match_list_x("RouterConfig","sr_if_x", "MAN","selected", 0); %> value="MAN">MAN</option>
-							<option  <% nvram_match_list_x("RouterConfig","sr_if_x", "WAN","selected", 0); %> value="WAN">WAN</option>
+						<select name="sr_if_x_0" class="input_option" style="width:62px;">
+							<option value="LAN">LAN</option>
+							<option value="MAN">MAN</option>
+							<option value="WAN">WAN</option>
 						</select>
 					</td>
 				

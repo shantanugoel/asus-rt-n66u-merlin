@@ -127,7 +127,9 @@ function init(ev)
 	crossY = E('crossY');
 	polyRx = E('polyRx');
 	polyTx = E('polyTx');
+
 //	pointTextBack = E('pointTextBack');
+
 	pointText = E('pointText');
 	pointG = E('pointGroup');
 	crossTextBack = E('crossTextBack');
@@ -150,7 +152,7 @@ function init(ev)
 		xpst[n] = E('xpst' + n);
 
 	time24 = ((new Date(2000, 0, 1, 23, 0, 0, 0)).toLocaleString().indexOf('23') != -1);
-	
+
 	top.updateSVG = updateSVG;
 	top.svgReady = 1;
 	top.initData();
@@ -211,10 +213,9 @@ function updateSVG(rxData, txData, maxValue, mode, rxColor, txColor, intv, maxLe
 	dataDiv = dataD;
 	samp = avgSamp;
 	tockD = clock;
-//	tockD = new Date();
 	tock = tockD.getTime();
 
-	if (intv < 60) {
+	if (intv < 5) {
 		// realtime
 		x = z = (vWidth / 5);
 		for (i = 0; i < 4; ++i) {
@@ -231,7 +232,6 @@ function updateSVG(rxData, txData, maxValue, mode, rxColor, txColor, intv, maxLe
 			z = Math.round(x);
 			y = (new Date(tock - (Math.round((vWidth - z - 1) / advX) * interval * 1000))).getHours();
 			x += v;
-
 			e = tickLines[i];
 			e.setAttribute('x1', z);
 			e.setAttribute('x2', z);

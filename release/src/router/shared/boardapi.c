@@ -57,11 +57,11 @@ int init_gpio(void)
 // this is shared by every process, so, need to get nvram for first time it called per process
 int get_gpio_values_once(void)
 {
-	int model;
+	//int model;
 	if (gpio_values_loaded) return;
 	
 	gpio_values_loaded = 1;
-	model = get_model();
+	//model = get_model();
 
 	// TODO : add other models
 	
@@ -130,7 +130,7 @@ int button_pressed(int which)
 	{
 		gpio_value = get_gpio(use_gpio&0xff);
 
-		//_dprintf("use_gpio: %x gpio_value: %x\n", use_gpio, gpio_value);
+//		_dprintf("use_gpio: %x gpio_value: %x\n", use_gpio, gpio_value);
 
 		if((use_gpio&GPIO_ACTIVE_LOW)==0) // active high case
 			return gpio_value==0 ? 0 : 1;
@@ -202,25 +202,21 @@ int led_control(int which, int mode)
 	return 0;
 }
 
-int wanport_status(void)
+int wanport_status(int wan_unit)
 {
-//TODO: turn it into a general way?
-#ifdef RTCONFIG_RALINK
-
-#ifdef RTCONFIG_DSL
-	return dsl_wanPort_phyStatus();	
-#else
-	return rtl8367m_wanPort_phyStatus();
-#endif	
-	
-	
-#else
 	char word[100], *next;
 	int mask;
+	char wan_ports[16];
+
+	memset(wan_ports, 0, 16);
+	if(wan_unit == 1)
+		strcpy(wan_ports, "wan1ports");
+	else
+		strcpy(wan_ports, "wanports");
 
 	mask = 0;
 
-	foreach(word, nvram_safe_get("wanports"), next) {
+	foreach(word, nvram_safe_get(wan_ports), next) {
 		mask |= (0x0001<<atoi(word));
 	}
 #ifdef RTCONFIG_WIRELESSWAN
@@ -229,7 +225,6 @@ int wanport_status(void)
 		return 1;
 #endif
 	return get_phy_status(mask);
-#endif
 }
 
 int wanport_speed(void)
@@ -279,9 +274,8 @@ int lanport_status(void)
 #ifdef RTCONFIG_RALINK
 
 #ifdef RTCONFIG_DSL
-	// to jiahao :
-	// do not know why need this function
-	return 1;
+	//DSL has no software controlled LAN LED
+	return 0;
 #else
 	return rtl8367m_lanPorts_phyStatus();
 #endif	

@@ -199,7 +199,7 @@ int is_wps_stopped(void)
 }
 
 #ifdef RTCONFIG_WIRELESSREPEATER
-static char *wlc_nvname(char *keyword) 
+char *wlc_nvname(char *keyword) 
 {
 	return(wl_nvname(keyword, nvram_get_int("wlc_band"), -1));
 }

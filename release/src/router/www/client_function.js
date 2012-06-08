@@ -1,4 +1,4 @@
-var selectedClientOrder;
+﻿var selectedClientOrder;
 
 function getclients_noMonitor(flag){							// return the number of the client
 	var clients = new Array();

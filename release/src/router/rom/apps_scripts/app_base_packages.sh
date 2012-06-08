@@ -100,6 +100,19 @@ if [ ! -f "$APPS_INSTALL_PATH/bin/ipkg" ] || [ ! -f "$APPS_INSTALL_PATH/lib/libu
 	cd $CURRENT_PWD
 fi
 
+APPS_MOUNTED_TYPE=`mount |grep "/dev/$APPS_DEV on " |awk '{print $5}'`
+if [ "$APPS_MOUNTED_TYPE" == "vfat" ]; then
+	app_move_to_pool.sh $APPS_DEV
+	if [ "$?" != "0" ]; then
+		# apps_state_error was already set by app_move_to_pool.sh.
+		exit 1
+	fi
+fi
+
 app_base_link.sh
+if [ "$?" != "0" ]; then
+	# apps_state_error was already set by app_base_link.sh.
+	exit 1
+fi
 
 echo "Success to build the base environment!"

@@ -22,6 +22,7 @@ int get_model(void)
 	else if(nvram_match("productid", "RT-N56U")) return MODEL_RTN56U;
 #ifdef RTCONFIG_DSL
 	else if(nvram_match("productid", "DSL-N55U")) return MODEL_DSLN55U;
+	else if(nvram_match("productid", "DSL-N55U-B")) return MODEL_DSLN55U;	
 #endif
 	else if(nvram_match("productid", "RT-N13U")) return MODEL_RTN13U;
 #endif

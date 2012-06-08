@@ -803,27 +803,23 @@ ej_wl_status(int eid, webs_t wp, int argc, char_t **argv, int unit)
 {
 	char tmp[128], prefix[] = "wlXXXXXXXXXX_";
 	char *name;
-	char name_vif[] = "wlX.Y_";
-/*
-	char name2[] = "wl0.1";
-	char name3[] = "wl0.2";
-	char name4[] = "wl0.3";
-*/
+	char name_vif[] = "wlX.Y_XXXXXXXXXX";
 	struct maclist *auth, *assoc, *authorized;
-/*
-	struct maclist *auth2, *assoc2, *authorized2;
-	struct maclist *auth3, *assoc3, *authorized3;
-	struct maclist *auth4, *assoc4, *authorized4;
-*/
 	int max_sta_count, maclist_size;
-//	int maclist_size2, maclist_size3, maclist_size4;
 	int i, j, val, ret = 0;
-//	channel_info_t ci;
 	int ii, jj;
 
 	snprintf(prefix, sizeof(prefix), "wl%d_", unit);
+#ifdef RTCONFIG_WIRELESSREPEATER
+	if ((nvram_get_int("sw_mode") == SW_MODE_REPEATER)
+		&& (nvram_get_int("wlc_band") == unit))
+	{
+		sprintf(name_vif, "wl%d.%d", unit, 1);
+		name = name_vif;
+	}
+	else
+#endif
 	name = nvram_safe_get(strcat_r(prefix, "ifname", tmp));
-	
 	wl_ioctl(name, WLC_GET_RADIO, &val, sizeof(val));
 
 	ret += wl_status(eid, wp, argc, argv, unit);
@@ -833,17 +829,7 @@ ej_wl_status(int eid, webs_t wp, int argc, char_t **argv, int unit)
 		ret += websWrite(wp, "Radio is disabled\n");
 		return ret;
 	}
-/*
-	if (nvram_match(strcat_r(prefix, "nbw_cap", tmp), "0"))
-		wl_ioctl(name, WLC_GET_CHANNEL, &ci, sizeof(ci));
-	else
-		ci.target_channel = atoi(nvram_get("wl_channel"));
 
-	if (ci.target_channel == 0)
-		ret += websWrite(wp, "Channel	: Auto\n");
-	else
-		ret += websWrite(wp, "Channel	: %d\n", ci.target_channel);
-*/
 	if (nvram_match(strcat_r(prefix, "mode", tmp), "ap"))
 	{
 		if (nvram_match(strcat_r(prefix, "lazywds", tmp), "1") ||
@@ -864,43 +850,26 @@ ej_wl_status(int eid, webs_t wp, int argc, char_t **argv, int unit)
 	else if (nvram_match(strcat_r(prefix, "mode", tmp), "wet"))
 	{
 //		ret += websWrite(wp, "Mode	: Ethernet Bridge\n");
-		ret += websWrite(wp, "Mode	: Repeater\n");
-		ret += ej_wl_sta_status(eid, wp, name);
-		return ret;
+#ifdef RTCONFIG_WIRELESSREPEATER
+		if ((nvram_get_int("sw_mode") == SW_MODE_REPEATER)
+			&& (nvram_get_int("wlc_band") == unit))
+			sprintf(prefix, "wl%d.%d_", unit, 1);
+#endif		
+		ret += websWrite(wp, "Mode	: Repeater [ SSID local: \"%s\" ]\n", nvram_safe_get(strcat_r(prefix, "ssid", tmp)));
+//		ret += ej_wl_sta_status(eid, wp, name);
+//		return ret;
 	}
 
 	/* buffers and length */
 	max_sta_count = 128;
 	maclist_size = sizeof(auth->count) + max_sta_count * sizeof(struct ether_addr);
-/*
-	maclist_size2 = sizeof(auth2->count) + max_sta_count * sizeof(struct ether_addr);
-	maclist_size3 = sizeof(auth3->count) + max_sta_count * sizeof(struct ether_addr);
-	maclist_size4 = sizeof(auth4->count) + max_sta_count * sizeof(struct ether_addr);
-*/
 	auth = malloc(maclist_size);
 	assoc = malloc(maclist_size);
 	authorized = malloc(maclist_size);
-/*
-	auth2 = malloc(maclist_size2);
-	assoc2 = malloc(maclist_size2);
-	authorized2 = malloc(maclist_size2);
-	auth3 = malloc(maclist_size3);
-	assoc3 = malloc(maclist_size3);
-	authorized3 = malloc(maclist_size3);
-	auth4 = malloc(maclist_size4);
-	assoc4 = malloc(maclist_size4);
-	authorized4 = malloc(maclist_size4);
-*/
+
 	if (!auth || !assoc || !authorized)
 		goto exit;
-/*
-	if (!auth2 || !assoc2 || !authorized2)
-		goto exit;
-	if (!auth3 || !assoc3 || !authorized3)
-		goto exit;
-	if (!auth4 || !assoc4 || !authorized4)
-		goto exit;
-*/
+
 	/* query wl for authenticated sta list */
 	strcpy((char*)auth, "authe_sta_list");
 	if (wl_ioctl(name, WLC_GET_VAR, auth, maclist_size))
@@ -915,61 +884,7 @@ ej_wl_status(int eid, webs_t wp, int argc, char_t **argv, int unit)
 	strcpy((char*)authorized, "autho_sta_list");
 	if (wl_ioctl(name, WLC_GET_VAR, authorized, maclist_size))
 		goto exit;
-#if 0
-	if (nvram_match("wl0.1_bss_enabled", "1"))
-	{
-		/* query wl for authenticated sta list */
-		strcpy((char*)auth2, "authe_sta_list");
-		if (wl_ioctl(name2, WLC_GET_VAR, auth2, maclist_size2))
-			goto exit;
 
-		/* query wl for associated sta list */
-		assoc2->count = max_sta_count;
-		if (wl_ioctl(name2, WLC_GET_ASSOCLIST, assoc2, maclist_size2))
-			goto exit;
-
-		/* query wl for authorized sta list */
-		strcpy((char*)authorized2, "autho_sta_list");
-		if (wl_ioctl(name2, WLC_GET_VAR, authorized2, maclist_size2))
-			goto exit;
-	}
-
-	if (nvram_match("wl0.2_bss_enabled", "1"))
-	{
-		/* query wl for authenticated sta list */
-		strcpy((char*)auth3, "authe_sta_list");
-		if (wl_ioctl(name3, WLC_GET_VAR, auth3, maclist_size3))
-			goto exit;
-
-		/* query wl for associated sta list */
-		assoc3->count = max_sta_count;
-		if (wl_ioctl(name3, WLC_GET_ASSOCLIST, assoc3, maclist_size3))
-			goto exit;
-
-		/* query wl for authorized sta list */
-		strcpy((char*)authorized3, "autho_sta_list");
-		if (wl_ioctl(name3, WLC_GET_VAR, authorized3, maclist_size3))
-			goto exit;
-	}
-
-	if (nvram_match("wl0.3_bss_enabled", "1"))
-	{
-		/* query wl for authenticated sta list */
-		strcpy((char*)auth4, "authe_sta_list");
-		if (wl_ioctl(name4, WLC_GET_VAR, auth4, maclist_size4))
-			goto exit;
-
-		/* query wl for associated sta list */
-		assoc4->count = max_sta_count;
-		if (wl_ioctl(name4, WLC_GET_ASSOCLIST, assoc4, maclist_size4))
-			goto exit;
-
-		/* query wl for authorized sta list */
-		strcpy((char*)authorized4, "autho_sta_list");
-		if (wl_ioctl(name4, WLC_GET_VAR, authorized4, maclist_size4))
-			goto exit;
-	}
-#endif
 	ret += websWrite(wp, "\n");
 	ret += websWrite(wp, "Stations List                           \n");
 	ret += websWrite(wp, "----------------------------------------\n");
@@ -996,78 +911,14 @@ ej_wl_status(int eid, webs_t wp, int argc, char_t **argv, int unit)
 		}
 		ret += websWrite(wp, "\n");
 	}
-#if 0
-	if (nvram_match("wl0.1_bss_enabled", "1"))
-	for (i = 0; i < auth2->count; i ++) {
-		char ea[ETHER_ADDR_STR_LEN];
 
-		ret += websWrite(wp, "%s ", ether_etoa((void *)&auth2->ea[i], ea));
-
-		for (j = 0; j < assoc2->count; j ++) {
-			if (!bcmp((void *)&auth2->ea[i], (void *)&assoc2->ea[j], ETHER_ADDR_LEN)) {
-				ret += websWrite(wp, " associated");
-				break;
-			}
-		}
-
-		for (j = 0; j < authorized2->count; j ++) {
-			if (!bcmp((void *)&auth2->ea[i], (void *)&authorized2->ea[j], ETHER_ADDR_LEN)) {
-				ret += websWrite(wp, " authorized");
-				break;
-			}
-		}
-		ret += websWrite(wp, "\n");
-	}
-
-	if (nvram_match("wl0.2_bss_enabled", "1"))
-	for (i = 0; i < auth3->count; i ++) {
-		char ea[ETHER_ADDR_STR_LEN];
-
-		ret += websWrite(wp, "%s ", ether_etoa((void *)&auth3->ea[i], ea));
-
-		for (j = 0; j < assoc3->count; j ++) {
-			if (!bcmp((void *)&auth3->ea[i], (void *)&assoc3->ea[j], ETHER_ADDR_LEN)) {
-				ret += websWrite(wp, " associated");
-				break;
-			}
-		}
-
-		for (j = 0; j < authorized3->count; j ++) {
-			if (!bcmp((void *)&auth3->ea[i], (void *)&authorized3->ea[j], ETHER_ADDR_LEN)) {
-				ret += websWrite(wp, " authorized");
-				break;
-			}
-		}
-		ret += websWrite(wp, "\n");
-	}
-
-	if (nvram_match("wl0.3_bss_enabled", "1"))
-	for (i = 0; i < auth4->count; i ++) {
-		char ea[ETHER_ADDR_STR_LEN];
-
-		ret += websWrite(wp, "%s ", ether_etoa((void *)&auth4->ea[i], ea));
-
-		for (j = 0; j < assoc4->count; j ++) {
-			if (!bcmp((void *)&auth4->ea[i], (void *)&assoc4->ea[j], ETHER_ADDR_LEN)) {
-				ret += websWrite(wp, " associated");
-				break;
-			}
-		}
-
-		for (j = 0; j < authorized4->count; j ++) {
-			if (!bcmp((void *)&auth4->ea[i], (void *)&authorized4->ea[j], ETHER_ADDR_LEN)) {
-				ret += websWrite(wp, " authorized");
-				break;
-			}
-		}
-		ret += websWrite(wp, "\n");
-	}
-#endif
-
-//	for (ii = 0; ii < MAX_NVPARSE; ii++) {
 	for (ii = 0; ii < 2; ii++) {
-//		for (jj = 0; jj < 16; jj++) {
-		for (jj = 0; jj < 8; jj++) {
+		for (jj = 1; jj < 4; jj++) {
+#ifdef RTCONFIG_WIRELESSREPEATER
+		        if ((nvram_get_int("sw_mode") == SW_MODE_REPEATER)
+        		        && (ii == nvram_get_int("wlc_band")) && (jj == 1))
+				break;
+#endif
 			sprintf(prefix, "wl%d.%d_", ii, jj);
 			if (nvram_match(strcat_r(prefix, "bss_enabled", tmp), "1"))
 			{
@@ -1117,17 +968,7 @@ exit:
 	if (auth) free(auth);
 	if (assoc) free(assoc);
 	if (authorized) free(authorized);
-/*
-	if (auth2) free(auth2);
-	if (assoc2) free(assoc2);
-	if (authorized2) free(authorized2);
-	if (auth3) free(auth3);
-	if (assoc3) free(assoc3);
-	if (authorized3) free(authorized3);
-	if (auth4) free(auth4);
-	if (assoc4) free(assoc4);
-	if (authorized4) free(authorized4);
-*/
+
 	return ret;
 }
 
@@ -1222,6 +1063,27 @@ getWscStatusStr()
 	status = nvram_safe_get("wps_proc_status");
 
 	switch (atoi(status)) {
+#if 1	/* AP mode */
+	case 1: /* WPS_ASSOCIATED */
+		return "Start WPS Process";
+		break;
+	case 2: /* WPS_OK */
+	case 7: /* WPS_MSGDONE */
+		return "Success";
+		break;
+	case 3: /* WPS_MSG_ERR */
+		return "Fail due to WPS message exchange error!";
+		break;
+	case 4: /* WPS_TIMEOUT */
+		return "Fail due to WPS time out!";
+		break;
+	default:
+		if (nvram_match("wps_enable", "1"))
+			return "Idle";
+		else
+			return "Not used";
+		break;
+#else	/* STA mode */
 	case 0:
 		return "Idle";
 		break;
@@ -1253,6 +1115,7 @@ getWscStatusStr()
 //		return "Init...";
 		return "Start WPS Process";
 		break;
+#endif
 	}
 }
 

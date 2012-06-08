@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_5_3#></title>
+<title><#Web_Title#> - <#menu5_5_3#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script language="JavaScript" type="text/javascript" src="/state.js"></script>
@@ -44,7 +44,7 @@ function showmacfilter_rulelist(){
 	else{
 		for(var i = 1; i < macfilter_rulelist_row.length; i++){
 		code +='<tr id="row'+i+'">';
-		code +='<td width="40%">'+ macfilter_rulelist_row[i] +'</td>';		//MAC
+		code +='<td width="80%">'+ macfilter_rulelist_row[i] +'</td>';		//MAC
 		code +='<td width="20%">';		
 		code +="<input class=\"remove_btn\" type=\"button\" onclick=\"deleteRow(this);\" value=\"\"/></td>";
 		}
@@ -70,23 +70,25 @@ function deleteRow(r){
 }
 
 function addRow(obj, upper){
-		var rule_num = $('macfilter_rulelist_table').rows.length;//幾組rule list 
-		var item_num = $('macfilter_rulelist_table').rows[0].cells.length; //兩欄位	
+		var rule_num = $('macfilter_rulelist_table').rows.length;//rule lists 
+		var item_num = $('macfilter_rulelist_table').rows[0].cells.length; //2 column
 		
 	if(rule_num >= upper){
 		alert("<#JS_itemlimit1#> " + upper + " <#JS_itemlimit2#>");
 		return false;	
 	}					
 	
-	if(!check_hwaddr_temp(obj))
-		return false;	
-	
 	if(obj.value==""){
 		alert("<#JS_fieldblank#>");
 		obj.focus();
 		obj.select();		
+		return false;
+	}else if(!check_macaddr(obj, check_hwaddr_flag(obj))){
+		obj.focus();
+		obj.select();		
+		return false;	
+	}	
 	
-	}else if(check_hwaddr_temp(obj)){
 		
 		//Viz check same rule
 		for(i=0; i<rule_num; i++){
@@ -104,8 +106,6 @@ function addRow(obj, upper){
 		obj.value = "";
 		showmacfilter_rulelist();
 		
-	}else
-		return false;
 }
 
 function applyRule(){
@@ -156,15 +156,25 @@ function done_validating(action){
 	refreshpage();
 }
 function check_macaddr(obj,flag){ //control hint of input mac address
-	if (flag){	
-		$("check_mac") ? $("check_mac").style.display="none" : true;
-	}
-	else{
+	if(flag == 1){
 		var childsel=document.createElement("div");
 		childsel.setAttribute("id","check_mac");
 		childsel.style.color="#FFCC00";
 		obj.parentNode.appendChild(childsel);
 		$("check_mac").innerHTML="<#LANHostConfig_ManualDHCPMacaddr_itemdesc#>";		
+		$("check_mac").style.display = "";
+		return false;
+	}if(flag == 2){
+		var childsel=document.createElement("div");
+		childsel.setAttribute("id","check_mac");
+		childsel.style.color="#FFCC00";
+		obj.parentNode.appendChild(childsel);
+		$("check_mac").innerHTML=Untranslated.illegal_MAC;		
+		$("check_mac").style.display = "";
+		return false;		
+	}else{
+		$("check_mac") ? $("check_mac").style.display="none" : true;
+		return true;
 	}	
 }
 </script>
@@ -241,15 +251,15 @@ function check_macaddr(obj,flag){ //control hint of input mac address
 					  </thead>
 
         	<tr>
-          		<th width="40%"><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,10);">
+          		<th width="80%"><a class="hintstyle" href="javascript:void(0);" onClick="openHint(5,10);">
           			<#FirewallConfig_MFhwaddr_itemname#></a>
               		<input type="hidden" name="macfilter_num_x_0" value="<% nvram_get("macfilter_num_x"); %>" readonly="1"/>
 		  	</th>
 			<th width="20%">Edit</th>
         	</tr>
         	<tr>
-          		<td width="40%">
-          			<input type="text" maxlength="17" class="input_macaddr_table" name="macfilter_list_x_0"  onKeyPress="return is_hwaddr(this,event)" onblur="check_macaddr(this,check_hwaddr_temp(this))">
+          		<td width="80%">
+          			<input type="text" maxlength="17" class="input_macaddr_table" name="macfilter_list_x_0"  onKeyPress="return is_hwaddr(this,event)">
 		  	</td>          			
 		  	<td width="20%">
 		  		<input class="add_btn" type="button" onclick="addRow(document.form.macfilter_list_x_0, 32);" value="">

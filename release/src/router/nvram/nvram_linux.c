@@ -179,6 +179,8 @@ int nvram_unset(const char *name)
 int nvram_commit(void)
 {
 	int r = 0;
+	FILE *fp;
+	fp = fopen("/var/log/commit_ret", "w");
 
 	if (wait_action_idle(10)) {
 		if (nvram_fd < 0) {
@@ -188,13 +190,22 @@ int nvram_commit(void)
 //		nvram_unset("dirty");
 		r = ioctl(nvram_fd, NVRAM_MAGIC, NULL);
 		set_action(ACT_IDLE);
+
 		if (r < 0) {
 			perror(PATH_DEV_NVRAM);
 			cprintf("commit: error\n");
+			if(fp!=NULL)
+				fprintf(fp,"commit: error\n");
+		}
+		else {
+			if(fp!=NULL)
+                                fprintf(fp,"commit: OK\n");
 		}
 	}
 	else {
 		cprintf("commit: system busy\n");
+		if(fp!=NULL)
+                        fprintf(fp,"commit: system busy\n");
 	}
 
 	return r;

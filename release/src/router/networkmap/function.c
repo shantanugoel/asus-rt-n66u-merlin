@@ -51,8 +51,10 @@ char *fixstr(const char *buf)
 
         for (i = 0; i < 16; i++)
         {
-                if (*p < 0x20)
-                        *p = 0x0;
+                if (*p < 0x20) 
+			*p = 0x0;
+		if (i == 15)
+                        *p = '\0';
                 p++;
         }
 
@@ -187,13 +189,14 @@ int Nbns_query(unsigned char *src_ip, unsigned char *dest_ip, P_CLIENT_DETAIL_IN
 
         recvlen = recvfrom(sock_nbns, recvbuf, sizeof(recvbuf), 0, (struct sockaddr *)&other_addr2, &other_addr_len2);
         if( recvlen > 0 ) {
-	#ifdef DEBUG_MORE
-	    printf("NBNS Response:\n");
-	    int x;
-	    for(x=0; x<recvlen; x++)
-	    	printf("%02x ",recvbuf[x]);
-	    printf("\n");
-	#endif
+	    NMP_DEBUG_M("NBNS Response:\n");
+	    #if 0 //def DEBUG_MORE	
+	    	int x;
+	    	for(x=0; x<recvlen; x++)
+	    	    NMP_DEBUG_M("%02x ",recvbuf[x]);
+	    	NMP_DEBUG_M("\n");
+	    #endif
+
 	    nbns_response =(NBNS_RESPONSE *)recvbuf;
 	    NMP_DEBUG_M("flags: %02x %02x, number of names= %d\n", 
 		nbns_response->flags[0],nbns_response->flags[1],nbns_response->number_of_names);
@@ -206,13 +209,12 @@ int Nbns_query(unsigned char *src_ip, unsigned char *dest_ip, P_CLIENT_DETAIL_IN
 	    if(((nbns_response->flags[0]>>4) == 8) && (nbns_response->number_of_names > 0)
 	    && (other_addr2.sin_addr.s_addr = other_addr1.sin_addr.s_addr))
             {
-		//fixstr(nbns_response->device_name1);
 		spinlock_lock(SPINLOCK_Networkmap);
-            	strcpy(p_client_detail_info_tab->device_name[p_client_detail_info_tab->detail_info_num], nbns_response->device_name1);
+            	memcpy(p_client_detail_info_tab->device_name[p_client_detail_info_tab->detail_info_num], nbns_response->device_name1, 16);
 		fixstr(p_client_detail_info_tab->device_name[p_client_detail_info_tab->detail_info_num]);
 		spinlock_unlock(SPINLOCK_Networkmap);
 	    	memcpy(NetBIOS_name, nbns_response->device_name1, 15);
-		NMP_DEBUG("Device name:%s~%s~%s~\n", NetBIOS_name, nbns_response->device_name1,
+		NMP_DEBUG("Device name:%s~%s~\n", nbns_response->device_name1,
 		p_client_detail_info_tab->device_name[p_client_detail_info_tab->detail_info_num]);
             	break;
 	    }
@@ -378,7 +380,7 @@ int open_socket_ipv4( unsigned char *src_ip )
 	struct timeval timeout={1, 0};
 	if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(struct timeval)) < 0)
         {
-                printf("SO_RCVTIMEO failed: %s\n", strerror(errno));
+                NMP_DEBUG_M("SO_RCVTIMEO failed: %s\n", strerror(errno));
                 return -1;
         }
                                                                                                                  
@@ -390,7 +392,7 @@ int open_socket_ipv4( unsigned char *src_ip )
         int flag=1;
         if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&flag, sizeof(flag)) < 0)
         {
-                printf("SO_REUSEADDR failed: %s\n", strerror(errno));
+                NMP_DEBUG_M("SO_REUSEADDR failed: %s\n", strerror(errno));
                 return -1;
         }
         if(bind(fd, (struct sockaddr*) &local, sizeof(local)) < 0)
@@ -548,7 +550,7 @@ int ctrlpt(unsigned char *dest_ip)
         int nbytes, addrlen;
         char buf[UPNP_BUFSIZE];
         int n;
-                                                                                                                                             
+
         if((ssdp_fd = create_ssdp_socket_ctrlpt(ifname, port)) == -1)
                 return 0;
                                                                                                                                              
@@ -576,7 +578,7 @@ int ctrlpt(unsigned char *dest_ip)
                                 nbytes = recvfrom(ssdp_fd, buf, sizeof(buf), 0, (struct sockaddr*)&destaddr, &addrlen);
                                 buf[nbytes] = '\0';
                                                                                                                                              
-                                //printf("recv: %d from: %s\n", nbytes, inet_ntoa(destaddr.sin_addr));
+                                NMP_DEBUG_M("recv: %d from: %s\n", nbytes, inet_ntoa(destaddr.sin_addr));
                                 if( !memcmp(&destaddr.sin_addr, dest_ip, 4) )
                                 {
                                         if(MATCH_PREFIX(buf, "HTTP/1.1 200 OK"))
@@ -589,19 +591,6 @@ int ctrlpt(unsigned char *dest_ip)
                         }
                 }
         }
-/*
-        printf("friendlyname=%s.\n", description.friendlyname);
-        printf("manufacturer=%s.\n", description.manufacturer);
-        printf("modelname=%s.\n", description.modelname);
-        printf("modelnumber=%s.\n", description.modelnumber);
-        printf("description=%s.\n", description.description);
-        printf("presentation=%s.\n", description.presentation);
-        for(n = 0; n< description.service_num; n++)
-        {
-                printf("service%d name =%s.\n", n, description.service[n].name);
-                printf("service%d url =%s.\n", n, description.service[n].url);
-        }
-*/
         close(ssdp_fd);
         if(return_value == FALSE)
                 return 0;
@@ -626,7 +615,7 @@ static char *strip_chars(char *str, char *reject)
 void interrupt()
 {
         global_exit = TRUE;
-        //printf("no upnp device of this ip\n");
+        NMP_DEBUG_M("no upnp device of this ip\n");
         return_value = FALSE;
 }
                                                                                                                                              
@@ -758,7 +747,7 @@ int process_device_response(char *msg)
         int i;
         char *descri = NULL;
         int len;
-                                                                                                                                             
+
         //search "\r\n\r\n" or "\r\n" first appear place and judge whether msg have blank.
         if( (body = strstr(msg, "\r\n\r\n")) != NULL)
                 body +=4;
@@ -778,22 +767,26 @@ int process_device_response(char *msg)
                         break;
                 }
         }
-        //printf("location=%s\n", location);
+        NMP_DEBUG_M("UPnP location=%s\n", location);
                                                                                                                                              
         // get the destination ip
-        for(location += 7, i = 0; *location != ':'; i++)
+        location += 7;
+	i = 0;
+	while( (*location != ':') && (*location != '/')) {
                 host[i] = *location++;
+		i++;
+	}
         host[i] = '\0';
-                                                                                                                                             
         //get the destination port
-        for(location++, i =0; *location != '/'; i++)
-                port[i] = *location++;
-        port[i] = '\0';
+        if(*location == ':') {
+            	for(location++, i =0; *location != '/'; i++)
+                	port[i] = *location++;
+            	port[i] = '\0';
+            	destport = (ushort)atoi(port);
+	}
+	else
+		destport = 80;
 
-        // change to short interger type
-        for(destport = 0, i =0; port[i] != '\0'; i++)
-                destport = destport*10 + (port[i]) - '0';
-                                                                                                                                             
         //create a socket of http
         if ( (http_fd = create_http_socket_ctrlpt(host, destport)) == -1)
                 goto error;
@@ -804,7 +797,7 @@ int process_device_response(char *msg)
         *data = '\0';
         sprintf(data, "GET %s HTTP/1.1\r\nHOST: %s:%s\r\nACCEPT-LANGUAGE: zh-cn\r\n\r\n",\
                         location, host, port);
-        //printf("%s",data);
+        //printf("%s\n",data);
                                                                                                                                              
         //send the request to get the device description
         if((nbytes = send(http_fd, data, strlen(data), 0)) == -1)
@@ -829,7 +822,7 @@ int process_device_response(char *msg)
         }
         //printf("%s", descri);
         //printf("len = %d", len);
-                                                                                                                                             
+
         //store the useful information.
         store_description(descri);
                                                                                                                                              
@@ -849,7 +842,8 @@ int create_http_socket_ctrlpt(char *host, ushort destport)
 {
         struct sockaddr_in destaddr;            // the device address information
         int fd;
-                                                                                                                                             
+
+	NMP_DEBUG_M("UPnP create http socket to: %s:%d\n", host,destport);
         // create out http socket
         if((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
                 return -1;
@@ -872,7 +866,7 @@ int create_http_socket_ctrlpt(char *host, ushort destport)
 void store_description(char *msg)
 {
         char line[200], *body, *p, *mxend;
-        char tmp[LINE_SIZE];
+        char tmp[200];
         int i, j;
         int s_num = 0;
         int type = 0;
@@ -880,7 +874,6 @@ void store_description(char *msg)
                         "<modelDescription>", "<modelName>", "<modelNumber>",
                         "<serviceType>", "<SCPDURL>",
                         };
-                                                                                                                                             
         // pointer to the end of msg
         p = strstr(msg, "<?xml");
         //printf("%s", p);
@@ -895,7 +888,12 @@ void store_description(char *msg)
                 // get a line.
                 i = 0;
                 while(*p != '>' && p < body)
+		{
+		    if(i<199)
                         line[i++] = *p++;
+		    else
+			*p++;
+		}
                 if(p == body)
                 {
                         //printf("end of the data\n");
@@ -921,8 +919,13 @@ void store_description(char *msg)
                 // get the information.
                 // eg. <manufacturer> information </manufacturer>
                 i = 0;
-                while(*p != '>' && p < body)
+                while(*p != '>' && p < body) 
+		{
+		    if(i<199)
                         line[i++] = *p++;
+		    else
+		  	*p++;
+		}
                 line[i++] = *p++;
                 line[i] ='\0';
                                                                                                                                              
@@ -935,27 +938,36 @@ void store_description(char *msg)
                 {
                 case 0:
                         strcpy(description.friendlyname, tmp);
-                        //printf("friendlyname = %s\n", tmp);
+                        NMP_DEBUG_M("friendlyname = %s\n", tmp);
+#ifdef NMP_DEBUG_M
+	if(strstr(tmp, "WDTVLive")) {
+        	FILE *fp = fopen("/var/networkmap.upnp", "w");
+        	if(fp != NULL) {
+                	fprintf(fp, "%s", msg);
+	                fclose(fp);
+        	}
+	}
+#endif                         
                         break;
                 case 1:
                         strcpy(description.manufacturer, tmp);
-                        //printf("manufacturer = %s\n", tmp);
+                        NMP_DEBUG_M("manufacturer = %s\n", tmp);
                         break;
                 case 2:
                         strcpy(description.presentation, tmp);
-                        //printf("presentation = %s\n", tmp);
+                        NMP_DEBUG_M("presentation = %s\n", tmp);
                         break;
                 case 3:
                         strcpy(description.description, tmp);
-                        //printf("description = %s\n", tmp);
+                        NMP_DEBUG_M("description = %s\n", tmp);
                         break;
                 case 4:
                         strcpy(description.modelname, tmp);
-                        //printf("modelname = %s\n", tmp);
+                        NMP_DEBUG_M("modelname = %s\n", tmp);
                         break;
                 case 5:
                         strcpy(description.modelnumber, tmp);
-                        //printf("modelnumber = %s\n", tmp);
+                        NMP_DEBUG_M("modelnumber = %s\n", tmp);
                         break;
                 case 6: // tmp="urn:schemas-upnp-org:service:serviceType:v"
                         mxend = tmp;
@@ -970,11 +982,11 @@ void store_description(char *msg)
                         }
                         tmp[j-1] = '\0';
                         strcpy(description.service[s_num].name, tmp);
-                        //printf("service %d name = %s\n", s_num, tmp);
+                        NMP_DEBUG_M("service %d name = %s\n", s_num, tmp);
                         break;
                 case 7:
                         strcpy(description.service[s_num].url, tmp);
-                        //printf("service %d url = %s\n", s_num, tmp);
+                        NMP_DEBUG_M("service %d url = %s\n", s_num, tmp);
                         s_num++;
                         break;
                 }
@@ -1023,7 +1035,7 @@ int SendSMBReq(UCHAR *des_ip, MY_DEVICE_INFO *my_info)
         struct timeval tv1, tv2, tm;
         int error=-1, len;
         len = sizeof(int);
-        UCHAR securitymode;
+        UCHAR securitymode=0x00;
         UCHAR  WordCount;               // Count of parameter words
         USHORT ParameterWords[1024];    // The parameter words
         USHORT ByteCount;               // Count of bytes
@@ -1450,14 +1462,13 @@ SMBretry:
                                                                         UCHAR tmpch[2] = {0x00, 0x00};
                                                                         i=36+1+tmplen*2+2;
 
-                                                                        NMP_DEBUG_M("\nNativeOS: ");
                                                                         while(memcmp(buf+i, tmpch, 2) != 0)
                                                                         {
-                                                                                NMP_DEBUG_M("%c", buf[i]);
 										sprintf(SMB_OS, "%s%c", SMB_OS, buf[i]);
                                                                                 i++;
                                                                         }
                                                                         i += 2;
+									NMP_DEBUG_M("\nNativeOS: %s\n", SMB_OS);
 
                                                                         while(memcmp(buf+i, tmpch, 2) != 0)
                                                                         {
@@ -1465,14 +1476,12 @@ SMBretry:
                                                                         }
                                                                         i += 2;
                                                                                 
-                                                                        NMP_DEBUG_M("\nPrimary Domain: ");
                                                                         while(memcmp(buf+i, tmpch, 2) != 0)
                                                                         {
-                                                                                NMP_DEBUG_M("%c", buf[i]);
 										sprintf(SMB_PriDomain,"%s%c",SMB_PriDomain,buf[i]);
                                                                                 i++;
                                                                         }
-                                                                        NMP_DEBUG_M("\n");
+                                                                        NMP_DEBUG_M("Primary Domain: %s\n", SMB_PriDomain);
                                                                 }
                                                                 else //Windows
                                                                 {
@@ -1482,28 +1491,25 @@ SMBretry:
                                                                         UCHAR tmpch[2] = {0x00, 0x00};
                                                                         i=47+tmplen;
 
-                                                                        NMP_DEBUG_M("\nNativeOS: ");
                                                                         while(memcmp(buf+i, tmpch, 2) != 0)
                                                                         {
-                                                                                NMP_DEBUG_M("%c", buf[i]);
 										sprintf(SMB_OS,"%s%c",SMB_OS,buf[i]);
                                                                                 i++;
                                                                         }
                                                                         i += 2;
+									NMP_DEBUG_M("\nNativeOS: %s\n", SMB_OS);
 
                                                                         while(memcmp(buf+i, tmpch, 2) != 0)
                                                                         {
                                                                                 i++;
                                                                         }
                                                                         i += 2;
-                                                                        NMP_DEBUG_M("\nPrimary Domain: ");
                                                                         while(memcmp(buf+i, tmpch, 2) != 0)
                                                                         {
-                                                                                NMP_DEBUG_M("%c", buf[i]);
 										sprintf(SMB_PriDomain,"%s%c",SMB_PriDomain,buf[i]);
                                                                                 i++;
                                                                         }
-                                                                        NMP_DEBUG_M("\n\n");     
+									NMP_DEBUG_M("Primary Domain: %s\n", SMB_PriDomain);
                                                                 }
                                                                 operate = 0;
                                                         }
@@ -1529,6 +1535,14 @@ SMBretry:
 
 /******** End of SMB function **********/
 
+void toLowerCase(char *str) {
+    char *p;
+
+    for(p=str;*p!='\0';p++)
+        if('A'<=*p&&*p<='Z')*p+=32;
+
+}
+
 int FindAllApp(unsigned char *src_ip, P_CLIENT_DETAIL_INFO_TABLE p_client_detail_info_tab)
 {
  	unsigned char *dest_ip = p_client_detail_info_tab->ip_addr[p_client_detail_info_tab->detail_info_num];
@@ -1538,18 +1552,10 @@ int FindAllApp(unsigned char *src_ip, P_CLIENT_DETAIL_INFO_TABLE p_client_detail
         UCHAR nativeOS[32];
         UCHAR nativeLanMan[32];
 #ifdef DEBUG
-    printf("Find Device App... ");
-    int i=0;
-    for(; i<4; i++)
-    printf("%d.", (int)*(dest_ip+i));
-    printf("\n");
-    printf("Router IP: ");
-    for(i=0; i<4; i++)
-    printf("%d.", (int)*(src_ip+i));
-    printf("\n");
-
+	char ipaddr[16];
+    	sprintf(ipaddr, "%d.%d.%d.%d",(int)*(dest_ip),(int)*(dest_ip+1),(int)*(dest_ip+2),(int)*(dest_ip+3));
+	NMP_DEBUG("Find device: %s\n", ipaddr);
 #endif
-
 	//NBSS Called and Calling Name
         UCHAR des_hostname[16] = {
                                 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
@@ -1564,12 +1570,12 @@ int FindAllApp(unsigned char *src_ip, P_CLIENT_DETAIL_INFO_TABLE p_client_detail
         memcpy(nativeOS, "Linux", 5);
         memcpy(nativeLanMan, "Samba", 5);
 
-/*        //nbns name query
+        //nbns name query
         NMP_DEBUG("NBNS Name Query...\n");
         Nbns_query(src_ip, dest_ip, p_client_detail_info_tab);
         if(scan_count==0) //leave when click refresh
                 return 0;
-*/       
+       
         //http service detect
         ret = SendHttpReq(dest_ip);
 	spinlock_lock(SPINLOCK_Networkmap);
@@ -1628,41 +1634,37 @@ int FindAllApp(unsigned char *src_ip, P_CLIENT_DETAIL_INFO_TABLE p_client_detail
         if( ctrlpt(dest_ip) )
         {
 		spinlock_lock(SPINLOCK_Networkmap);
-		NMP_DEBUG("Find: description= %s, modelname= %s\n",description.description, description.modelname);
+		NMP_DEBUG("Find UPnP device: description= %s, modelname= %s\n",description.description, description.modelname);
 	        //parse description
-        	if( (strstr(description.description, "Router")!=NULL) ||
-	            (strstr(description.description, "router")!=NULL) )
+	        toLowerCase(description.description);
+        	if( strstr(description.description, "router")!=NULL ) 
         	{
                 	p_client_detail_info_tab->type[p_client_detail_info_tab->detail_info_num] = 2;
 			found_type = 1;
         	}
-	        else if( (strstr(description.description, "AP")!=NULL) ||
-        	         (strstr(description.description, "Access Pointer")!=NULL) ||
-                	 (strstr(description.description, "access pointer")!=NULL) )
+	        else if( (strstr(description.description, "ap")!=NULL) ||
+        	         (strstr(description.description, "access pointer")!=NULL) ||
+			 (strstr(description.description, "wireless device")!=NULL) ) 
 	        {
         	        p_client_detail_info_tab->type[p_client_detail_info_tab->detail_info_num] = 3;
 			found_type = 1;
 	        }
-        	else if( (strstr(description.description, "NAS")!=NULL) ||
-                	 (strstr(description.description, "Nas")!=NULL) ||
-	                 (strstr(description.description, "nas")!=NULL) )
+        	else if( (strstr(description.description, "nas")!=NULL) )
         	{
                 	p_client_detail_info_tab->type[p_client_detail_info_tab->detail_info_num] = 4;
 			found_type = 1;
         	}
-	        else if( (strstr(description.description, "Cam")!=NULL) ||
-        	         (strstr(description.description, "cam")!=NULL) )
+	        else if( (strstr(description.description, "cam")!=NULL) )
 	        {	
         	        p_client_detail_info_tab->type[p_client_detail_info_tab->detail_info_num] = 5;
 			found_type = 1;
 	        }
-                else if( (strstr(description.description, "Xbox")!=NULL))
+                else if( (strstr(description.description, "xbox")!=NULL))
                 {
                         p_client_detail_info_tab->type[p_client_detail_info_tab->detail_info_num] = 8;
                         found_type = 1;
                 }
-                else if( (strstr(description.description, "PS3")!=NULL) ||
-                         (strstr(description.description, "ps3")!=NULL) )
+                else if( (strstr(description.description, "ps")!=NULL) ) 
                 {
                         p_client_detail_info_tab->type[p_client_detail_info_tab->detail_info_num] = 8;
                         found_type = 1;

@@ -54,6 +54,7 @@
 #include <disk_io_tools.h>
 #include <disk_share.h>
 // 2007.05 James }
+#include "opts.h"
 
 /* Private local functions */
 static void handle_pwd(struct vsf_session* p_sess);
@@ -251,7 +252,7 @@ process_post_login(struct vsf_session* p_sess)
 				break;
 			}
 		}
-ftp_dbg("1. cmd=%s, arg=%s, path=%s.\n", str_getbuf(&p_sess->ftp_cmd_str), str_getbuf(&p_sess->ftp_arg_str), str_getbuf(&p_sess->full_path));
+//ftp_dbg("1. cmd=%s, arg=%s, path=%s.\n", str_getbuf(&p_sess->ftp_cmd_str), str_getbuf(&p_sess->ftp_arg_str), str_getbuf(&p_sess->full_path));
 
 	if(!chk_path)
 		goto VSFTPD_CMD;
@@ -297,7 +298,7 @@ ftp_dbg("1. cmd=%s, arg=%s, path=%s.\n", str_getbuf(&p_sess->ftp_cmd_str), str_g
 				str_alloc_text(&p_sess->full_path, fullpath);
 			}
 		}
-ftp_dbg("2. cmd=%s, arg=%s, path=%s.\n", str_getbuf(&p_sess->ftp_cmd_str), str_getbuf(&p_sess->ftp_arg_str), str_getbuf(&p_sess->full_path));
+//ftp_dbg("2. cmd=%s, arg=%s, path=%s.\n", str_getbuf(&p_sess->ftp_cmd_str), str_getbuf(&p_sess->ftp_arg_str), str_getbuf(&p_sess->full_path));
 
 		// remove the char '/' in the end of p_sess->ftp_arg_str.
 		arg_buf = (char *)str_getbuf(&p_sess->ftp_arg_str);
@@ -306,7 +307,7 @@ ftp_dbg("2. cmd=%s, arg=%s, path=%s.\n", str_getbuf(&p_sess->ftp_cmd_str), str_g
 			memset(fullpath, 0, PATH_MAX);
 			strncpy(fullpath, arg_buf, len-1);
 			str_alloc_text(&p_sess->ftp_arg_str, fullpath);
-ftp_dbg("3. cmd=%s, arg=%s, path=%s.\n", str_getbuf(&p_sess->ftp_cmd_str), str_getbuf(&p_sess->ftp_arg_str), str_getbuf(&p_sess->full_path));
+//ftp_dbg("3. cmd=%s, arg=%s, path=%s.\n", str_getbuf(&p_sess->ftp_cmd_str), str_getbuf(&p_sess->ftp_arg_str), str_getbuf(&p_sess->full_path));
 		}
 
 		// remove the char '/' in the end of p_sess->full_path.
@@ -314,7 +315,7 @@ ftp_dbg("3. cmd=%s, arg=%s, path=%s.\n", str_getbuf(&p_sess->ftp_cmd_str), str_g
 		len = str_getlen(&p_sess->full_path);
 		if(arg_buf != NULL && len > 1 && arg_buf[len-1] == '/'){
 			str_trunc(&p_sess->full_path, len-1);
-ftp_dbg("4. cmd=%s, arg=%s, path=%s.\n", str_getbuf(&p_sess->ftp_cmd_str), str_getbuf(&p_sess->ftp_arg_str), str_getbuf(&p_sess->full_path));
+//ftp_dbg("4. cmd=%s, arg=%s, path=%s.\n", str_getbuf(&p_sess->ftp_cmd_str), str_getbuf(&p_sess->ftp_arg_str), str_getbuf(&p_sess->full_path));
 		}
 	}
 // 2008.05 James. }
@@ -324,7 +325,7 @@ ftp_dbg("4. cmd=%s, arg=%s, path=%s.\n", str_getbuf(&p_sess->ftp_cmd_str), str_g
 	if(str_equal_text(&p_sess->ftp_cmd_str, "CDUP") || str_equal_text(&p_sess->ftp_cmd_str, "XCUP"))
 		--layer;
 
-ftp_dbg("layer=%d.\n", layer);
+//ftp_dbg("layer=%d.\n", layer);
 	if(layer < BASE_LAYER){
 		cmd_ok = 0;
 
@@ -633,7 +634,7 @@ VSFTPD_CMD:
     }
     else if (str_equal_text(&p_sess->ftp_cmd_str, "OPTS"))
     {
-	  vsf_cmdio_write(p_sess, FTP_BADOPTS, "Option not understood.");
+      handle_opts(p_sess);
     }
     else if (str_equal_text(&p_sess->ftp_cmd_str, "STAT") &&
              str_isempty(&p_sess->ftp_arg_str))

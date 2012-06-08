@@ -51,15 +51,13 @@ _install_package(){
 		pkg_file=
 		installed_ipk_path=
 
-		if [ "$1" == "downloadmaster" ]; then
+		if [ "$1" == "downloadmaster" ] && [ -z "$apps_from_internet" ]; then
 			app_base_library.sh $APPS_DEV
 			if [ "$?" != "0" ]; then
 				# apps_state_error was already set by app_base_library.sh.
 				return 1
 			fi
-		fi
 
-		if [ "$1" == "downloadmaster" ] && [ -z "$apps_from_internet" ]; then
 			installed_ipk_path=`ls $apps_local_space/downloadmaster*`
 		else
 			# Geting the app's file name...

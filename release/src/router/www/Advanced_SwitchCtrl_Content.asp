@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - Switch Control</title>
+<title><#Web_Title#> - Switch Control</title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="other.css">
@@ -64,7 +64,7 @@ function valid_form(){
 <form method="post" name="form" id="ruleForm" action="/start_apply.htm" target="hidden_frame">
 <input type="hidden" name="productid" value="<% nvram_get("productid"); %>">
 <input type="hidden" name="current_page" value="Advanced_SwitchCtrl_Content.asp">
-<input type="hidden" name="next_page" value="">
+<input type="hidden" name="next_page" value="Advanced_SwitchCtrl_Content.asp">
 <input type="hidden" name="next_host" value="">
 <input type="hidden" name="group_id" value="">
 <input type="hidden" name="modified" value="0">
@@ -97,7 +97,7 @@ function valid_form(){
 		  <div>&nbsp;</div>
 		  <div class="formfonttitle"><#menu5_2#> - Switch Control</div>
       <div style="margin-left:5px;margin-top:10px;margin-bottom:10px"><img src="/images/New_ui/export/line_export.png"></div>
-      <div class="formfontdesc">Setting <#Web_Title#> switch control.</div>
+      <div class="formfontdesc">Setting <#Web_Title2#> switch control.</div>
 		  
 		  <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable">
       <tr>

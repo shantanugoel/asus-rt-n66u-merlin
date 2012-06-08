@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - Quickly Internet Setup</title>
+<title><#Web_Title#> - Quickly Internet Setup</title>
 <link rel="stylesheet" type="text/css" href="/other.css">
 <link rel="stylesheet" type="text/css" href="/qis/qis_style.css">
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
@@ -19,7 +19,13 @@
 	height:54px;
 	background:url(images/New_ui/title_bg.png) 0 0 no-repeat;
 	margin:0px auto;
-}	
+}
+.qismenu{
+	width:120px;
+	font-size: 12px;
+	font-weight: bold;
+	text-shadow: 0px 1px 1px black;
+}
 </style>
 <script type="text/JavaScript" src="/state.js"></script>
 <script type="text/javascript" src="/popup.js"></script>
@@ -40,6 +46,12 @@ var return_btn = 0;
 var flag_manual = 0;
 var issubmit = 0;
 var isrescan = 0;
+
+// redirect to DomainName
+/*
+if('<% nvram_get("x_Setting"); %>' == 0 && location.href.search("www.asusnetwork.net") < 0)
+	location.href = "http://www.asusnetwork.net/QIS_wizard.htm?flag=welcome";
+*/
 
 function set_step(focus_id){
 	/*if(focus_id == "t0")
@@ -277,7 +289,7 @@ function gotoIndex(){
 			<span id="proceeding_img_text"></span>
 			<div id="proceeding_img"></div>
 		</div>
-		<div style="margin:5px auto; width:85%;"><#APSurvey_msg_waiting_to_connect#> <span style="font-weight:bolder;" id="stassid"></span></div>
+		<div id="connHint" style="margin:5px auto; width:85%;"><#APSurvey_msg_waiting_to_connect#> <span style="font-weight:bolder;" id="stassid"></span></div>
 		</td>
 	</tr>
 </table>
@@ -311,11 +323,21 @@ function gotoIndex(){
 
 <!--For content in ifame-->	
 <!--[if !lte IE 6]>-->
-<div class="banner1" align="center"><img src="images/New_ui/asustitle.png" width="218" height="54" align="left"></div>
+<div class="banner1" align="center">
+	<img src="images/New_ui/asustitle.png" width="218" height="54" align="left">
+	<span class="modelName_top" style="margin-top:20px;"><#Web_Title2#></span>
+</div>
 <!--<![endif]-->
 <!--[if lte IE 6]>
-<div class="banner1" align="center"><img src="images/New_ui/asustitle_ie6.png" width="218" height="54" align="left"></div>
+<div class="banner1" align="center">
+	<img src="images/New_ui/asustitle_ie6.png" width="218" height="54" align="left">
+	<span class="modelName_top" style="margin-top:20px;"><#Web_Title2#></span>
+</div>
 <![endif]-->
+
+<!--div style="margin-top:0px;margin-left:0px;">
+	<span class="modelName_top" style="	margin-top:-34px;margin-left:260px;"><#Web_Title2#></span>
+</div-->
 
 <table width="998px" border="0" align="center" cellpadding="0" cellspacing="0">
 	<tr>
@@ -327,9 +349,9 @@ function gotoIndex(){
   <tr>
 		<td style="width:218px;*width:263px;" valign="top">
 			<div class="lefttabhead" style="margin-left:15px;margin-top:-130px;" id="option0"><table width="192px" height="37px"><tbody><tr><td><#QIS_title#></td></tr></tbody></table></div>
-			<div class="lefttabmid" id="t1" style="margin-left:15px;"><table height="52px"><tbody><tr><td><img style="margin-left:3px;" border="0" src="/images/qis/qisStep1.png"></td><td><div style="width:120px;"><#QIS_step2#></div></td></tr></tbody></table></div>
-			<div class="lefttabmid" id="t2" style="margin-left:15px;"><table height="52px"><tbody><tr><td><img style="margin-left:3px;" border="0" src="/images/qis/qisStep2.png"></td><td><div style="width:120px;"><#QIS_step3#></div></td></tr></tbody></table></div>
-			<div class="lefttabmid" id="t3" style="margin-left:15px;"><table height="52px"><tbody><tr><td><img style="margin-left:3px;" border="0" src="/images/qis/qisStep3.png"></td><td><div style="width:120px;"><#QIS_step4#></div></td></tr></tbody></table></div>
+			<div class="lefttabmid" id="t1" style="margin-left:15px;"><table height="52px"><tbody><tr><td><img style="margin-left:3px;" border="0" src="/images/qis/qisStep1.png"></td><td><div class="qismenu"><#QIS_step2#></div></td></tr></tbody></table></div>
+			<div class="lefttabmid" id="t2" style="margin-left:15px;"><table height="52px"><tbody><tr><td><img style="margin-left:3px;" border="0" src="/images/qis/qisStep2.png"></td><td><div class="qismenu"><#QIS_step3#></div></td></tr></tbody></table></div>
+			<div class="lefttabmid" id="t3" style="margin-left:15px;"><table height="52px"><tbody><tr><td><img style="margin-left:3px;" border="0" src="/images/qis/qisStep3.png"></td><td><div class="qismenu"><#QIS_step4#></div></td></tr></tbody></table></div>
 		</td>
 
 		<td>

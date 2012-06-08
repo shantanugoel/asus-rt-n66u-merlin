@@ -5,7 +5,7 @@
 }
 .statusTitle{	
 	font-family: "Times New Roman", Times, serif;
-	background: url(/images/statusTitle.gif) repeat-x;
+	background: url(/images/statusTitle_gray.gif) repeat-x;
 	/*background-color: #2A3539; */
 	letter-spacing:1px;
 	font-weight: bold;
@@ -20,9 +20,9 @@
 	-moz-border-radius-topright: 10px;
 	border-top-left-radius: 10px;
 	border-top-right-radius: 10px;
-	-moz-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.6);
-	-webkit-box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.6);
-	box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.6);
+	-moz-box-shadow: 5px 5px 10px #333;
+	-webkit-box-shadow: 5px 5px 10px #333;
+	box-shadow: 5px 5px 10px #333;
 	behavior: url(/PIE.htc);
 	border-radius: 10px 10px 0 0;
 }
@@ -101,7 +101,7 @@
 
 .clients{
 	font-family:Verdana, Arial, Helvetica, sans-serif;
-	font-size:11px;
+	font-size:13px;
 	line-height:150%;
 	margin-top:10px;
 }
@@ -237,6 +237,8 @@
 }
 
 .statusTitle #helpname{
+	text-shadow:0px 1px 1px black;
+	font-weight: bolder;
 	font-family:verdana;
 	text-align:center;
 	border:0px solid #333;
@@ -294,9 +296,9 @@
 	-moz-border-radius-bottomleft: 10px;
 	border-top-left-radius: 10px;
 	border-bottom-left-radius: 10px;
-	-moz-box-shadow: 12px 5px 10px rgba(0, 0, 0, 0.6);
-	-webkit-box-shadow: 12px 5px 10px rgba(0, 0, 0, 0.6);
-	box-shadow: 12px 5px 10px rgba(0, 0, 0, 0.6);
+	-moz-box-shadow: 12px 5px 10px #333;
+	-webkit-box-shadow: 12px 5px 10px #333;
+	box-shadow: 12px 5px 10px #333;
 	/*filter: alpha(opacity=98);
 	opacity: .98;*/
 	behavior: url(/PIE.htc);
@@ -310,9 +312,9 @@
 	-moz-border-radius-bottomright: 10px;
 	border-top-right-radius: 10px;
 	border-bottom-right-radius: 10px;
-	-moz-box-shadow: 10px 5px 10px rgba(0, 0, 0, 0.6);
-	-webkit-box-shadow: 10px 5px 10px rgba(0, 0, 0, 0.6);
-	box-shadow: 10px 5px 10px rgba(0, 0, 0, 0.6);
+	-moz-box-shadow: 10px 5px 10px #333;
+	-webkit-box-shadow: 10px 5px 10px #333;
+	box-shadow: 10px 5px 10px #333;
 	/*filter: alpha(opacity=98);
 	opacity: .98;*/
 	behavior: url(/PIE.htc);
@@ -325,9 +327,9 @@
 	-moz-border-radius-topright: 10px;
 	border-top-left-radius: 10px;
 	border-top-right-radius: 10px;
-	-moz-box-shadow: 3px 10px 10px rgba(0, 0, 0, 0.6);
-	-webkit-box-shadow: 3px 10px 10px rgba(0, 0, 0, 0.6);
-	box-shadow: 3px 10px 10px rgba(0, 0, 0, 0.6);
+	-moz-box-shadow: 3px 10px 10px #333;
+	-webkit-box-shadow: 3px 10px 10px #333;
+	box-shadow: 3px 10px 10px #333;
 	/*filter: alpha(opacity=98);
 	opacity: .98;*/
 	behavior: url(/PIE.htc);
@@ -340,14 +342,27 @@
 	-moz-border-radius-bottomleft: 10px;
 	border-bottom-right-radius: 10px;
 	border-bottom-left-radius: 10px;
-	-moz-box-shadow: 3px 11px 10px rgba(0, 0, 0, 0.6);
-	-webkit-box-shadow: 3px 11px 10px rgba(0, 0, 0, 0.6);
-	box-shadow: 3px 11px 10px rgba(0, 0, 0, 0.6);
+
+	-moz-box-shadow: 3px 8px 10px #333;
+	-webkit-box-shadow: 3px 8px 10px #333;
+	box-shadow: 3px 8px 10px #333;
+
 	/*filter: alpha(opacity=98);
 	opacity: .98;*/
 	behavior: url(/PIE.htc);
 	border-radius: 0 0 10px 10px;
 }
+.NM_radius{
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	-moz-box-shadow: 3px 11px 10px #333;
+	-webkit-box-shadow: 3px 11px 10px #333;
+	box-shadow: 3px 11px 10px #333;
+	behavior: url(/PIE.htc);
+	border-radius: 10px 10px 10px 10px;
+}
+
 .style1 {color: #569AC7}
 .style4 {color: #333333}
 .style5 {

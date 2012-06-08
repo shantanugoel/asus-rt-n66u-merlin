@@ -17,6 +17,39 @@
 #include "shutils.h"
 #include "shared.h"
 
+
+/* Transfer Char to ASCII */
+void char_to_ascii(char *output, char *input)
+{
+	int i;
+	char *ptr;
+
+	ptr = output;
+
+	for ( i=0; i<strlen(input); i++ )
+	{
+		if ( input[i] == '[' || input[i] == ']' ) {
+			*ptr = '\\';
+			ptr ++;
+			*ptr = input[i];
+			ptr ++;
+		}
+		else if ( (input[i] >='0' && input[i] <='9')
+			||(input[i] >='A' && input[i] <='Z')
+			||(input[i] >='a' && input[i] <='z'))
+		{
+			*ptr = input[i];
+			ptr ++;
+		}
+		else
+		{
+			sprintf(ptr, "%%%.02X", input[i]);
+			ptr += strlen(ptr);
+		}
+	}
+	*(ptr) = '\0';
+}
+
 const char *find_word(const char *buffer, const char *word)
 {
 	const char *p, *q;

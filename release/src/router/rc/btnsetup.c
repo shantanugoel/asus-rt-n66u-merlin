@@ -1084,7 +1084,7 @@ OTS_socket_init( usockaddr* usaP )
     return listen_fd;
 }
 
-OTSFinish(int fd, int flag)
+void OTSFinish(int fd, int flag)
 {
     	shutdown(fd, 2);
     	close(fd);

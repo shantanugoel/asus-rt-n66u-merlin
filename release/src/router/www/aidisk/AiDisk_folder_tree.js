@@ -1,4 +1,4 @@
-var list_share_or_folder = 1; // 0: share, 1: folder.
+﻿var list_share_or_folder = 1; // 0: share, 1: folder.
 var isLoading = 0;
 var FromObject = "0";
 var Items = -1;

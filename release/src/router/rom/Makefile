@@ -1,7 +1,7 @@
 include ../common.mak
 
 #APPS_TEST_SERVER=y
-DM_VERSION=2.1.0.48
+DM_VERSION=3.1.0.51
 
 all:
 	@echo "" >rom/etc/motd

@@ -31,13 +31,16 @@
 #include <bcmnvram.h>
 #include <shutils.h>
 
-
 //#define DEBUG_NOISY
 //#define DEBUG_STIME
 
-
 #include <shared.h>
 
+#ifdef RTCONFIG_ISP_METER
+	#include <rtstate.h>
+#endif
+
+//#define DEBUG
 #define K 1024
 #define M (1024 * 1024)
 #define G (1024 * 1024 * 1024)
@@ -47,7 +50,11 @@
 #define	SDAY	(60 * 60 * 24)
 #define Y2K		946684800UL
 
-#define INTERVAL		120
+#define INTERVAL		30
+
+#ifdef RTCONFIG_ISP_METER
+	#define MTD_WRITE_INTERVEL	60
+#endif
 
 #define MAX_NSPEED		((24 * SHOUR) / INTERVAL)
 #define MAX_NDAILY		62
@@ -67,6 +74,8 @@
 #define CURRENT_ID	ID_V1
 
 #define HI_BACK		5
+
+#define RA_OFFSET_ISP_METER	0x4FF00
 
 typedef struct {
 	uint32_t xtime;
@@ -118,6 +127,78 @@ const char speed_fn[] = "/var/lib/misc/rstats-speed";
 const char uncomp_fn[] = "/var/tmp/rstats-uncomp";
 const char source_fn[] = "/var/lib/misc/rstats-source";
 
+#ifdef RTCONFIG_ISP_METER
+#define ISP_METER_FILE	"/jffs/isp_meter"
+int isp_limit, isp_limit_time;
+unsigned long last_day_rx, last_day_tx, last_month_rx, last_month_tx;
+unsigned long today_rx, today_tx, month_rx, month_tx;
+unsigned long reset_base_day_rx, reset_base_day_tx, reset_base_month_rx, reset_base_month_tx;
+long cur_conn_time, last_connect_time, total_connect_time, reset_base_time;
+
+void reset_traffic_meter_counter(){
+	FILE *fp;
+        last_day_rx = 0;
+        last_day_tx = 0;
+        last_month_rx = 0;
+        last_month_tx = 0;
+        today_rx = 0;
+        today_tx = 0;
+        month_rx = 0;
+        month_tx = 0;
+        reset_base_day_rx = (history.daily[history.dailyp].counter[0]/K);
+        reset_base_day_tx = (history.daily[history.dailyp].counter[1]/K);
+        reset_base_month_rx = (history.monthly[history.monthlyp].counter[0]/K);
+        reset_base_month_tx = (history.monthly[history.monthlyp].counter[1]/K);
+        nvram_set("isp_day_tx", "0");
+        nvram_set("isp_day_rx", "0");
+        nvram_set("isp_month_tx", "0");
+        nvram_set("isp_month_rx", "0");
+        isp_limit = nvram_get_int("isp_limit");
+	isp_limit_time = nvram_get_int("isp_limit_time");
+
+	reset_base_time = cur_conn_time;
+	last_connect_time = 0;
+	total_connect_time = 0;
+
+        set_meter_file("isp_meter:0,0,0,end");
+
+        if(!nvram_match("isp_meter", "disable")
+          && !(nvram_match("wan0_state_t", "2") && nvram_match("wan0_auxstate_t", "0")) ) {
+                notify_rc_and_wait("isp_meter up");
+        }
+}
+
+void get_meter_file(char *meter_buf) 
+{
+#ifdef CONFIG_BCMWL5 
+	FILE *fp;
+        if (fp=fopen(ISP_METER_FILE, "r")) {
+                fgets(meter_buf, sizeof(meter_buf), fp);
+                fclose(fp);
+	}
+#else
+	FRead(meter_buf, RA_OFFSET_ISP_METER, 64);
+#endif
+	_dprintf("meter_buf: %s\n", meter_buf);
+	return;
+}
+
+int set_meter_file(char *meter_buf)
+{
+	if(meter_buf == NULL)
+		return 0;
+#ifdef CONFIG_BCMWL5 
+        FILE *fp;
+        if (fp=fopen(ISP_METER_FILE, "w")) {
+               fprintf(fp, "%s", meter_buf);
+               fclose(fp);
+	}
+#else
+	FWrite(meter_buf, RA_OFFSET_ISP_METER, sizeof(meter_buf));
+#endif
+	return 1;
+}
+#endif
 
 static int get_stime(void)
 {
@@ -159,7 +240,7 @@ static void save(int quick)
 	struct tm *tms;
 	static int lastbak = -1;
 
-	_dprintf("%s: quick=%d\n", __FUNCTION__, quick);
+	//_dprintf("%s: quick=%d\n", __FUNCTION__, quick);
 
 	f_write("/var/lib/misc/rstats-stime", &save_utime, sizeof(save_utime), 0, 0);
 
@@ -174,7 +255,7 @@ static void save(int quick)
 
 	comp(history_fn, &history, sizeof(history));
 
-	_dprintf("%s: write source=%s\n", __FUNCTION__, save_path);
+	//_dprintf("%s: write source=%s\n", __FUNCTION__, save_path);
 	f_write_string(source_fn, save_path, 0, 0);
 
 	if (quick) {
@@ -185,7 +266,7 @@ static void save(int quick)
 
 	if (strcmp(save_path, "*nvram") == 0) {
 // Do nothing - disabled for now
-		return;
+                return;
 /*
 		if (!wait_action_idle(10)) {
 			_dprintf("%s: busy, not saving\n", __FUNCTION__);
@@ -372,7 +453,7 @@ static void load(int new)
 	}
 	t = current_uptime + get_stime();
 	if ((save_utime < current_uptime) || (save_utime > t)) save_utime = t;
-	_dprintf("%s: uptime = %dm, save_utime = %dm\n", __FUNCTION__, current_uptime / 60, save_utime / 60);
+	//_dprintf("%s: uptime = %dm, save_utime = %dm\n", __FUNCTION__, current_uptime / 60, save_utime / 60);
 
 	//
 
@@ -508,18 +589,20 @@ static void save_datajs(FILE *f, int mode)
 	int max;
 	int k, kn;
 
+_dprintf("save_datajs:\n");
 	fprintf(f, "\n%s_history = [\n", (mode == DAILY) ? "daily" : "monthly");
 
-printf("save_datajs:: %s_history = [\n", (mode == DAILY) ? "daily" : "monthly");
 	if (mode == DAILY) {
 		data = history.daily;
 		p = history.dailyp;
 		max = MAX_NDAILY;
+_dprintf("DAILY: p= %d\n", p);
 	}
 	else {
 		data = history.monthly;
 		p = history.monthlyp;
 		max = MAX_NMONTHLY;
+_dprintf("MONTHLY: p= %d\n", p);
 	}
 	kn = 0;
 	for (k = max; k > 0; --k) {
@@ -528,9 +611,8 @@ printf("save_datajs:: %s_history = [\n", (mode == DAILY) ? "daily" : "monthly");
 		fprintf(f, "%s[0x%lx,0x%llx,0x%llx]", kn ? "," : "",
 			(unsigned long)data[p].xtime, data[p].counter[0] / K, data[p].counter[1] / K);
 		++kn;
-                printf(" %s[%ld, %lld, %lld] ", kn ? "," : "",
-                        (unsigned long)data[p].xtime, data[p].counter[0] / K, data[p].counter[1] / K);
-
+_dprintf("%d:: [0x%lx,0x%llx,0x%llx]\n", p, 
+	(unsigned long)data[p].xtime, data[p].counter[0] / K, data[p].counter[1] / K);
 	}
 	fprintf(f, "];\n");
 }
@@ -570,6 +652,7 @@ static void bump(data_t *data, int *tail, int max, uint32_t xnow, unsigned long 
 	}
 }
 
+#if 0
 static void calc(void)
 {
 	FILE *f;
@@ -590,6 +673,7 @@ static void calc(void)
 	long tick;
 	int n;
 	char *exclude;
+	char traffic[64];
 
 	now = time(0);
 	exclude = nvram_safe_get("rstats_exclude");
@@ -631,7 +715,7 @@ loopagain:
 			sp->utime = current_uptime;
 		}
 		if (sp->sync) {
-			//_dprintf("%s: sync %s\n", __FUNCTION__, ifname_desc);
+			_dprintf("%s: sync %s\n", __FUNCTION__, ifname_desc);
 			sp->sync = -1;
 
 			memcpy(sp->last, counter, sizeof(sp->last));
@@ -686,6 +770,34 @@ loopagain:
 			tms = localtime(&mon);
 			bump(history.monthly, &history.monthlyp, MAX_NMONTHLY,
 				(tms->tm_year << 16) | ((uint32_t)tms->tm_mon << 8), counter);
+
+printf("history.monthlyp= %d\n", history.monthlyp);
+printf("%d, %d, %d : %ld %lld %lld\n ",
+&history.monthly[history.monthlyp].xtime, &history.monthly[history.monthlyp].counter[0],
+&history.monthly[history.monthlyp].counter[1],
+history.monthly[history.monthlyp].xtime, history.monthly[history.monthlyp].counter[0],
+history.monthly[history.monthlyp].counter[1]);
+printf("*** Rx= %lld, Tx= %lld\n",history.monthly[history.monthlyp].counter[0],history.monthly[history.monthlyp].counter[1]);
+
+#ifdef RTCONFIG_ISP_METER
+                        today_rx = last_day_rx + (history.daily[history.dailyp].counter[0]/K);
+                        today_tx = last_day_tx + (history.daily[history.dailyp].counter[1]/K);
+			memset(traffic, 0, 64);
+			sprintf(traffic, "%lu", today_rx);
+                        nvram_set("TM_day_rx", traffic);
+			memset(traffic, 0, 64);
+			sprintf(traffic, "%lu", today_tx);
+                        nvram_set("TM_day_tx", traffic);
+                        month_rx = last_month_rx + (history.monthly[history.monthlyp].counter[0]/K);
+                        month_tx = last_month_tx + (history.monthly[history.monthlyp].counter[1]/K);
+                        memset(traffic, 0, 64);
+                        sprintf(traffic, "%lu", month_rx);
+                        nvram_set("TM_month_rx", traffic);
+                        memset(traffic, 0, 64);
+                        sprintf(traffic, "%lu", month_tx);
+                        nvram_set("TM_month_tx", traffic);
+//printf("MONTH: Rx= %lu = %lu + %lld\n",month_rx,last_month_rx,(history.monthly[history.monthlyp].counter[0]/K));
+#endif
 		}
 
 loopjudge:
@@ -724,7 +836,188 @@ loopjudge:
 		_dprintf("%s: uptime = %dm, save_utime = %dm\n", __FUNCTION__, current_uptime / 60, save_utime / 60);
 	}
 }
+#else
+static void calc(void)
+{
+	FILE *f;
+	char buf[256];
+	char *ifname;
+	char ifname_desc[12], ifname_desc2[12];
+	char *p;
+	unsigned long counter[MAX_COUNTER];
+	unsigned long rx2, tx2;
+	speed_t *sp;
+	int i, j;
+	time_t now;
+	time_t mon;
+	struct tm *tms;
+	uint32_t c;
+	uint32_t sc;
+	unsigned long diff;
+	long tick;
+	int n;
+	char *exclude;
+#ifdef RTCONFIG_ISP_METER
+        char traffic[64];
+#endif
 
+	now = time(0);
+	exclude = nvram_safe_get("rstats_exclude");
+
+	if ((f = fopen("/proc/net/dev", "r")) == NULL) return;
+	fgets(buf, sizeof(buf), f);	// header
+	fgets(buf, sizeof(buf), f);	// "
+	while (fgets(buf, sizeof(buf), f)) {
+		if ((p = strchr(buf, ':')) == NULL) continue;
+//_dprintf("\n=== %s\n", buf);
+		*p = 0;
+		if ((ifname = strrchr(buf, ' ')) == NULL) ifname = buf;
+			else ++ifname;
+		if ((strcmp(ifname, "lo") == 0) || (find_word(exclude, ifname))) continue;
+
+		// <rx bytes, packets, errors, dropped, fifo errors, frame errors, compressed, multicast><tx ...>
+		if (sscanf(p + 1, "%lu%*u%*u%*u%*u%*u%*u%*u%lu", &counter[0], &counter[1]) != 2) continue;
+
+		if(!netdev_calc(ifname, ifname_desc, &counter[0], &counter[1], ifname_desc2, &rx2, &tx2))
+			continue;
+//_dprintf(">>> %s, %s, %lu, %lu, %s, %lu, %lu, %s <<<\n",ifname, ifname_desc, counter[0], counter[1], ifname_desc2, rx2, tx2);
+loopagain:
+		sp = speed;
+
+		for (i = speed_count; i > 0; --i) {
+			if (strcmp(sp->ifname, ifname_desc) == 0) break;
+			++sp;
+		}
+
+		if (i == 0) {
+			if (speed_count >= MAX_SPEED_IF) continue;
+
+			//_dprintf("%s: add %s as #%d\n", __FUNCTION__, ifname_desc, speed_count);
+
+			i = speed_count++;
+			sp = &speed[i];
+			memset(sp, 0, sizeof(*sp));
+			strcpy(sp->ifname, ifname_desc);
+			sp->sync = 1;
+			sp->utime = current_uptime;
+		}
+		if (sp->sync) {
+			//_dprintf("%s: sync %s\n", __FUNCTION__, ifname_desc);
+			sp->sync = -1;
+
+			memcpy(sp->last, counter, sizeof(sp->last));
+			memset(counter, 0, sizeof(counter));
+		}
+		else {
+			sp->sync = -1;
+
+			tick = current_uptime - sp->utime;
+			n = tick / INTERVAL;
+			if (n < 1) {
+				//_dprintf("%s: %s is a little early... %d < %d\n", __FUNCTION__, ifname_desc, tick, INTERVAL);
+				goto loopjudge;
+			}
+
+			sp->utime += (n * INTERVAL);
+			//_dprintf("%s: %s n=%d tick=%d\n", __FUNCTION__, ifname, n, tick);
+
+			for (i = 0; i < MAX_COUNTER; ++i) {
+				c = counter[i];
+				sc = sp->last[i];
+				if (c < sc) {
+					diff = (0xFFFFFFFF - sc) + c;
+					if (diff > MAX_ROLLOVER) diff = 0;
+				}
+				else {
+					 diff = c - sc;
+				}
+				sp->last[i] = c;
+				counter[i] = diff;
+			}
+
+			for (j = 0; j < n; ++j) {
+				sp->tail = (sp->tail + 1) % MAX_NSPEED;
+				for (i = 0; i < MAX_COUNTER; ++i) {
+					sp->speed[sp->tail][i] = counter[i] / n;
+				}
+			}
+		}
+
+		// todo: split, delay
+
+		if (now > Y2K && strcmp(ifname_desc, "INTERNET")==0) {	
+			/* Skip this if the time&date is not set yet */
+			/* Skip non-INTERNET interface only 	     */
+			tms = localtime(&now);
+			bump(history.daily, &history.dailyp, MAX_NDAILY,
+				(tms->tm_year << 16) | ((uint32_t)tms->tm_mon << 8) | tms->tm_mday, counter);
+			n = nvram_get_int("rstats_offset");
+			if ((n < 1) || (n > 31)) n = 1;
+			mon = now + ((1 - n) * (60 * 60 * 24));
+			tms = localtime(&mon);
+			bump(history.monthly, &history.monthlyp, MAX_NMONTHLY,
+				(tms->tm_year << 16) | ((uint32_t)tms->tm_mon << 8), counter);
+#ifdef RTCONFIG_ISP_METER
+                        today_rx = last_day_rx + (history.daily[history.dailyp].counter[0]/K);
+                        today_tx = last_day_tx + (history.daily[history.dailyp].counter[1]/K);
+                        memset(traffic, 0, 64);
+                        sprintf(traffic, "%lu", today_rx);
+                        nvram_set("isp_day_rx", traffic);
+                        memset(traffic, 0, 64);
+                        sprintf(traffic, "%lu", today_tx);
+                        nvram_set("isp_day_tx", traffic);
+                        month_rx = last_month_rx + (history.monthly[history.monthlyp].counter[0]/K) - reset_base_month_rx;
+                        month_tx = last_month_tx + (history.monthly[history.monthlyp].counter[1]/K) - reset_base_month_tx;
+                        memset(traffic, 0, 64);
+                        sprintf(traffic, "%lu", month_rx);
+                        nvram_set("isp_month_rx", traffic);
+                        memset(traffic, 0, 64);
+                        sprintf(traffic, "%lu", month_tx);
+                        nvram_set("isp_month_tx", traffic);
+#ifdef DEBUG
+_dprintf("CUR MONTH Rx= %lu = %lu + %llu - %lu\n",month_rx,last_month_rx,(history.monthly[history.monthlyp].counter[0]/K), reset_base_month_rx);
+_dprintf("CUR MONTH Tx= %lu = %lu + %llu - %lu\n",month_tx,last_month_tx,(history.monthly[history.monthlyp].counter[0]/K), reset_base_month_tx);
+#endif
+#endif
+		}
+
+loopjudge:
+		if(strlen(ifname_desc2)) {
+			strcpy(ifname_desc, ifname_desc2);
+			counter[0] = rx2;
+			counter[1] = tx2;
+			strcpy(ifname_desc2, "");
+			goto loopagain;
+		}
+	}
+	fclose(f);
+
+	// cleanup stale entries
+	for (i = 0; i < speed_count; ++i) {
+		sp = &speed[i];
+		if (sp->sync == -1) {
+			sp->sync = 0;
+			continue;
+		}
+		if (((current_uptime - sp->utime) > (10 * SMIN)) || (find_word(exclude, sp->ifname))) {
+			_dprintf("%s: #%d removing. > time limit or excluded\n", __FUNCTION__, i);
+			--speed_count;
+			memcpy(sp, sp + 1, (speed_count - i) * sizeof(speed[0]));
+		}
+		else {
+			_dprintf("%s: %s not found setting sync=1\n", __FUNCTION__, sp->ifname, i);
+			sp->sync = 1;
+		}
+	}
+
+	// todo: total > user
+	if (current_uptime >= save_utime) {
+		save(0);
+		save_utime = current_uptime + get_stime();
+		_dprintf("%s: uptime = %dm, save_utime = %dm\n", __FUNCTION__, current_uptime / 60, save_utime / 60);
+	}
+}
+#endif
 
 static void sig_handler(int sig)
 {
@@ -750,6 +1043,14 @@ int main(int argc, char *argv[])
 	struct sigaction sa;
 	long z;
 	int new;
+#ifdef RTCONFIG_ISP_METER
+	long zzz, pppd_uptime, pppd_conntime, isp_connect_time; 
+	FILE *fp;
+	char isp_meter_buf[64];
+	unsigned long isp_rx, isp_tx;
+	int get_connect_time;
+	struct timeval timenow;
+#endif
 
 	printf("rstats\nCopyright (C) 2006-2009 Jonathan Zarate\n\n");
 
@@ -776,10 +1077,64 @@ int main(int argc, char *argv[])
 	sigaction(SIGHUP, &sa, NULL);
 	sigaction(SIGTERM, &sa, NULL);
 	sigaction(SIGINT, &sa, NULL);
+#ifdef RTCONFIG_ISP_METER
+        signal(SIGTSTP, reset_traffic_meter_counter);
 
+	get_connect_time = 0;
+        reset_base_day_rx = 0;
+        reset_base_day_tx = 0;
+        reset_base_month_rx = 0;
+        reset_base_month_tx = 0;
+        isp_limit = nvram_get_int("isp_limit");
+        last_day_rx = nvram_get_int("isp_day_rx");
+        last_day_tx = nvram_get_int("isp_day_tx");
+        last_month_rx = nvram_get_int("isp_month_rx");
+        last_month_tx = nvram_get_int("isp_month_tx");
+	isp_limit_time = nvram_get_int("isp_limit_time");
+	last_connect_time = nvram_get_int("isp_connect_time");
+#ifdef DEBUG
+_dprintf("rstats get last data from nvram:\n");
+_dprintf("day rx= %lu\n", last_day_rx);
+_dprintf("day tx= %lu\n", last_day_tx);
+_dprintf("mon rx= %lu\n", last_month_rx);
+_dprintf("mon tx= %lu\n", last_month_tx);
+_dprintf("limit = %d\n", isp_limit);
+_dprintf("L_time= %ld\n",isp_limit_time);
+#endif
+	memset(isp_meter_buf, 0, sizeof(isp_meter_buf));
+        get_meter_file(isp_meter_buf);
+	if(isp_meter_buf!=NULL) {
+                if (sscanf(isp_meter_buf, "isp_meter:%lu,%lu,%ld,end", &isp_rx, &isp_tx, &isp_connect_time) == 3) {
+                        _dprintf("isp_rx= %lu, isp_tx= %lu, isp_connent_time= %ld\n", 
+				 isp_rx, isp_tx, isp_connect_time);
+                        if((isp_rx>last_month_rx)&&(isp_tx>last_month_tx)){
+                                last_month_rx = isp_rx;
+				last_month_tx = isp_tx;
+                        }
+			if(isp_connect_time > last_connect_time)
+				last_connect_time = isp_connect_time;
+                }
+        }
+	else {
+		isp_rx = 0;
+		isp_tx = 0;
+		last_connect_time = 0;
+	}
+#ifdef DEBUG
+_dprintf("Update last data from mtd:\n");
+_dprintf("mon rx= %lu\n", last_month_rx);
+_dprintf("mon tx= %lu\n", last_month_tx);
+_dprintf("last_t= %ld\n", last_connect_time);
+#endif
+	month_rx = last_month_rx;
+	month_tx = last_month_tx;
+
+	zzz = current_uptime = uptime();
+#endif
 	load(new);
 
 	z = current_uptime = uptime();
+
 	while (1) {
 		while (current_uptime < z) {
 			sleep(z - current_uptime);
@@ -804,6 +1159,78 @@ int main(int argc, char *argv[])
 		}
 		calc();
 		z += INTERVAL;
+
+#ifdef RTCONFIG_ISP_METER
+		gettimeofday(&timenow, NULL);
+#ifdef DEBUG
+		_dprintf("********************************\n");
+		_dprintf(" now time          = %ld\n", timenow.tv_sec);
+#endif
+		if((fp=fopen("/var/pppd_time", "r"))!=NULL) {
+			fgets(isp_meter_buf, sizeof(isp_meter_buf), fp);
+		        fclose(fp);
+			if( sscanf(isp_meter_buf, "uptime:%ld", &pppd_uptime) == 1 ) {
+				cur_conn_time = timenow.tv_sec - pppd_uptime;
+#ifdef DEBUG
+				_dprintf(" up time           = %ld\n", pppd_uptime);
+				_dprintf(" cur_conn time     = %ld\n", cur_conn_time);
+#endif
+				total_connect_time = last_connect_time + cur_conn_time - reset_base_time;
+				get_connect_time = 0;
+			}
+			else if( (sscanf(isp_meter_buf, "conntime:%ld", &pppd_conntime)==1) && get_connect_time==0 ) {
+#ifdef DEBUG
+                		_dprintf(" last connect time = %ld\n", pppd_conntime);
+#endif
+				last_connect_time += pppd_conntime - reset_base_time;
+				total_connect_time = last_connect_time;
+				reset_base_time = 0;
+				get_connect_time = 1;
+		        }
+			memset(isp_meter_buf, 0, sizeof(isp_meter_buf));
+		}
+#ifdef DEBUG
+		_dprintf(" reset_base_time   = %ld\n", reset_base_time);
+		_dprintf(" total_connect_time= %ld\n", total_connect_time);
+		_dprintf("******************************** %ld\n", z);
+#endif
+//_dprintf("isp_meter= %s\n", nvram_get("isp_meter"));
+                if(!nvram_match("isp_meter", "disable")) {
+                        isp_limit  = nvram_get_int("isp_limit");
+#ifdef DEBUG
+_dprintf("* Month: tx= %lu, rx= %lu \n", month_tx, month_rx);
+_dprintf("* isplimit = %d\n", isp_limit);
+_dprintf("* wan_state= %s\n", nvram_get("wan0_state_t"));
+#endif
+                        if(nvram_match("wan0_state_t", "2")) { //Connected
+                                if(nvram_match("isp_meter", "download")) {
+                                        if(month_rx > (isp_limit*1000))
+                                                notify_rc_and_wait("isp_meter down");
+                                }
+                                else if(nvram_match("isp_meter", "both")) {
+                                        if((month_tx)+(month_rx) > (isp_limit*1000))
+                                                notify_rc_and_wait("isp_meter down");
+                                }
+				else if(nvram_match("isp_meter", "time")) {
+					if(total_connect_time > (isp_limit_time*60)) {
+						notify_rc_and_wait("isp_meter down");
+						cur_conn_time = 0;
+					}
+				}
+                        }
+
+			//Write to Flash
+			if(current_uptime - zzz >= MTD_WRITE_INTERVEL) {	
+				nvram_commit();
+				sprintf(isp_meter_buf,"isp_meter:%lu,%lu,%ld,end", month_rx, month_tx, total_connect_time);
+#ifdef DEBUG
+_dprintf("*WRITE: %s\n", isp_meter_buf);
+#endif
+				set_meter_file(isp_meter_buf);
+				zzz = current_uptime;
+         		}
+		}
+#endif //RTCONFIG_ISP_METER
 	}
 
 	return 0;

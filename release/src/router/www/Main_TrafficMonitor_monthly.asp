@@ -5,7 +5,7 @@
 <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_8_3#></title>
+<title><#Web_Title#> - <#menu5_8_3#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css">
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="tmmenu.css">
@@ -203,7 +203,7 @@ function switchPage(page){
 
 	        				<tr>
 	          					<td height="30" align="left" valign="middle" >
-										<p class="formfontcontent"><#traffic_monitor_desc#></p>
+										<div class="formfontcontent"><p class="formfontcontent"><#traffic_monitor_desc#></p></div>
 	          					</td>
 	        				</tr>
 

@@ -44,7 +44,12 @@ usage(void)
 }
 
 #define PROFILE_HEADER		"HDR1"
-#define PROFILE_HEADER_NEW	"HDR2"
+#ifdef RTCONFIG_DSL
+#define PROFILE_HEADER_NEW      "N55U"
+#else
+#define PROFILE_HEADER_NEW      "HDR2"
+#endif
+
 
 // save nvram to file
 int nvram_save(char *file, char *buf)

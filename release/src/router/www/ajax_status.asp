@@ -7,4 +7,5 @@
   <wan>cooler=<% nvram_get("cooler"); %></wan>
   <wan>wlc_state=<% nvram_get("wlc_state"); %></wan>
   <wan>wlc_sbstate=<% nvram_get("wlc_sbstate"); %></wan>
+  <wan>wifi_hw_switch=<% nvram_get("wl0_radio"); %></wan>    
 </devicemap>

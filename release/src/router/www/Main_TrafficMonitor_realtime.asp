@@ -5,20 +5,20 @@
 <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
-<meta name="svg.render.forceflash" content="false" />	
-<title>ASUS Wireless Router <#Web_Title#> - <#menu4_2#> : <#menu4_2_1#></title>
-<link rel="stylesheet" type="text/css" href="index_style.css"> 
+<meta name="svg.render.forceflash" content="false" />
+<title><#Web_Title#> - <#menu4_2#> : <#menu4_2_1#></title>
+<link rel="stylesheet" type="text/css" href="index_style.css">
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="tmmenu.css">
 <link rel="stylesheet" type="text/css" href="menu_style.css"> <!-- Viz 2010.09 -->
 <link rel="shortcut icon" href="images/favicon.png">
-<link rel="icon" href="images/favicon.png">  
+<link rel="icon" href="images/favicon.png">
 <script language="JavaScript" type="text/javascript" src="help.js"></script>
-<script src='svg.js' data-path="/svghtc/" data-debug="false"></script>	
+<script src='svg.js' data-path="/svghtc/" data-debug="false"></script>
 <script language="JavaScript" type="text/javascript" src="state.js"></script>
 <script language="JavaScript" type="text/javascript" src="general.js"></script>
 <script language="JavaScript" type="text/javascript" src="tmmenu.js"></script>
-<script language="JavaScript" type="text/javascript" src="tmcal.js"></script>	
+<script language="JavaScript" type="text/javascript" src="tmcal.js"></script>
 <script language="JavaScript" type="text/javascript" src="popup.js"></script>
 <script type='text/javascript'>
 
@@ -164,14 +164,14 @@ function switchPage(page){
 
   <td valign="top">
 		<div id="tabMenu" class="submenuBlock"></div>
-		
+
       	<!--===================================Beginning of Main Content===========================================-->
       	<table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
 
   		<tr>
 			<td align="left"  valign="top">
-			<table width="100%" border="0" cellpadding="4" cellspacing="0" class="FormTitle" id="FormTitle">		
-				<tbody>	
+			<table width="100%" border="0" cellpadding="4" cellspacing="0" class="FormTitle" id="FormTitle">
+				<tbody>
 				<!--===================================Beginning of graph Content===========================================-->
 	      		<tr>
 					<td bgcolor="#4D595D" valign="top"  >
@@ -185,7 +185,7 @@ function switchPage(page){
 											<option value="2"><#menu4_2_2#></option>
 											<option value="3"><#menu4_2_3#></option>
 											<option value="4">Monthly</option>
-										</select>	    
+										</select>
 									</div>
 								</td>
         			</tr>
@@ -196,7 +196,7 @@ function switchPage(page){
 
         			<tr>
           				<td height="30" align="left" valign="middle" >
-										<p class="formfontcontent"><#traffic_monitor_desc#></p>
+										<div class="formfontcontent"><p class="formfontcontent"><#traffic_monitor_desc#></p></div>
           				</td>
         			</tr>
 
@@ -233,18 +233,18 @@ function switchPage(page){
 										<div id='rx-sel'><#Downlink#>
 										</div>
 						  			</td>
-						  			
+
 						  			<td style="text-align:center;font-weight: bold; background-color:#111;"><span id='rx-current' style="color:#FF9000;"></span></td>
 						  			<td style="text-align:center; background-color:#111;" id='rx-avg'></td>
 						  			<td style="text-align:center; background-color:#111;" id='rx-max'></td>
 						  			<td style="text-align:center; background-color:#111;" id='rx-total'></td>
 						    		</tr>
-						    		
+
 						    		<tr>
 						    			<td style="text-align:center; background-color:#111;">
 									<div id='tx-sel'><#Uplink#>
-									</div>               			
-              							</td>   
+									</div>
+              							</td>
 						  		<td style="text-align:center;font-weight: bold; background-color:#111;"><span id='tx-current' style="color:#3CF;"></span></td>
 									<td style="text-align:center; background-color:#111;" id='tx-avg'></td>
 									<td style="text-align:center; background-color:#111;" id='tx-max'></td>
@@ -254,10 +254,10 @@ function switchPage(page){
 						</td>
 					</tr>
 					</table>
-					
+
 					</td>
 				</tr>
-				
+
 				<tr style="display:none">
 					<td bgcolor="#FFFFFF">
 		  				<table width="100%"  border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
@@ -266,7 +266,7 @@ function switchPage(page){
 			  				<td colspan="5" id="TriggerList">Display Options</td>
 						</tr>
 		  				</thead>
-			
+
 						<div id='bwm-controls'>
 						<tr>
 							<th width='50%'><#Traffic_Avg#></th>
@@ -300,19 +300,19 @@ function switchPage(page){
 						</tr>
 						</div>
 						</table>
-						
+
 					</td>
 				</tr>
 
 				</tbody>
-				</table>	
+				</table>
 			</td>
 		</tr>
-		
-		</table>				
-		
+
+		</table>
+
 	</td>
-    		
+
     	<td>&nbsp</td>
 </tr>
 </table>

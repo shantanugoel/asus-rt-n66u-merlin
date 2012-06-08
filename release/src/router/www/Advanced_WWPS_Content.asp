@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_1_2#></title>
+<title><#Web_Title#> - <#menu5_1_2#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script type="text/javascript" src="/state.js"></script>
@@ -122,6 +122,7 @@ function resetWPS(){
 	showLoading(5);
 	FormActions("apply.cgi", "wps_reset", "", "5");
 	document.form.submit();
+	setTimeout('location.href=location.href;', 5000);
 }
 
 function resetTimer()
@@ -307,7 +308,7 @@ function show_wsc_status(wps_infos){
 		$("wpsDesc").style.display = "none";
 	}
 
-	if(wps_infos[0].firstChild.nodeValue == "Start enrolling...")
+	if(wps_infos[0].firstChild.nodeValue == "Start WPS Process")
 		$("wps_pin_hint").style.display = "inline";
 	else
 		$("wps_pin_hint").style.display = "none";

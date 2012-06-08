@@ -62,9 +62,9 @@ char *pptp_encode(char *str, char *output)
 	i=j=0;
 
 	while(*(str+i)) {
-		if(*(str+i)==' ' || *(str+i)=='\\') {
+		if(*(str+i)==' ' || *(str+i)=='\\' || *(str+i)=='\'' || *(str+i)=='"' || *(str+i)=='#') {
 			*(output+j++)='\\';
-			*(output+j++)=' ';
+			*(output+j++)=*(str+i);
 		}
 		else *(output+j++) = *(str+i); 
 		i++;

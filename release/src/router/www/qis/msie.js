@@ -1,4 +1,4 @@
-/* 
+﻿/* 
 Correctly handle PNG transparency in Win IE 5.5 & 6.
 Copyright 2007 Ignia, LLC
 Based in part on code from from http://homepage.ntlworld.com/bobosola.

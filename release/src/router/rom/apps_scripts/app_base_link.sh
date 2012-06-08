@@ -23,10 +23,7 @@ APP_LINK_LIB=$APP_LINK_DIR/lib
 
 APPS_MOUNTED_TYPE=`mount |grep "/dev/$APPS_DEV on " |awk '{print $5}'`
 if [ "$APPS_MOUNTED_TYPE" != "vfat" ]; then
-	if [ ! -L "$APP_LINK_DIR" ]; then
-		rm -rf $APP_LINK_DIR
-	fi
-
+	rm -rf $APP_LINK_DIR
 	ln -sf $APPS_INSTALL_PATH $APP_LINK_DIR
 	exit 0
 fi
@@ -44,7 +41,10 @@ for obj in $objs; do
 	fi
 
 	if [ "$obj" != "bin" ] && [ "$obj" != "lib" ]; then
-		ln -sf $APPS_INSTALL_PATH/$obj $APP_LINK_DIR/$obj 
+		if [ -d "$APP_LINK_DIR/$obj" ]; then
+			rm -rf $APP_LINK_DIR/$obj
+		fi
+		ln -sf $APPS_INSTALL_PATH/$obj $APP_LINK_DIR/$obj
 	fi
 done
 
@@ -64,6 +64,9 @@ for obj in $objs; do
 		continue
 	fi
 
+	if [ -d "$APP_LINK_DIR/$obj" ]; then
+		rm -rf $APP_LINK_DIR/$obj
+	fi
 	ln -sf $APP_BIN/$obj $APP_LINK_BIN/$obj 
 done
 
@@ -81,6 +84,9 @@ for obj in $objs; do
 		continue
 	fi
 
+	if [ -d "$APP_LINK_DIR/$obj" ]; then
+		rm -rf $APP_LINK_DIR/$obj
+	fi
 	ln -sf $APP_LIB/$obj $APP_LINK_LIB/$obj 
 done
 

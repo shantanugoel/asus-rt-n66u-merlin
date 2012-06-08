@@ -5,17 +5,17 @@
 <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
-<meta name="svg.render.forceflash" content="false" />	
+<meta name="svg.render.forceflash" content="false" />
 
-<title>ASUS Wireless Router <#Web_Title#> - <#menu4_2#> : <#menu4_2_2#></title>
-<link rel="stylesheet" type="text/css" href="index_style.css"> 
+<title><#Web_Title#> - <#menu4_2#> : <#menu4_2_2#></title>
+<link rel="stylesheet" type="text/css" href="index_style.css">
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="tmmenu.css">
 <link rel="stylesheet" type="text/css" href="menu_style.css">  <!--  Viz 2010.09 -->
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
 <script language="JavaScript" type="text/javascript" src="help.js"></script>
-<script src='svg.js' data-path="/svghtc/" data-debug="false"></script>	
+<script src='svg.js' data-path="/svghtc/" data-debug="false"></script>
 <script language="JavaScript" type="text/javascript" src="/state.js"></script>
 <script language="JavaScript" type="text/javascript" src="/general.js"></script>
 <script language="JavaScript" type="text/javascript" src="/tmmenu.js"></script>
@@ -31,9 +31,9 @@ wan_proto = '<% nvram_get("wan_proto"); %>';
 <% backup_nvram("wan_ifname,lan_ifname,wl_ifname,wan_proto,web_svg,rstats_enable,rstats_colors"); %>
 
 var cprefix = 'bw_24';
-var updateInt = 120;
+var updateInt = 30;
 var updateDiv = updateInt;
-var updateMaxL = 720;
+var updateMaxL = 2880;
 var updateReTotal = 1;
 var hours = 24;
 var lastHours = 0;
@@ -51,7 +51,7 @@ function switchHours(h)
 	if ((!svgReady) || (updating)) return;
 
 	hours = h;
-	updateMaxL = (720 / 24) * hours;
+	updateMaxL = (updateMaxL / 24) * hours;
 	showHours();
 	loadData();
 	cookie.set(cprefix + 'hrs', hours);
@@ -126,7 +126,7 @@ function init()
 	}
 
 	hours = fixInt(cookie.get(cprefix + 'hrs'), 1, 24, 24);
-	updateMaxL = (720 / 24) * hours;
+	updateMaxL = (updateMaxL / 24) * hours;
 	showHours();
 	initCommon(1, 0, 0, 1);	   //Viz 2010.09
 	ref.initX();
@@ -148,7 +148,7 @@ function Zoom(func){
 		document.form.zoom.value = parseInt(document.form.zoom.value) - 1;
 	else
 		document.form.zoom.value = parseInt(document.form.zoom.value) + 1;;
-		
+
 	if(document.form.zoom.value == 1)
 		switchHours("4");
 	else if(document.form.zoom.value == 2)
@@ -196,16 +196,16 @@ function Zoom(func){
 	  <div id="mainMenu"></div>
 	  <div id="subMenu"></div>
 	</td>
-		
+
     <td valign="top">
 	<div id="tabMenu" class="submenuBlock"></div>
 <!--===================================Beginning of Main Content===========================================-->
       <table width="98%" border="0" align="left" cellpadding="0" cellspacing="0">
       	<tr>
-          		<td align="left"  valign="top" >         
-            		<table width="100%" border="0" cellpadding="4" cellspacing="0" class="FormTitle" id="FormTitle">		
-            		<tbody>	
-            		<!--===================================Beginning of graph Content===========================================-->	
+          		<td align="left"  valign="top" >
+            		<table width="100%" border="0" cellpadding="4" cellspacing="0" class="FormTitle" id="FormTitle">
+            		<tbody>
+            		<!--===================================Beginning of graph Content===========================================-->
 	      		<tr>
 					<td bgcolor="#4D595D" valign="top"  >
 		  				<table width="740px" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="TMTable">
@@ -219,7 +219,7 @@ function Zoom(func){
 											<option value="2" selected><#menu4_2_2#></option>
 											<option value="3"><#menu4_2_3#></option>
 											<option value="4">Monthly</option>
-										</select>	
+										</select>
 									</div>
 								</td>
         			</tr>
@@ -230,15 +230,15 @@ function Zoom(func){
 
         			<tr>
           				<td height="30" align="left" valign="middle" >
-										<p class="formfontcontent"><#traffic_monitor_desc#></p>
+										<div class="formfontcontent"><p class="formfontcontent"><#traffic_monitor_desc#></p></div>
           				</td>
         			</tr>
 
 
         					<tr>
         						<td>
-								<span id="tab-area"></span>										
-										<span>	
+								<span id="tab-area"></span>
+										<span style="display:none;">
 											<input title="Zoom in" type="button" onclick="Zoom('in');" class="zoomin_btn" name="button">
          							<input title="Zoom out" type="button" onclick="Zoom('out');" class="zoomout_btn" name="button">
 										</span>
@@ -253,10 +253,10 @@ function Zoom(func){
 					<!--<![endif]-->
 									</object>
       				<!--========= svg =========-->
-      			
+
                     				</td>
         	    				</tr>
-        	    
+
   		     				<tr>
 							<td>
 				    	 			<table width="735px"   border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable_NWM">
@@ -284,13 +284,13 @@ function Zoom(func){
 											</ul>
 										</div>
 						  			</td>
-						  			
+
 						  			<td style="text-align:center;font-weight: bold; background-color:#111;"><span id='rx-current' style="color:#FF9000;"></span></td>
 						  			<td style="text-align:center; background-color:#111;" id='rx-avg'></td>
 						  			<td style="text-align:center; background-color:#111;" id='rx-max'></td>
 						  			<td style="text-align:center; background-color:#111;" id='rx-total'></td>
 						    		</tr>
-						    		
+
 						    		<tr>
 						    			<td style="text-align:center; background-color:#111;">
 										<div id='tx-sel'><#Uplink#>
@@ -306,9 +306,9 @@ function Zoom(func){
       												</ul>
    												</li>
 											</ul-->
-										</div>              			                            
+										</div>
 						    			</td>
-						    			
+
 						  			<td style="text-align:center;font-weight: bold; background-color:#111;"><span id='tx-current' style="color:#3CF;"></span></td>
 									<td style="text-align:center; background-color:#111;" id='tx-avg'></td>
 									<td style="text-align:center; background-color:#111;" id='tx-max'></td>
@@ -320,7 +320,7 @@ function Zoom(func){
 						</table>
 					</td>
 				</tr>
-	
+
 				<tr style="display:none">
 					<td bgcolor="#FFFFFF">
 		  				<table width="100%"  border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
@@ -331,7 +331,7 @@ function Zoom(func){
 		    				</thead>
 
 						<div id='bwm-controls'>
-						
+
 						<tr>
 							<th width='50%'><#Traffic_Hours#>:&nbsp;</th>
 							<td>
@@ -342,7 +342,7 @@ function Zoom(func){
 								<a href='javascript:switchHours(24);' id='hr24'>24</a>
 							</td>
 						</tr>
-						
+
 						<tr>
 							<th><#Traffic_Avg#>:&nbsp;</th>
 							<td>
@@ -353,7 +353,7 @@ function Zoom(func){
 								<a href='javascript:switchAvg(8)' id='avg8'>8x</a>
 							</td>
 						</tr>
-			
+
 						<tr>
 							<th><#Traffic_Max#>:&nbsp;</th>
 							<td>
@@ -361,7 +361,7 @@ function Zoom(func){
 								<a href='javascript:switchScale(1)' id='scale1'>Per IF</a>
 							</td>
 						</tr>
-			
+
 						<tr>
 							<th><#Traffic_SvgDisp#>:&nbsp;</th>
 							<td>
@@ -369,19 +369,19 @@ function Zoom(func){
 								<a href='javascript:switchDraw(1)' id='draw1'>Line</a>
 							</td>
 						</tr>
-			
+
 						<tr>
 							<th><#Traffic_Color#>:&nbsp; </th>
 							<td>
 								<a href='javascript:switchColor()' id='drawcolor'> </a><small><a href='javascript:switchColor(1)' id='drawrev'><#Traffic_Reverse#></a></small>
 							</td>
-						</tr>	
-						</div>	
-						
+						</tr>
+						</div>
+
 						</table>
 					</td>
 				</tr>
- 
+
 				<!--tr>
 					<td bgcolor="#FFFFFF">
 						<table width="100%"  border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
@@ -396,14 +396,14 @@ function Zoom(func){
 
 				</td>
 				</tr>
-			</tbody>		
-			</table>	
+			</tbody>
+			</table>
 		</td>
 	</tr>
-	</table>				
+	</table>
 	</td>
    	 <td>&nbsp</td>
-   	 
+
 	</tr>
 </table>
 

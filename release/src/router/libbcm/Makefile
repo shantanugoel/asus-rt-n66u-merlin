@@ -22,8 +22,12 @@ LDFLAGS += -L.
 
 OBJS := bcmgpio.o
 
-
+ifneq ($(wildcard ./prebuilt),)
+all:
+	cp -f ./prebuilt/libbcm.so . 
+else
 all: libbcm.so
+endif
 
 install: all
 	install -d $(INSTALLDIR)/usr/lib

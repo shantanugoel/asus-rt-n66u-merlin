@@ -8,6 +8,9 @@
 <link rel="icon" href="images/favicon.png">
 </head>
 <body>
-<script>alert("<#FIRM_fail_desc#>");</script>
+<script>
+	alert("<#FIRM_fail_desc#>");
+	parent.location.href=parent.location.href;
+</script>
 </body>
 </html>

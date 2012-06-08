@@ -33,6 +33,18 @@ fi
 
 APPS_INSTALL_PATH=$APPS_MOUNTED_PATH/$APPS_INSTALL_FOLDER
 
+i=0
+while [ $i -le 20 ]; do
+	success_start_service=`nvram get success_start_service`
+	if [ "$success_start_service" == "1" ]; then
+		break
+	fi
+
+	i=$(($i+1))
+	echo "autorun APP: wait $i seconds..."
+	sleep 1
+done
+
 
 nvram set apps_state_autorun=1 # CHECKING_POOL
 APPS_MOUNTED_TYPE=`mount |grep "/dev/$APPS_DEV on " |awk '{print $5}'`

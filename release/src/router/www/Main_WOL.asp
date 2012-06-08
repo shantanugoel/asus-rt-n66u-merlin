@@ -73,7 +73,7 @@ function wakeup()
 
         document.form.action_mode.value = " Refresh ";
 /*        document.form.SystemCmd.value = "/usr/bin/ether-wake -i br0 -b "+macaddr; */
-        document.form.SystemCmd.value = "wol "+macaddr+" -i `ip a show br0 | tail -n 1 | cut -d ' ' -f 8`";
+        document.form.SystemCmd.value = "wol "+macaddr+" -i `ip a show br0 | head -n 3 | tail -n 1 | cut -d ' ' -f 8`";
         document.form.target = "";
         document.form.submit();
 }

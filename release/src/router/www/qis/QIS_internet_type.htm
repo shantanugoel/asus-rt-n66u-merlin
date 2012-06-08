@@ -31,7 +31,7 @@ var original_switch_wantag = '<% nvram_get("switch_wantag"); %>';
 var contentM_height_orig = parent.document.getElementById("contentM").height;
 
 function QKinternettype_load_body(){
-	parent.document.title = "ASUS Wireless Router <#Web_Title#> - <#QKSet_type_head#>";
+	parent.document.title = "<#Web_Title#> - <#QKSet_type_head#>";
 	parent.set_step("t2");
 	document.applyForm.wan_proto.value = '<% nvram_get("wan_proto"); %>';
 	
@@ -51,6 +51,9 @@ function QKinternettype_load_body(){
 
 	ISP_Profile_Selection(original_switch_wantag);
 	hide_specialISP();
+
+	if(parent.ruisp_support >= 0)
+		document.getElementById("ruisp_btn").style.display = "";
 }
 
 function inputCCtrl4(o, flag){
@@ -349,6 +352,7 @@ function hide_specialISP(){
 		<tr>
 			<td align="center" colspan="2">
 				<div id="apply_gen" class="apply_gen">
+				 	<input id="ruisp_btn" type='button' value="Russia ISP" onclick="location.href='QIS_internet_ruisp.htm';" class="button_gen" width="70px" align="center" style="display:none;">
 				 	<input id="ff123" type='button' value="<#CTL_next#>" onclick="submitForm();" class="button_gen" width="70px" align="center">
 				</div>
 			</td>

@@ -308,7 +308,7 @@ a.fc-event {
 	overflow:hidden;	
 	padding: 0 1px;
 	background-color: #EC6; /* default BACKGROUND color */
-	background: url(/images/general_th.gif) repeat;
+	background: url(/images/statusTitle.gif) repeat;
 	-webkit-border-top-left-radius: 7px;
 	-webkit-border-top-right-radius: 7px;
 	-moz-border-radius-topleft: 7px;

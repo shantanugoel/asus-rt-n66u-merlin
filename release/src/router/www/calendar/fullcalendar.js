@@ -32,8 +32,8 @@ var defaults = {
 	
 	// editing
 	//editable: false,
-	//disableDragging: false,
-	//disableResizing: false,
+	disableDragging: false,
+	disableResizing: false,
 	
 	allDayDefault: false,
 	ignoreTimezone: true,
@@ -137,8 +137,7 @@ $.fn.fullCalendar = function(options) {
 		}
 		return this;
 	}
-	
-	
+
 	// would like to have this logic in EventManager, but needs to happen before options are recursively extended
 	var eventSources = options.eventSources || [];
 	delete options.eventSources;
@@ -146,14 +145,12 @@ $.fn.fullCalendar = function(options) {
 		eventSources.push(options.events);
 		delete options.events;
 	}
-	
 
 	options = $.extend(true, {},
 		defaults,
 		(options.isRTL || options.isRTL===undefined && defaults.isRTL) ? rtlDefaults : {},
 		options
 	);
-	
 	
 	this.each(function(i, _element) {
 		var element = $(_element);
@@ -162,9 +159,7 @@ $.fn.fullCalendar = function(options) {
 		calendar.render();
 	});
 	
-	
-	return this;
-	
+	return this;	
 };
 
 
@@ -850,7 +845,7 @@ var eventGUID = 1;
 
 function EventManager(options, _sources) {
 	var t = this;
-	
+
 	// exports
 	t.isFetchNeeded = isFetchNeeded;
 	t.fetchEvents = fetchEvents;
@@ -1081,8 +1076,8 @@ function EventManager(options, _sources) {
 		reportEvents(cache);
 	}
 	
-	
-	function renderEvent(event, stick) {
+// Jerry5: start to creat a event.	
+	function renderEvent(event, stick) { 
 		normalizeEvent(event);
 		if (!event.source) {
 			if (stick) {
@@ -2809,7 +2804,8 @@ setDefaults({
 	defaultEventMinutes: 60,
 	axisFormat: 'h tt',
 	timeFormat: {
-		agenda: 'h TT{ - h TT}'
+		agenda: ''
+		//agenda: 'HH{ ~ HH}'
 	},
 	dragOpacity: {
 		agenda: 0.5
@@ -3099,7 +3095,6 @@ function AgendaView(element, calendar, viewName) {
 			"</table>";
 		slotTable = $(s).appendTo(slotContent);
 		slotTableFirstInner = slotTable.find('div:first');
-		
 		slotBind(slotTable.find('td'));
 		
 		axisFirstCells = axisFirstCells.add(slotTable.find('th:first'));
@@ -3538,8 +3533,13 @@ function AgendaView(element, calendar, viewName) {
 		if (ev.which == 1 && opt('selectable')) { // ev.which==1 means left mouse button
 			unselect(ev);
 			var dates;
-			hoverListener.start(function(cell, origCell) {
+// Jerry5: hover listener on creat events
+			hoverListener.start(function(cell, origCell) { 
 				clearSelection();
+// Jerry5: cross column {
+				if (cell && cell.col != origCell.col)
+					cell.col = origCell.col;
+// end }
 				if (cell && cell.col == origCell.col && !cellIsAllDay(cell)) {
 					var d1 = cellDate(origCell);
 					var d2 = cellDate(cell);
@@ -3742,8 +3742,8 @@ function AgendaEventRenderer() {
 	
 	
 	// renders events in the 'time slots' at the bottom
-	
-	function renderSlotSegs(segs, modifiedEventId) { // db: genTable
+// Jerry5: genTable	
+	function renderSlotSegs(segs, modifiedEventId) {
 
 		var i, segCnt=segs.length, seg,
 			event,
@@ -3799,9 +3799,11 @@ function AgendaEventRenderer() {
 					outerWidth = availWidth;
 				}
 			}
-			left = leftmost +                                  // leftmost possible
+// Jerry5: set seg.left {
+			left = leftmost;/* +  // leftmost possible 
 				(availWidth / (levelI + forward + 1) * levelI) // indentation
-				* dis + (rtl ? availWidth - outerWidth : 0);   // rtl
+				* dis + (rtl ? availWidth - outerWidth : 0);   // rtl*/
+// }
 			seg.top = top;
 			seg.left = left;
 			seg.outerWidth = outerWidth;
@@ -3860,18 +3862,21 @@ function AgendaEventRenderer() {
 		for (i=0; i<segCnt; i++) {
 			seg = segs[i];
 			if(eventElement = seg.element){
-				eventElement[0].style.width = Math.max(20, seg.outerWidth - seg.hsides + 5) + 'px';
+				//eventElement[0].style.width = Math.max(20, seg.outerWidth - seg.hsides + 5) + 'px';
+// Jerry5: set seg width, the default value is 87px.
+				eventElement[0].style.width = '87px'; 
 				//eventElement.draggable('option', 'revert', true);
 				height = Math.max(0, seg.outerHeight - seg.vsides);
 				eventElement[0].style.height = height + 'px';
 				event = seg.event;
-				if (seg.contentTop !== undefined && height - seg.contentTop < 10) {
-					// not enough room for title, put it in the time header
+// Jerry5: no need, add Title into time text
+				/*if (seg.contentTop !== undefined && height - seg.contentTop < 10) { 
+					// not enough room for title, put it in the time header 
 					eventElement.find('div.fc-event-time')
 						.text(formatDate(event.start, opt('timeFormat')) + '-' + event.title);
 					eventElement.find('div.fc-event-title')
 						.remove();
-				}
+				}*/
 				trigger('eventAfterRender', event, event, eventElement);
 			}
 		}
@@ -3905,24 +3910,29 @@ function AgendaEventRenderer() {
 		}
 		html +=
 			" class='" + classes.join(' ') + "'" +
-			" style='position:absolute;z-index:8;top:" + seg.top + "px;left:" + seg.left + "px;" + skinCss + "'" +
-			">" +
+			" style='position:absolute;z-index:8;top:" + seg.top + "px;left:" + seg.left + "px;" + skinCss + "'>" +
 			"<div class='fc-event-inner fc-event-skin'" + skinCssAttr + ">" +
 			"<div class='fc-event-head fc-event-skin'" + skinCssAttr + ">" +
+			
 			"<div class='fc-event-time'>" +
-			htmlEscape(formatDates(event.start, event.end, opt('timeFormat'))) +
-			"</div>" +
-			"</div>" +
-			"<div class='fc-event-content' onmouseover='document.getElementById(\"closeIcon"+event.id+"\").style.visibility=\"visible\"'>" +
-			"<img id='closeIcon"+event.id+"' src='/images/button-close.png' width='18px' height='18px' hspace='1' style='margin-left:0px;margin-top:1px;cursor:pointer;' title='Delete' onclick='$j(\"#calendar\").fullCalendar(\"removeEvents\","+event.id+");\'" +
+			"<img id='closeIcon"+event.id+"' src='/images/button-close.png' width='18px' height='18px' hspace='1' style='margin-left:0px;cursor:pointer;' title='Delete' onclick='$j(\"#calendar\").fullCalendar(\"removeEvents\","+event.id+");\'" +
 			"onmouseover='this.src=\"/images/button-close2.png\"' onmouseout='this.src=\"/images/button-close.png\"'>" +
+			"<span class='fc-event-time-text'>" +
+			htmlEscape(formatDates(event.start, event.end, opt('timeFormat'))) +
+			"</span>" +
+			"</div>" +
+
+			"</div>" +
+			"<div class='fc-event-content'>" +
+			//"<img id='closeIcon"+event.id+"' src='/images/button-close.png' width='18px' height='18px' hspace='1' style='margin-left:0px;margin-top:1px;cursor:pointer;' title='Delete' onclick='$j(\"#calendar\").fullCalendar(\"removeEvents\","+event.id+");\'" +
+			//"onmouseover='this.src=\"/images/button-close2.png\"' onmouseout='this.src=\"/images/button-close.png\"'>" +
 			"<div class='fc-event-title' style='display:none;width:80%;color:#FFF;'>" +
 			htmlEscape(event.title) +
 			"</div>" +
 			"<div><img src='/images/checked_parentctrl.png' hspace='1' style='margin-top:5px;margin-left:16px;'></div>" +
 			"</div>" +
 			"<div class='fc-event-bg'" +
-			"onmouseover='document.getElementById(\"closeIcon"+event.id+"\").style.visibility=\"visible\"'" +
+			//"onmouseover='document.getElementById(\"closeIcon"+event.id+"\").style.visibility=\"visible\"'" +
 			"></div></div>"; // close inner
 		if (seg.isEnd && isEventResizable(event)) {
 			html +=
@@ -3946,7 +3956,8 @@ function AgendaEventRenderer() {
 	
 	
 	function bindSlotSeg(event, eventElement, seg) {
-		var timeElement = eventElement.find('div.fc-event-time');
+// Jerry5: change Time Element
+		var timeElement = eventElement.find('span.fc-event-time-text'); 
 		if (isEventDraggable(event)) {
 			draggableSlotEvent(event, eventElement, timeElement);
 		}
@@ -4172,7 +4183,8 @@ function AgendaEventRenderer() {
 				eventElement.css('z-index', 9);
 				trigger('eventResizeStart', this, event, ev, ui);
 			},
-			resize: function(ev, ui) {
+// Jerry5: resize
+			resize: function(ev, ui) { 
 				// don't rely on ui.size.height, doesn't take grid into account
 				slotDelta = Math.round((Math.max(slotHeight, eventElement.height()) - ui.originalSize.height) / slotHeight);
 				if (slotDelta != prevSlotDelta) {
@@ -4398,10 +4410,11 @@ function View(element, calendar, viewName) {
 	/* Event Modification Reporting
 	---------------------------------------------------------------------------------*/
 	
-	
-	function eventDrop(e, event, dayDelta, minuteDelta, allDay, ev, ui) { //db: drop 
+//Jerry5: drop 	
+	function eventDrop(e, event, dayDelta, minuteDelta, allDay, ev, ui) { 
 		var oldAllDay = event.allDay;
-		var eventId = event._id; // db: _fcX
+// Jerry5: _fcX
+		var eventId = event._id; 
 
 		moveEvents(eventsByID[eventId], dayDelta, minuteDelta, allDay);
 		trigger(
@@ -4448,8 +4461,8 @@ function View(element, calendar, viewName) {
 	/* Event Modification Math
 	---------------------------------------------------------------------------------*/
 	
-	
-	function moveEvents(events, dayDelta, minuteDelta, allDay) { // db: move
+// Jerry5: move	
+	function moveEvents(events, dayDelta, minuteDelta, allDay) { 
 		minuteDelta = minuteDelta || 0;
 		for (var e, len=events.length, i=0; i<len; i++) {
 			e = events[i];

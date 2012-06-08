@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -19,6 +19,8 @@ var $j = jQuery.noConflict();
 <script>
 <% wanlink(); %>
 
+var wanproto = '<% nvram_get("wan_proto"); %>';
+var dslproto = '<% nvram_get("dsl0_proto"); %>';
 var wanip = wanlink_ipaddr();
 var wandns = wanlink_dns();
 var wangateway = wanlink_gateway();
@@ -28,11 +30,49 @@ var wanauxstate = -1;
 var old_link_internet = -1;
 var lan_proto = '<% nvram_get("lan_proto"); %>';
 
+var wans_dualwan = '<% nvram_get("wans_dualwan"); %>';
+var wans_lanport = '<% nvram_get("wans_lanport"); %>';
+var wan0_primary = '<% nvram_get("wan0_primary"); %>';
+
 <% wan_get_parameter(); %>
+
+function add_lanport_number(if_name)
+{
+	if (if_name == "lan") {
+		return "lan" + wans_lanport;
+	}
+	return if_name;
+}
 
 function initial(){
 	flash_button();
 	
+	// if dualwan enabled , show dualwan status
+	if(dualWAN_support != -1){
+		var pri_if = wans_dualwan.split(" ")[0];
+		var sec_if = wans_dualwan.split(" ")[1];	
+		pri_if = add_lanport_number(pri_if);
+		sec_if = add_lanport_number(sec_if);
+		pri_if = pri_if.toUpperCase();
+		sec_if = sec_if.toUpperCase();
+		if(sec_if != 'NONE'){
+			$("dualwan_row_main").style.display = "";	
+			// DSLTODO, need ajax to update failover status
+			if (wan0_primary == '1') {
+				showtext($j("#dualwan_current")[0], pri_if);
+			}
+			else {
+				showtext($j("#dualwan_current")[0], sec_if);		
+			}
+
+			$("dualwan_row_primary").style.display = "";			
+			showtext($j("#dualwan_primary_if")[0], pri_if);
+
+			$("dualwan_row_secondary").style.display = "";	
+			showtext($j("#dualwan_secondary_if")[0], sec_if);
+		}
+	}
+
 	if(sw_mode == 1){
 		setTimeout("update_wanip();", 1);
 	}
@@ -41,6 +81,8 @@ function initial(){
 		$("ap_table").style.display = "";
 		if(sw_mode == 2)
 			showtext($("RemoteAP"), decodeURIComponent(document.internetForm.wlc_ssid.value));
+		if(sw_mode == 3)
+			showtext($("RemoteAP"), decodeURIComponent(document.internetForm.wlc_ssid.value));	
 
 		if(lan_proto == "static")
 			showtext($("LanProto"), "<#BOP_ctype_title5#>");
@@ -60,6 +102,15 @@ function initial(){
 		var wanlink_type_conv = "L2TP";
 	else
 		var wanlink_type_conv = wanlink_type();
+		
+	if (parent.dsl_support != -1) {
+		if (wanproto == "pppoe") {
+			if (dslproto == "pppoa") wanlink_type_conv = "PPPoA";
+		}
+		else if (wanproto == "static") {
+			if (dslproto == "ipoa") wanlink_type_conv = "IPoA";
+		}		
+	}
 
 	showtext($j("#connectionType")[0], wanlink_type_conv);
 	update_all_ip(wanip, wandns, wangateway);
@@ -143,6 +194,7 @@ function goQIS(){
 <input type="hidden" name="wan_enable" value="<% nvram_get("wan_enable"); %>">
 <input type="hidden" name="wan_unit" value="<% get_wan_unit(); %>">
 <input type="hidden" name="wlc_ssid" value="<% nvram_char_to_ascii("WLANConfig11b", "wlc_ssid"); %>" disabled>
+<input type="hidden" name="dslx_link_enable" value="" disabled>
 
 <table width="95%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="table1px" id="rt_table">
 <tr>
@@ -154,12 +206,20 @@ function goQIS(){
 						$j('#radio_wan_enable').iphoneSwitch('<% nvram_get("wan_enable"); %>', 
 							 function() {
 								document.internetForm.wan_enable.value = "1";
+								if (parent.dsl_support != -1) {
+									document.internetForm.dslx_link_enable.value = "1";
+									document.internetForm.dslx_link_enable.disabled = false;
+								}
 								parent.showLoading();
 								document.internetForm.submit();	
 								return true;
 							 },
 							 function() {
 								document.internetForm.wan_enable.value = "0";
+								if (parent.dsl_support != -1) {
+									document.internetForm.dslx_link_enable.value = "0";
+									document.internetForm.dslx_link_enable.disabled = false;
+								}
 								parent.showLoading();
 								document.internetForm.submit();	
 								return true;
@@ -172,6 +232,32 @@ function goQIS(){
     		<img style="margin-top:5px;" src="/images/New_ui/networkmap/linetwo2.png">
     </td>
 </tr>
+
+
+<tr id=dualwan_row_main style="display:none">
+    <td style="padding:5px 10px 5px 15px;">
+    		<p class="formfonttitle_nwm">Dual WAN</p>
+    		<p style="padding-left:10px; margin-top:3px; background-color:#444f53; line-height:20px;" id="dualwan_current"></p>
+      	<img style="margin-top:5px;" src="/images/New_ui/networkmap/linetwo2.png">
+    </td>
+</tr>
+
+<tr id=dualwan_row_primary style="display:none">
+    <td style="padding:5px 10px 5px 15px;">
+    		<p class="formfonttitle_nwm">Primary</p>
+    		<p style="padding-left:10px; margin-top:3px; background-color:#444f53; line-height:20px;" id="dualwan_primary_if"></p>
+      	<img style="margin-top:5px;" src="/images/New_ui/networkmap/linetwo2.png">
+    </td>
+</tr>
+
+<tr id=dualwan_row_secondary style="display:none">
+    <td style="padding:5px 10px 5px 15px;">
+    		<p class="formfonttitle_nwm">Secondary</p>
+    		<p style="padding-left:10px; margin-top:3px; background-color:#444f53; line-height:20px;" id="dualwan_secondary_if"></p>
+      	<img style="margin-top:5px;" src="/images/New_ui/networkmap/linetwo2.png">
+    </td>
+</tr>
+  
   
 <tr>
     <td style="padding:5px 10px 5px 15px;">
@@ -234,7 +320,7 @@ function goQIS(){
 
 <tr>
     <td style="padding:5px 10px 5px 15px;">
-    		<p class="formfonttitle_nwm"><#WAN_IP#></p>
+    		<p class="formfonttitle_nwm"><#LAN_IP#></p>
     		<p style="padding-left:10px; margin-top:3px; background-color:#444f53; line-height:20px;"><% nvram_get("lan_ipaddr"); %></p>
       	<img style="margin-top:5px;" src="/images/New_ui/networkmap/linetwo2.png">
     </td>

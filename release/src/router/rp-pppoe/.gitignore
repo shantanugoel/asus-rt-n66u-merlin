@@ -1,6 +1,5 @@
 *.o
 *.so
-stamp-h1
 gui/Makefile
 gui/tkpppoe
 scripts/pppoe-connect
@@ -16,4 +15,7 @@ src/config.log
 src/config.status
 src/libevent/Makefile
 src/plugin/
+src/pppoe
+src/pppoe-server
+src/pppoe-sniff
 src/pppoe-relay

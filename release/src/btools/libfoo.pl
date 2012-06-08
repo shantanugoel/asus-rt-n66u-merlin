@@ -155,16 +155,17 @@ sub fixDyn
 	fixDynDep("pppd", "rp-pppoe.so");
 	fixDynDep("libcrypto.so.1.0.0", "libssl.so.1.0.0");
 ## charles add
+#	    fixDynDep("libsmbclient.so.0", "libpthread.so.0");
 	fixDynDep("mod_smbdav.so", "libshared.so");
 	fixDynDep("mod_smbdav.so", "libnvram.so");
 	fixDynDep("mod_smbdav.so", "libsqlite3.so.0");
     fixDynDep("mod_smbdav.so", "libxml2.so.2");
 	fixDynDep("mod_smbdav.so", "libsmbclient.so.0");
-	   fixDynDep("mod_smbdav.so", "libpthread.so.0");
+	fixDynDep("mod_smbdav.so", "libpthread.so.0");
 	   fixDynDep("lighttpd", "libpthread.so.0");
 	   fixDynDep("lighttpd-arpping", "libpthread.so.0");
 	   fixDynDep("lighttpd-arpping", "libsmbclient.so.0");
-	
+
 	fixDynDep("lighttpd", "libcrypto.so.1.0.0");
 	fixDynDep("lighttpd", "libssl.so.1.0.0");
         fixDynDep("lighttpd", "libpcre.so.0.0.1");
@@ -207,7 +208,7 @@ sub fixDyn
 		fixDynDep("lighttpd", "mod_smbdav.so");
         fixDynDep("lighttpd", "libshared.so");
         fixDynDep("lighttpd", "libnvram.so");
-		fixDynDep("lighttpd", "libxml2.so.2");	
+		fixDynDep("lighttpd", "libxml2.so.2");
 		fixDynDep("libbcm.so", "libshared.so");
 		fixDynDep("libbcm.so", "libc.so.0");
 #   fixDynDep("lighttpd", "libdisk.so");

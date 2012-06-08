@@ -591,9 +591,8 @@ int start_iQos(void)
 					i, rate, x, x, u, v, x);
 		}
 
+		free(buf);
 	}
-
-	free(buf);
 
 	fputs(
 		"\t;;\n"

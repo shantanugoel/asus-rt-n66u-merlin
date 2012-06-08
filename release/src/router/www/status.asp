@@ -1,3 +1,3 @@
-<% wanlink(); %>
+﻿<% wanlink(); %>
 
 <% wanstate(); %>

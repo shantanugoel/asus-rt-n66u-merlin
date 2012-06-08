@@ -1,4 +1,4 @@
-// Use AJAX to get nvram
+﻿// Use AJAX to get nvram
 var http_request = false;
 
 function makeRequest(url) {

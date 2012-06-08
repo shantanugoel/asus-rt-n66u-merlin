@@ -5,6 +5,7 @@ CZ=Česky
 PL=Polski
 RU=Pусский
 DE=Deutsch
+ES=Español
 FR=Français
 TR=Türkçe
 TH=ไทย

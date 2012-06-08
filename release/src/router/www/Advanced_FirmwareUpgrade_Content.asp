@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_6_3#></title>
+<title><#Web_Title#> - <#menu5_6_3#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <style>
@@ -42,14 +42,17 @@ wan_route_x = '<% nvram_get("wan_route_x"); %>';
 wan_nat_x = '<% nvram_get("wan_nat_x"); %>';
 wan_proto = '<% nvram_get("wan_proto"); %>';
 
+var webs_state_update = '<% nvram_get("webs_state_update"); %>';
+var webs_state_error = '<% nvram_get("webs_state_error"); %>';
+var webs_state_info = '<% nvram_get("webs_state_info"); %>';
+
 var varload = 0;
-var count=0;
 
 function initial(){
 	show_menu();	
 	if(live_update_support == -1)
 		$("update").style.display = "none";
-	else
+	else if('<% nvram_get("webs_state_update"); %>' != '')
 		detect_firmware();
 }
 
@@ -66,53 +69,56 @@ function detect_firmware(){
     		
     		success: function(){
       			if(webs_state_update==0){
-      					count =count+1;
-      					//$('update_states').innerHTML="<#check_proceeding#>";
       					$('update_scan').style.display="none";
-      					setTimeout("detect_firmware();", 1000);      				
+      					setTimeout("detect_firmware();", 1000);
       			}else{
       					if(webs_state_error==1){
-      							//if(count>=1){
-      								$('update_states').innerHTML="<#connect_failed#>";
       								$('update_scan').style.display="none";
+      								$('update_states').innerHTML="<#connect_failed#>";      								
       								return;
-      							//}	
       					}else{
       			      				      					
 	      					var Latest_firmver = webs_state_info.split("_");
 	      					var Latest_firm = Latest_firmver[0];
 	      					var Latest_buildno = Latest_firmver[1];
-      						current_firm = parseInt(exist_firmver.replace(/[.]/gi,""));
-      						current_buildno = <% nvram_get("buildno"); %>;
-      						//alert(Latest_firm+' , '+Latest_buildno+' , '+current_firm+' , '+current_buildno);
-      						if(current_firm < Latest_firm){
-      							  //$('update_states').innerHTML="<#exist_new#>";
-      								$('update_scan').style.display="none";
-      								if(confirm("<#exist_new#>")){
-      										document.start_update.action_mode.value="apply";
-      										document.start_update.action_script.value="start_webs_upgrade";
-      										document.start_update.action_wait.value="300";
-													document.start_update.submit();
-													return;
-      								}
-      						}else if(current_firm == Latest_firm && current_buildno < Latest_buildno){
-      							  //$('update_states').innerHTML="<#exist_new#>";
-      								$('update_scan').style.display="none";
-      								if(confirm("<#exist_new#>")){
-      										document.start_update.action_mode.value="apply";
-      										document.start_update.action_script.value="start_webs_upgrade";
-      										document.start_update.action_wait.value="300";
-													document.start_update.submit();
-													return;
-      								}      							      							
-      						}else{
-      								var flag = getCookie("after_check");      							
-      								if(flag==1){
-      							  		$('update_states').innerHTML="<#is_latest#>";
-      										$('update_scan').style.display="none";      									
-      										setCookie("after_check", 0, 365);
+	      					
+	      					if(Latest_firm.length > 0 && Latest_buildno.length > 0){	//match model FW
+      								current_firm = parseInt(exist_firmver.replace(/[.]/gi,""));
+      								current_buildno = <% nvram_get("buildno"); %>;
+      								if(current_firm < Latest_firm){
+      										$('update_scan').style.display="none";
+      										if(confirm("<#exist_new#>")){
+      												document.start_update.action_mode.value="apply";
+      												document.start_update.action_script.value="start_webs_upgrade";
+      												document.start_update.action_wait.value="300";
+															document.start_update.submit();
+															return;
+      										}
+      								}else if(current_firm == Latest_firm && current_buildno < Latest_buildno){
+      										$('update_scan').style.display="none";
+      										if(confirm("<#exist_new#>")){
+      												document.start_update.action_mode.value="apply";
+      												document.start_update.action_script.value="start_webs_upgrade";
+      												document.start_update.action_wait.value="300";
+															document.start_update.submit();
+															return;
+      										}
+      										
+      								}else{
+      										var flag = getCookie("after_check");      							
+      										if(flag==1){
+      							  				$('update_states').innerHTML="<#is_latest#>";
+      												$('update_scan').style.display="none";      									
+      												setCookie("after_check", 0, 365);
+      										}	
       								}	
-      						}	
+      						}
+      						else{		//miss-match model FW
+      								$('update_scan').style.display="none";
+      								/*$('update_states').innerHTML="<#connect_failed#>";*/
+      								$('update_states').innerHTML="Not support";
+      								return;      							
+      						}
 								}
 							}	
   		}
@@ -167,6 +173,33 @@ else
   
 return getCookie("after_check");
 }
+
+
+var dead = 0;
+function detect_httpd(){
+
+	$j.ajax({
+    		url: '/httpd_check.htm',
+    		dataType: 'script', 
+	
+    		error: function(xhr){
+    				dead++;
+    				if(dead < 6)
+    						setTimeout("detect_httpd();", 1000);
+    				else{
+    						$('loading_block1').style.display = "none";
+    						$('loading_block2').style.display = "none";
+    						$('loading_block3').style.display = "";
+    						$('loading_block3').innerHTML = Untranslated.reboot_manually;
+    				}    						
+    		},
+    		
+    		success: function(){
+      			location.href = "index.asp";
+  			}
+  		});
+}
+
 </script>
 </head>
 
@@ -178,17 +211,34 @@ return getCookie("after_check");
 <table cellpadding="5" cellspacing="0" id="loadingBarBlock" class="loadingBarBlock" align="center">
 	<tr>
 		<td height="80">
-		<div class="Bar_container">
+		<div id="loading_block1" class="Bar_container">
 			<span id="proceeding_img_text" ></span>
 			<div id="proceeding_img"></div>
 		</div>
-		<div style="margin:5px auto; width:85%;"><#FIRM_ok_desc#></div>
+		<div id="loading_block2" style="margin:5px auto; width:85%;"><#FIRM_ok_desc#></div>
+		<div id="loading_block3" style="width:85%; display:none;"></div>	
 		</td>
 	</tr>
 </table>
 <!--[if lte IE 6.5]><iframe class="hackiframe"></iframe><![endif]-->
 </div>
 <div id="Loading" class="popup_bg"></div><!--for uniform show, useless but have exist-->
+
+<div id="hiddenMask" class="popup_bg">
+	<table cellpadding="5" cellspacing="0" id="dr_sweet_advise" class="dr_sweet_advise" align="center">
+		<tr>
+		<td>
+			<br/>
+			<div class="drword" id="drword" style="height:50px;">&nbsp;&nbsp;&nbsp;<#Main_alert_proceeding_desc1#>...
+			<br/>
+			<br/>
+	    </div>
+		  <!--div class="drImg"><img src="/images/DrsurfImg.gif"></div-->
+		</td>
+		</tr>
+	</table>
+<!--[if lte IE 6.5]><iframe class="hackiframe"></iframe><![endif]-->
+</div>
 
 <iframe name="hidden_frame" id="hidden_frame" src="" width="0" height="0" frameborder="0"></iframe>
 
@@ -231,19 +281,30 @@ return getCookie("after_check");
 				<th><#FW_item1#></th>
 				<td><input type="text" class="input_15_table" value="<% nvram_get("productid"); %>" readonly="1"></td>
 			</tr>
+<!--###HTML_PREP_START###-->
+<!--###HTML_PREP_ELSE###-->
+<!--
+[DSL-N55U][DSL-N55U-B]
+{ADSL firmware version}
+			<tr>
+				<th><#adsl_fw_ver_itemname#></th>
+				<td><input type="text" class="input_15_table" value="<% nvram_dump("adsl/tc_fw_ver_short.txt",""); %>" readonly="1"></td>
+			</tr>
+-->
+<!--###HTML_PREP_END###-->				
 			<tr>
 				<th><#FW_item2#></th>
 				<td><input type="text" name="firmver_table" class="input_15_table" value="<% nvram_get("firmver"); %>.<% nvram_get("buildno"); %>" readonly="1"><!--/td-->
 						<input type="button" id="update" name="update" class="button_gen" onclick="detect_update();" value="<#liveupdate#>" />
 						<div id="check_states">
-								<img id="update_scan" style="display:none;" src="images/InternetScan.gif" />
 								<span id="update_states"></span>								
+								<img id="update_scan" style="display:none;" src="images/InternetScan.gif" />
 						</div>							
 				</td>
 			</tr>
 			<tr>
 				<th><#FW_item5#></th>
-				<td><input type="file" name="file" class="input" style="color:#FFCC00;"></td>
+				<td><input type="file" name="file" class="input" style="color:#FFCC00;*color:#000;"></td>
 			</tr>
 			<tr align="center">
 			  <td colspan="2"><input type="button" name="button" class="button_gen" onclick="onSubmitCtrlOnly(this, 'Upload1');" value="<#CTL_upload#>" /></td>

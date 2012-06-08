@@ -1,7 +1,7 @@
-function show_4G_country_list(){
+﻿function show_4G_country_list(){
 	countrylist = new Array();
 	countrylist[0] = new Array("Russia", "RU");
-	countrylist[1] = new Array("others", "");
+	countrylist[1] = new Array("Manual", "");
 
 	var got_country = 0;
 	free_options($("isp_countrys"));

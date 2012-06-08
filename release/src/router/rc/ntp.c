@@ -83,6 +83,8 @@ int ntp_main(int argc, char *argv[])
 	while (1)
 	{
 		ret = doSystem("ntpclient -h %s -i 3 -l -s &", servers);
+		sleep(3);
+		setup_timezone();
 		pause();
 	}	
 }

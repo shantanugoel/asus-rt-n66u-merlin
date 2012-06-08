@@ -49,6 +49,7 @@ void start_jffs2(void)
 
 	if (!mtd_getinfo("jffs2", &part, &size)) return;
 
+_dprintf("*** jffs2: %d, %d\n", part, size);
 	if (nvram_match("jffs2_format", "1")) {
 		nvram_set("jffs2_format", "0");
 
@@ -78,21 +79,18 @@ void start_jffs2(void)
 		notice_set("jffs", format ? "Formatted" : "Loaded");
 		return;
 	}
-
 	if (!mtd_unlock("jffs2")) {
 		error("unlocking");
 		return;
 	}
-
 	modprobe(JFFS_NAME);
-
 	sprintf(s, MTD_BLKDEV(%d), part);
 	if (mount(s, "/jffs", JFFS_NAME, MS_NOATIME, "") != 0) {
-		modprobe_r(JFFS_NAME);
+_dprintf("*** jffs2 mount error\n");
+		//modprobe_r(JFFS_NAME);
 		error("mounting");
 		return;
 	}
-
 #ifdef TEST_INTEGRITY
 	int test;
 
@@ -103,7 +101,6 @@ void start_jffs2(void)
 			return;
 		}
 	}
-
 	if ((f_read("/jffs/.tomato_do_not_erase", &test, sizeof(test)) != sizeof(test)) || (test != size)) {
 		stop_jffs2();
 		error("testing integrity of");
@@ -119,6 +116,7 @@ void start_jffs2(void)
 		chdir("/");
 	}
 	run_userfile("/jffs", ".asusrouter", "/jffs", 3);
+
 }
 
 void stop_jffs2(void)

@@ -43,7 +43,11 @@
 void init_devs(void)
 {
 	mknod("/dev/video0", S_IFCHR | 0x666, makedev(81, 0));
+#ifdef RTCONFIG_DSL
+	mknod("/dev/rtl8367r", S_IFCHR | 0x666, makedev(206, 0));
+#else
 	mknod("/dev/rtl8367m", S_IFCHR | 0x666, makedev(206, 0));
+#endif
 	mknod("/dev/spiS0", S_IFCHR | 0x666, makedev(217, 0));
 	mknod("/dev/i2cM0", S_IFCHR | 0x666, makedev(218, 0));
 	mknod("/dev/rdm0", S_IFCHR | 0x666, makedev(254, 0));
@@ -110,7 +114,7 @@ void generate_switch_para(void)
 	}
 }
 
-void init_switch()
+void init_switch_ralink()
 {
 	generate_switch_para();
 
@@ -119,15 +123,28 @@ void init_switch()
 #ifdef RTCONFIG_RALINK_RT3052
 	if(is_routing_enabled()) config_3052(nvram_get_int("switch_stb_x"));
 #else
-	if (!nvram_match("et1macaddr", ""))
-		eval("ifconfig", "eth3", "hw", "ether", nvram_safe_get("et1macaddr"));
-	else
-		eval("ifconfig", "eth3", "hw", "ether", nvram_safe_get("et0macaddr"));
+	if(strlen(nvram_safe_get("wan0_ifname"))) {
+		if (!nvram_match("et1macaddr", ""))
+			eval("ifconfig", nvram_safe_get("wan0_ifname"), "hw", "ether", nvram_safe_get("et1macaddr"));
+		else
+			eval("ifconfig", nvram_safe_get("wan0_ifname"), "hw", "ether", nvram_safe_get("et0macaddr"));
+	}
 	config_switch();
 #endif
 
 //	reinit_hwnat();
 }
+
+void init_switch()
+{
+#ifdef RTCONFIG_DSL
+	init_switch_dsl();
+	config_switch_dsl();	
+#else
+	init_switch_ralink();
+#endif	
+}
+
 
 int config_switch_for_first_time = 1;
 void config_switch()
@@ -155,7 +172,7 @@ void config_switch()
 		if (stbport < 0 || stbport > 6) stbport = 0;
 		dbG("STB port: %d\n", stbport);
 
-		if(strcmp(nvram_safe_get("switch_wantag"), "none"))/* Cherry Cho added in 2011/6/28. */
+		if(!nvram_match("switch_wantag", "none")&&!nvram_match("switch_wantag", ""))//2012.03 Yau modify
 		{
 			char tmp[128];
 			int voip_port = 0;
@@ -406,6 +423,20 @@ void config_switch()
 	eval("8367m", "16");	// link up all ports
 }
 
+int
+switch_exist(void)
+{
+	int ret;
+#ifdef RTCONFIG_DSL
+	// 0 means switch exist
+	ret = 0;
+#else
+	ret = eval("8367m", "41");
+	_dprintf("eval(8367m, 41) ret(%d)\n", ret);
+#endif
+	return !ret;
+}
+
 void init_wl(void)
 {
 	if (!is_module_loaded("rt2860v2_ap"))
@@ -493,8 +524,10 @@ void init_syspara(void)
 	else
 		nvram_set("wl_mssid", "1");
 
+	//TODO: separate for different chipset solution
 	nvram_set("et0macaddr", macaddr);
 	nvram_set("et1macaddr", macaddr2);
+	
 
         if (FRead(dst, OFFSET_MAC_GMAC0, bytes)<0)
                 dbg("READ MAC address GMAC0: Out of scope\n");
@@ -692,3 +725,13 @@ char *get_wlifname(int unit, int subunit, int subunit_x, char *buf)
 		sprintf(buf, "");
 	return buf;
 }
+
+int
+wl_exist(char *ifname, int band)
+{
+	int ret = 0;
+	ret = eval("iwpriv", ifname, "stat");
+	_dprintf("eval(iwpriv, %s, stat) ret(%d)\n", ifname, ret);
+	return !ret;
+}
+

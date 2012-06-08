@@ -43,7 +43,7 @@ extern char wan6face[];
 #define LOGNAME nvram_safe_get("productid")
 #define is_ap_mode() (nvram_match("sw_mode", "3"))
 #ifdef RTCONFIG_USB_MODEM
-#define is_phyconnected() (nvram_match("link_wan", "1") || nvram_match("link_modem", "1"))
+#define is_phyconnected() (nvram_match("link_wan", "1") || nvram_match("link_wan1", "1"))
 #else
 #define is_phyconnected() (nvram_match("link_wan","1"))
 #endif
@@ -66,7 +66,6 @@ int parental_ctrl(void);
 
 #define MAX_NO_BRIDGE 	2
 #define MAX_NO_MSSID	4
-#define MOUNT_ROOT	"/tmp/mnt"
 #define PROC_SCSI_ROOT	"/proc/scsi"
 #define USB_STORAGE	"usb-storage"
 
@@ -75,6 +74,11 @@ int parental_ctrl(void);
 #endif
 #define PPP_DIR "/tmp/ppp/peers"
 #define PPP_CONF_FOR_3G "/tmp/ppp/peers/3g"
+
+#ifdef RTCONFIG_USB_BECEEM
+#define BECEEM_DIR "/tmp/Beceem_firmware"
+#define BECEEM_CONF "/tmp/Beceem_firmware/wimaxd.conf"
+#endif
 
 #define BOOT		0
 #define REDIAL		1
@@ -91,6 +95,7 @@ int parental_ctrl(void);
 #define USB_CONNECT		0x06	//For WRTSL54GS
 #define USB_DISCONNECT		0x07	//For WRTSL54GS
 
+#define SERIAL_NUMBER_LENGTH	12	//ATE need
 /*
 // ?
 #define SET_LED(val) \
@@ -161,7 +166,7 @@ extern int set_pppoepid_main(int argc, char **argv);	// by tallest 1219
 extern int pppoe_down_main(int argc, char **argv);		// by tallest 0407
 
 // pppd.c
-extern int start_pppd(char *prefix);
+extern int start_pppd(int unit);
 extern void start_pppoe_relay(char *wan_if);
 
 // network.c
@@ -170,13 +175,6 @@ extern void start_lan(void);
 extern void stop_lan(void);
 extern void do_static_routes(int add);
 extern void start_wl(void);
-#ifdef RTCONFIG_IPV6
-extern void enable_ipv6(int enable, int forceup);
-extern void accept_ra(const char *ifname);
-#else
-#define enable_ipv6(enable, forceup) do {} while (0)
-#define accept_ra(ifname) do {} while (0)
-#endif
 extern void wan_up(char *wan_ifname);
 #ifdef RTCONFIG_IPV6
 extern void wan6_up(const char *wan_ifname);
@@ -190,6 +188,8 @@ extern int update_resolvconf();
 // udhcpc.c
 extern int udhcpc_wan(int argc, char **argv);
 extern int udhcpc_lan(int argc, char **argv);
+extern int zcip_wan(int argc, char **argv);
+extern int start_zcip(char *wan_ifname);
 
 #ifdef RTCONFIG_IPV6
 extern int dhcp6c_state_main(int argc, char **argv);
@@ -259,10 +259,6 @@ extern char *trim_r(char *str);
 
 
 // ssh.c
-#ifdef RTCONFIG_SSH
-extern void start_sshd(void);
-extern void stop_sshd(void);
-#endif
 
 // usb.c
 #ifdef RTCONFIG_USB

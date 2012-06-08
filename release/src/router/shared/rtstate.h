@@ -33,7 +33,9 @@ enum {
 	WAN_STOPPED_REASON_MANUAL,
 	WAN_STOPPED_REASON_SYSTEM_ERR,
 	WAN_STOPPED_REASON_IPGATEWAY_CONFLICT,
-	WAN_STOPPED_REASON_METER_LIMIT
+	WAN_STOPPED_REASON_METER_LIMIT,
+	WAN_STOPPED_REASON_PINCODE_ERR,
+	WAN_STOPPED_REASON_PPP_LACK_ACTIVITY
 };
 
 enum {
@@ -210,6 +212,7 @@ enum {
 };
 #endif
 
+#ifdef RTCONFIG_DUALWAN
 // the following definition is for wans_cap
 #define WANSCAP_DSL	0x01
 #define WANSCAP_WAN	0x02
@@ -226,6 +229,13 @@ enum {
 #define WANS_DUALWAN_IF_USB	4
 #define WANS_DUALWAN_IF_2G	5
 #define WANS_DUALWAN_IF_5G	6
+#endif
+
+// the following definition is for free_caches()
+#define FREE_MEM_NONE  "0"
+#define FREE_MEM_PAGE  "1"
+#define FREE_MEM_INODE "2"
+#define FREE_MEM_ALL   "3"
 
 #define is_routing_enabled() (nvram_get_int("sw_mode")==SW_MODE_ROUTER||nvram_get_int("sw_mode")==SW_MODE_HOTSPOT)
 #define is_nat_enabled()     ((nvram_get_int("sw_mode")==SW_MODE_ROUTER||nvram_get_int("sw_mode")==SW_MODE_HOTSPOT)&&nvram_get_int("wan0_nat_x")==1)
@@ -237,14 +247,16 @@ int wan_primary_ifunit(void);
 extern int get_wan_state(int unit);
 extern int get_wan_unit(char *ifname);
 extern char *get_wan_ifname(int unit);
-extern int get_wanports_status();
+extern int get_wanports_status(int wan_unit);
 extern char *get_usb_ehci_port(int port);
 extern char *get_usb_ohci_port(int port);
 extern int get_usb_port_number(const char *usb_port);
+#ifdef RTCONFIG_DUALWAN
 extern void set_wanscap_support(char *feature);
 extern void add_wanscap_support(char *feature);
 extern int get_wans_dualwan(void);
 extern int get_dualwan_by_unit(int unit);
 extern int get_dualwan_primary(void);
 extern int get_dualwan_secondary(void);
+#endif
 #endif

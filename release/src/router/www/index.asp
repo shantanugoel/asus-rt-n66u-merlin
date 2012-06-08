@@ -9,7 +9,7 @@
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
 <link href="/images/map-iconRouter_iphone.png" rel="apple-touch-icon" />
-<title>ASUS Wireless Router <#Web_Title#> - <#menu1#></title>
+<title><#Web_Title#> - <#menu1#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css">
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="NM_style.css">
@@ -40,6 +40,10 @@ var wansbstate = -1;
 var wanauxstate = -1;
 var Dev3G = '<% nvram_get("d3g"); %>';
 var flag = '<% get_parameter("flag"); %>';
+
+var webs_state_update= '<% nvram_get("webs_state_update"); %>';
+var webs_state_error= '<% nvram_get("webs_state_error"); %>';
+var webs_state_info= '<% nvram_get("webs_state_info"); %>';
 var usb_path1_index = '<% nvram_get("usb_path1"); %>';
 var usb_path2_index = '<% nvram_get("usb_path2"); %>';
 
@@ -65,11 +69,24 @@ function initial(){
 	show_middle_status(document.form.wl_auth_mode_x.value, document.form.wl_wpa_mode.value, parseInt(document.form.wl_wep_x.value));
 	set_default_choice();
 	show_client_status();		
-	show_device();
-	if(rc_support.search("usbX1") > -1){
+
+	if(parent.usb_support == -1){
+		$("line3_td").height = '21px';
+		$("line3_img").src = '/images/New_ui/networkmap/line_one.png';
+		$("clients_tr").colSpan = "3";
+		$("clients_tr").className = 'NM_radius';
+		$("clients_tr").width = '350';
+		$("clientspace_td").style.display = "none";
+		$("usb1_tr").style.display = "none";
+		$("usb2_tr").style.display = "none";
+		$("bottomspace_tr").style.display = "";
+	}
+
+	if(rc_support.search("usbX") == -1 || rc_support.search("usbX1") > -1){
 		$("deviceIcon_1").style.display = "none";
-		$("deviceDec_1").style.display = "none";		
-	}	
+		$("deviceDec_1").style.display = "none";
+	}
+	show_device();
 
 	if(sw_mode == "3")
 		showMapWANStatus(3);
@@ -89,7 +106,7 @@ function initial(){
 
 function detectUSBStatusIndex(){
 	$j.ajax({
-    		url: '/detect_firmware.asp',
+    		url: '/update_diskinfo.asp',
     		dataType: 'script',
     		error: function(xhr){
     			detectUSBStatusIndex();
@@ -188,7 +205,6 @@ function show_middle_status(auth_mode, wpa_mode, wl_wep_x){
 				$("wl_securitylevel_span").style.fontSize = "16px";
 				break;		
 		default:
-				alert("case default");
 				security_mode = "Unknown Auth";	
 	}
 	
@@ -362,8 +378,12 @@ function no_device_html(device_seat){
 	var icon_html_code = '';
 	var dec_html_code = '';
 	
-	icon_html_code += '<div class="iconNo"></div>';	
-	dec_html_code += '<br/><span id="noUSB'+ device_seat +'"><#NoDevice#></span>\n';
+	icon_html_code += '<div class="iconNo"></div>';
+	dec_html_code += '<br/><span id="noUSB'+ device_seat +'">';
+	if(rc_support.search("usbX") > -1)
+		dec_html_code += '<#NoDevice#>';
+	else	dec_html_code += '<#CTL_nonsupported#>';
+	dec_html_code += '</span>\n';
 	device_icon.innerHTML = icon_html_code;
 	device_dec.innerHTML = dec_html_code;
 }
@@ -391,7 +411,7 @@ function clickEvent(obj){
 	}
 	else if(obj.id.indexOf("Router") > 0){
 		icon = "iconRouter";
-		stitle = "<#statusTitle_System#>";
+		stitle = "<#menu5_7_1#>";
 	}
 	else if(obj.id.indexOf("Client") > 0){
 		icon = "iconClient";
@@ -563,17 +583,17 @@ function showstausframe(page){
 		<div id="NM_shift" style="margin-top:-160px;"></div>
 		<div id="NM_table" class="NM_table">
 		
-		<table cellspacing="0" id="_NM_table">
+		<table id="_NM_table" border="0" cellpadding="0" cellspacing="0" height="685">
   		<tr>
     			<td width="40" rowspan="11" valign="center">
 					</td>
 
-    			<td width="150" height="100" align="right" class="NM_radius_left" valign="middle" bgcolor="#444f53" onclick="showstausframe('Internet');">
+    			<td height="100" align="right" class="NM_radius_left" valign="middle" bgcolor="#444f53" onclick="showstausframe('Internet');">
     				<a href="/device-map/internet.asp" target="statusframe"><div id="iconInternet" onclick="clickEvent(this);"></div></a>
     			</td>
 
     			<td colspan="2" valign="middle" bgcolor="#444f53" class="NM_radius_right" onclick="showstausframe('Internet');">
-						<span id="internetDesc"><#statusTitle_Internet#>:</span><br/><br/>
+						<span style="font-size:14px;font-family: Verdana, Arial, Helvetica, sans-serif;" id="internetDesc"><#statusTitle_Internet#>:</span><br/><br/>
     				<strong id="NM_connect_status" class="index_status"><#QKSet_Internet_Setup_fail_method1#>...</strong>
     			</td>
 
@@ -583,13 +603,15 @@ function showstausframe(page){
     				</div>
     				
     				<div>
-    					<iframe id="statusframe" class="NM_radius_bottom" style="margin-left:45px;margin-top:-2px;" name="statusframe" width="320" height="630" frameborder="0" allowtransparency="true" style="background-color:transparent; margin-left:10px;" src="device-map/router.asp"></iframe>
+    					<iframe id="statusframe" class="NM_radius_bottom" style="margin-left:45px;margin-top:-2px;" name="statusframe" width="320" height="650" frameborder="0" allowtransparency="true" style="background-color:transparent; margin-left:10px;" src="device-map/router.asp"></iframe>
     				</div>
   	 			</td>	
   		</tr>
   		
   		<tr>
-    			<td colspan="5" height="20" align="center" background="images/New_ui/networkmap/line_one.png" style="background-repeat: no-repeat;"></td>
+    		<td colspan="5" align="center" height="19px">
+					<img style="margin-left:-365px;*margin-left:-185px;" src="/images/New_ui/networkmap/line_one.png">
+				</td>
   		</tr>
   		
   		<tr>
@@ -597,34 +619,41 @@ function showstausframe(page){
     				<a href="device-map/router.asp" target="statusframe"><div id="iconRouter" onclick="clickEvent(this);"></div></a>
 					</td>
     			<td colspan="2" valign="middle" bgcolor="#444f53" class="NM_radius_right" onclick="showstausframe('Router');">
-    				<#statusTitle_System#><br/><#Security_Level#>: <br/><br/><strong id="wl_securitylevel_span" class="index_status"></strong>
+    				<span style="font-size:14px;font-family: Verdana, Arial, Helvetica, sans-serif;"><#Security_Level#>: </span><br/><br/><strong id="wl_securitylevel_span" class="index_status"></strong>
 						<img id="iflock">
     			</td>
   		</tr>
   		
   		<tr>
-    			<td colspan="3" height="55" align="center" background="images/New_ui/networkmap/line_two.png" style="background-repeat: no-repeat;"></td>
+    			<td id="line3_td" colspan="3" align="center" height="52px">
+						<img id="line3_img" src="/images/New_ui/networkmap/line_two.png">
+					</td>
   		</tr>
-  		
+
   		<tr>
-    			<td width="150" height="170" bgcolor="#444f53" align="center" valign="top" class="NM_radius_top" onclick="showstausframe('Client');">
+    			<td id="clients_tr" width="150" height="170" bgcolor="#444f53" align="center" valign="top" class="NM_radius_top" onclick="showstausframe('Client');">
     				<a id="clientStatusLink" href="device-map/clients.asp" target="statusframe"><!--lock 1226-->
     					<div id="iconClient" style="margin-top:20px;" onclick="clickEvent(this);"></div>
     				</a>
     				<div class="clients" id="clientNumber" style="cursor:pointer;"></div>
     			</td>
-					<td width="36" rowspan="6"></td>
-					<td width="160" bgcolor="#444f53" align="center" valign="top" class="NM_radius_top">
+					<td width="36" rowspan="6" id="clientspace_td"></td>
+					<td id="usb1_tr" width="160" bgcolor="#444f53" align="center" valign="top" class="NM_radius_top">
 						<div style="margin-top:20px;" id="deviceIcon_0"></div><div id="deviceDec_0"></div>
 					</td>
 			</tr>
 	  		
-			<tr>
-    			<td rowspan="5"  bgcolor="#444f53" align="center" valign="top" class="NM_radius_bottom">
+			<tr id="usb2_tr">
+    			<td bgcolor="#444f53" align="center" valign="top" class="NM_radius_bottom">
 					</td>
   				<td height="150" bgcolor="#444f53" align="center" valign="top" class="NM_radius_bottom">
-						<div style="margin-top:10px;" id="deviceIcon_1"></div><div id="deviceDec_1"></div>
+						<div style="margin-top:10px;" id="deviceIcon_1"></div>
+						<div id="deviceDec_1"></div>
 					</td>
+			</tr>
+
+			<tr id="bottomspace_tr" style="display:none">
+				<td colspan="3" height="200px"></td>
 			</tr>
 	
 		</table>

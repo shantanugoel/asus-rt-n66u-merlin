@@ -263,8 +263,15 @@ _dprintf("Ready to disconnect...%d.\n", wlc_count);
 				if(ret == WLC_STATE_CONNECTED)
 					repeater_nat_setting();
 
+				logmessage("notify wanduck", "wlc state change!");
+				_dprintf("%s: notify wanduck: wlcstate=%d.\n", __FUNCTION__, ret);
 				// notify the change to wanduck.
 				kill_pidfile_s("/var/run/wanduck.pid", SIGUSR1);
+
+				// run the actions of wanduck first, and then run restart_wlcmode.
+				int wait = 5;
+				while(strstr(nvram_safe_get("rc_service"), "nat_rules") == NULL && (wait-- > 0))
+					sleep(1);
 			}
 #endif
 

@@ -245,7 +245,7 @@ int del_account(const char *const account){
 	if(i <= 0){
 		nvram_set("st_samba_mode", "1");
 		nvram_set("st_ftp_mode", "1");
-#ifdef RTCONFIG_WEBDAV
+#ifdef RTCONFIG_WEBDAV_OLD
 		nvram_set("st_webdav_mode", "1");
 #endif
 	}

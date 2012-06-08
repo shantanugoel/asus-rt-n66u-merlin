@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_4_3#></title>
+<title><#Web_Title#> - <#menu5_4_3#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script type="text/javascript" src="/state.js"></script>
@@ -108,11 +108,6 @@ function validForm(){
                 return false;
         }
         
-        /*
-        if(!validate_range(document.form.apps_upload_max, 0, 999))
-                return false;
-        */
-        
         String.prototype.Trim = function(){return this.replace(/(^\s*)|(\s*$)/g,"");}
         document.form.st_samba_workgroup.value = document.form.st_samba_workgroup.value.Trim();
 
@@ -196,7 +191,7 @@ function done_validating(action){
                                                 <a class="hintstyle" href="javascript:void(0);" onClick="openHint(17,1);"><#ShareNode_MaximumLoginUser_itemname#></a>
                                         </th>
                                         <td>
-                                                <input type="text" name="st_max_user" class="input_3_table" maxlength="1" value="<% nvram_get("st_max_user"); %>" onKeyPress="return is_number(this, event);" onblur="validate_number_range(this, 1, 5)">
+                                                <input type="text" name="st_max_user" class="input_3_table" maxlength="1" value="<% nvram_get("st_max_user"); %>" onKeyPress="return is_number(this, event);">
                                         </td>
                                 </tr>
                                 

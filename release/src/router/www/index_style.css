@@ -51,8 +51,11 @@ body {
 /*=================================1 Button Home================================*/
 
 .menu {
+	font-weight:bold;
+	text-shadow:0px 1px 1px black;
 	width:189px;
-/*	height:46px; */
+	height:46px;
+	height:45px \9;
 	font-family:Verdana;
 	font-size:12px;
 	text-align:left;
@@ -98,15 +101,15 @@ body {
 #option6 a:link,  #option5 a:visited {height:52px; background:url(images/New_ui/lefttabdown_n.png);}
 #option6 a:hover, #option5 a:active {background:url(images/New_ui/lefttabdown_o.png)}
 
-.m_qis_r {width:189px;height: 55px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/item1.png) no-repeat; color:#ffffff;padding-left:0px; position:relative;}
-.m_qis_r:hover {width:189px;height: 55px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/item1_hover.png) no-repeat; color:#ffffff;padding-left:0px; position:relative;}
-.m0_r {margin-top:12px;width:190px;text-align:center;font-family:Verdana ;color: #94ccf2;background:url(images/New_ui/lefttabhead.png) no-repeat; color:#ffffff;font-weight:bold; padding-top:0px;	position:relative;}
-.m1_r {margin-top: -2px; width:203px;height: 52px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/lefttabdown_f.png) no-repeat; color:#ffffff;font-weight:bold; padding-left:0px; position:relative;}
-.m2_r {margin-top: -2px; width:203px;height: 52px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/lefttabdown_f.png) no-repeat; color:#ffffff;font-weight:bold; padding-left:0px; position:relative;}
-.m3_r {margin-top: -2px; width:203px;height: 52px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/lefttabdown_f.png) no-repeat; color:#ffffff;font-weight:bold; padding-left:0px; position:relative;}
-.m4_r {margin-top: -2px; width:203px;height: 52px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/lefttabdown_f.png) no-repeat; color:#ffffff;font-weight:bold; padding-left:0px; position:relative;}
-.m5_r {margin-top: -2px; width:203px;height: 52px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/lefttabdown_f.png) no-repeat; color:#ffffff;font-weight:bold;	padding-left:0px; position:relative;}
-.m6_r {margin-top: -2px; width:203px;height: 52px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/lefttabdown_f.png) no-repeat; color:#ffffff;font-weight:bold;	padding-left:0px; position:relative;}
+.m_qis_r {width:189px;height: 55px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/item1.png) no-repeat; color:#ffffff;padding-left:0px; position:relative;text-shadow:0px 1px 1px black;font-weight: bolder;}
+.m_qis_r:hover {width:189px;height: 55px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/item1_hover.png) no-repeat; color:#ffffff;padding-left:0px; position:relative;text-shadow:0px 1px 1px black;font-weight: bolder;}
+.m0_r {margin-top:12px;width:190px;text-align:center;font-family:Verdana ;color: #94ccf2;background:url(images/New_ui/lefttabhead.png) no-repeat; color:#ffffff;font-weight:bold; padding-top:0px;	position:relative;text-shadow:0px 1px 1px black;}
+.m1_r {margin-top: -2px; width:203px;height: 52px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/lefttabdown_f.png) no-repeat; color:#ffffff;font-weight:bold; padding-left:0px; position:relative;text-shadow:0px 1px 1px black;}
+.m2_r {margin-top: -2px; width:203px;height: 52px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/lefttabdown_f.png) no-repeat; color:#ffffff;font-weight:bold; padding-left:0px; position:relative;text-shadow:0px 1px 1px black;}
+.m3_r {margin-top: -2px; width:203px;height: 52px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/lefttabdown_f.png) no-repeat; color:#ffffff;font-weight:bold; padding-left:0px; position:relative;text-shadow:0px 1px 1px black;}
+.m4_r {margin-top: -2px; width:203px;height: 52px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/lefttabdown_f.png) no-repeat; color:#ffffff;font-weight:bold; padding-left:0px; position:relative;text-shadow:0px 1px 1px black;}
+.m5_r {margin-top: -2px; width:203px;height: 52px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/lefttabdown_f.png) no-repeat; color:#ffffff;font-weight:bold;	padding-left:0px; position:relative;text-shadow:0px 1px 1px black;}
+.m6_r {margin-top: -2px; width:203px;height: 52px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/lefttabdown_f.png) no-repeat; color:#ffffff;font-weight:bold;	padding-left:0px; position:relative;text-shadow:0px 1px 1px black;}
 .m7_r {margin-top: -2px; width:203px;height: 52px;font-family:Verdana ;font-size : 12px;color: #94ccf2;background:url(images/New_ui/lefttabdown_f.png) no-repeat; color:#ffffff;font-weight:bold;   padding-left:0px; position:relative;}
 
 .submenu {width:187px; font-family:Verdana; font-size:11px; line-height:20px;}
@@ -133,7 +136,7 @@ body {
 /*==========================Level 3 Tab Class=================================*/
 .submenuBlock{
 	width:735px;
-	margin-top:-145px;
+	margin-top:-140px;
 /*	background-color:#547fb6;*/
 	padding-left:0px;
 	position:relative;
@@ -308,7 +311,6 @@ body {
 	background-color: #444F53;
 	filter:alpha(opacity=94);  /*IE5、IE5.5、IE6、IE7*/
 	opacity: .94;  /*Opera9.0+、Firefox1.5+、Safari、Chrome*/
-	/*background:url(/images/popup_bg2.gif);*/
 	background-repeat: repeat;
 	visibility:hidden;
 	overflow:hidden;
@@ -324,40 +326,65 @@ body {
 	background-color: #444F53;
 	filter:alpha(opacity=90);  /*IE5、IE5.5、IE6、IE7*/
 	opacity: .9;  /*Opera9.0+、Firefox1.5+、Safari、Chrome*/
-	/*background:url(/images/popup_bg2.gif);*/
 	background-repeat: repeat;
 	visibility:hidden;
 	overflow:hidden;
 }
 
 .loadingBlock{
+	filter:alpha(opacity=90);
+	opacity:.90;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	behavior: url(/PIE.htc);
+	border-radius: 10px 10px 10px 10px;
+	border: 0px;
 	margin-top:200px;
 	width:400px;
 	font-size:20px;
 	color:#FFFFFF;
 	font-weight:bolder;
 	background-color:#000000;
-	border:5px double #1F2D35;
+	position:fixed;
+	left:35%;
+	top:0;Hot 
+	z-index:200;
+	_position:absolute;
 }
 
 .dr_sweet_advise{
+	filter:alpha(opacity=90);
+	opacity:.90;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	behavior: url(/PIE.htc);
+	border-radius: 10px 10px 10px 10px;
+	border: 0px;
 	margin-top:200px;
 	width:500px;
 	font-size:20px;
 	color:#FFFFFF;
 	background-color:#000000;
-	border:5px double #1F2D35;
 	font-family:Arial, Helvetica, sans-serif;
 }
 
 .loadingBarBlock{
+	filter:alpha(opacity=90);
+	opacity:.90;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	behavior: url(/PIE.htc);
+	border-radius: 10px 10px 10px 10px;
+	border: 0px;
 	margin-top:200px;
 	width:300px;
 	font-size:12px;
 	font-family:Verdana, Arial, Helvetica, sans-serif;
 	color:#FFFFFF;
 	background-color:#000000;
-	border:3px double #1F2D35;
 }
 
 .hackiframe   /* iframe for Hack IE 6.0 to avoid select menu over DIV layer. */
@@ -562,7 +589,7 @@ width:122px;
 
 .index_status{
 	font:Impact;
-	font-size:18px;
+	font-size:20px;
 	text-shadow:1px 1px 1px black;
 }
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_5_1#></title>
+<title><#Web_Title#> - <#menu5_5_1#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script language="JavaScript" type="text/javascript" src="/state.js"></script>
@@ -30,12 +30,10 @@ function initial(){
 	show_menu();
 	load_body();
 	change_firewall('<% nvram_get("fw_enable_x"); %>');
-	hideport(document.form.misc_http_x.value);
 
 	if(HTTPS_support == -1)
 		$("https_port").style.display = "none";
-
-	$("accessfromwan_port").style.display = (document.form.misc_http_x[0].checked == 1) ? "" : "none";
+	hideport(document.form.misc_http_x[0].checked);
 }
 
 function applyRule(){
@@ -57,8 +55,17 @@ function applyRule(){
 }
 
 function validForm(){
-	if(!validate_range(document.form.misc_httpport_x, 1024, 65535))
-		return false;
+	if (document.form.misc_http_x[0].checked) {
+		if (!validate_range(document.form.misc_httpport_x, 1024, 65535))
+			return false;
+
+		if (HTTPS_support != -1 &&
+		    !validate_range(document.form.misc_httpsport_x, 1024, 65535))
+			return false;
+	} else {
+		document.form.misc_httpport_x.value = '<% nvram_get("misc_httpport_x"); %>';
+		document.form.misc_httpsport_x.value = '<% nvram_get("misc_httpsport_x"); %>';
+	}
 	
 	return true;
 }
@@ -159,10 +166,10 @@ function done_validating(action){
           	<tr id="accessfromwan_port">
             	<th align="right"><a class="hintstyle" href="javascript:void(0);" onClick="openHint(8,3);"><#FirewallConfig_x_WanWebPort_itemname#></a></th>
             	<td>
-            		<span>HTTP: <input type="text" maxlength="5" name="misc_httpport_x" class="input_6_table" value="<% nvram_get("misc_httpport_x"); %>" onKeyPress="return is_number(this,event);"  onblur="validate_number_range(this, 1024, 65535)" /></span>
-            		&nbsp;
-								<span id="https_port">HTTPS: <input type="text" maxlength="5" name="misc_httpsport_x" class="input_6_table" value="<% nvram_get("misc_httpsport_x"); %>" onKeyPress="return is_number(this,event);"  onblur="validate_number_range(this, 1024, 65535)" /></span>
-							</td>
+			<span id="http_port">HTTP: <input type="text" maxlength="5" name="misc_httpport_x" class="input_6_table" value="<% nvram_get("misc_httpport_x"); %>" onKeyPress="return is_number(this,event);"/></span>
+			&nbsp;
+			<span id="https_port">HTTPS: <input type="text" maxlength="5" name="misc_httpsport_x" class="input_6_table" value="<% nvram_get("misc_httpsport_x"); %>" onKeyPress="return is_number(this,event);"/></span>
+		</td>
           	</tr>         
           	<tr>
           		<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(8,5);"><#FirewallConfig_x_WanPingEnable_itemname#></a></th>

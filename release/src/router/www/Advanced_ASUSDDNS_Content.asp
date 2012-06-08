@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <html xmlns:v>
 <head>
@@ -8,7 +8,7 @@
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
-<title>ASUS Wireless Router <#Web_Title#> - <#menu5_3_6#></title>
+<title><#Web_Title#> - <#menu5_3_6#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css"> 
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <script language="JavaScript" type="text/javascript" src="/state.js"></script>
@@ -54,7 +54,7 @@ function valid_wan_ip() {
                 ip_class = 'C';
         else if(ip_num != 0){
 		showhide("wan_ip_hide2", 0);
-		showhide("wan_ip_hide3", 1);
+		showhide("wan_ip_hide3", 0);
 		return;
         }
 	showhide("wan_ip_hide2", 1);
@@ -123,13 +123,39 @@ function ddns_load_body(){
 		alert("<#LANHostConfig_x_DDNS_alarm_10#>");
 	else if(ddns_return_code == 'register,407')
 		alert("<#LANHostConfig_x_DDNS_alarm_11#>");
-	else if(ddns_return_code == 'time_out')
+	else if(ddns_return_code == 'Time-out')
 		alert("<#LANHostConfig_x_DDNS_alarm_1#>");
 	else if(ddns_return_code =='unknown_error')
 		alert("<#LANHostConfig_x_DDNS_alarm_2#>");
-        else if(ddns_return_code =='connect_fail')
+  else if(ddns_return_code =='connect_fail')
 		alert("<#qis_fail_desc7#>");
-	
+	else if(ddns_return_code == 'update,200'){
+       alert("<#LANHostConfig_x_DDNS_alarm_3#>");
+       showhide("wan_ip_hide2", 0);
+       showhide("wan_ip_hide3", 1);
+	}
+  else if(ddns_return_code == 'update,220'){
+       alert("<#LANHostConfig_x_DDNS_alarm_4#>");
+       showhide("wan_ip_hide2", 0);
+       showhide("wan_ip_hide3", 1);            
+  }
+  else if(ddns_return_code == 'update,297')
+  	alert("<#LANHostConfig_x_DDNS_alarm_7#>");
+  else if(ddns_return_code == 'update,298')
+    alert("<#LANHostConfig_x_DDNS_alarm_8#>");
+  else if(ddns_return_code == 'update,299')
+    alert("<#LANHostConfig_x_DDNS_alarm_9#>");
+  else if(ddns_return_code == 'update,401')
+    alert("<#LANHostConfig_x_DDNS_alarm_10#>");
+  else if(ddns_return_code == 'update,407')
+    alert("<#LANHostConfig_x_DDNS_alarm_11#>");
+  else if(ddns_return_code =='no_change')
+    alert("Both hostname & IP address have not changed since the last update.");
+  else if(ddns_return_code =='ddns_query')
+    alert("<#LANHostConfig_x_DDNSHostnameCheck_buttonname#>");
+  else if(ddns_return_code !='')
+    alert("<#LANHostConfig_x_DDNS_alarm_2#>");
+
 	if(ddns_server_x == "WWW.ASUS.COM" || ddns_server_x == ""){
 		inputCtrl(document.form.ddns_username_x, 0);
 		inputCtrl(document.form.ddns_passwd_x, 0);
@@ -149,12 +175,6 @@ function ddns_load_body(){
 
 function applyRule(){
 	if(validForm()){
-		with(document.form){
-			//Viz 2011.09
-			//if(ddns_enable_x[0].checked && ddns_server_x.value == 'WWW.ASUS.COM' && ddns_hostname_x.value.length > '.asuscomm.com'.length)/*&& !confirm('<#ddnsname_computername#>'))*/
-				//return;
-		}
-		
 		showLoading();
 		document.form.submit();	
 	}
@@ -162,12 +182,12 @@ function applyRule(){
 
 function validForm(){
 	if(document.form.ddns_server_x.value == "WWW.ASUS.COM"){
-		if(!validate_string(document.form.DDNSName)
-				|| !validate_ddns_hostname(document.form.DDNSName)){
+		if(!validate_ddns_hostname(document.form.DDNSName)){
 			document.form.DDNSName.focus();
 			document.form.DDNSName.select();				
 			return false;
-	}
+		}
+		document.form.action_script.value = "adm_asusddns_register";
 	}else{
 		if(!validate_string(document.form.ddns_username_x)
 				|| !validate_string(document.form.ddns_passwd_x))
@@ -232,6 +252,57 @@ function checkDDNSReturnCode(){
    });
 }
 
+function validate_ddns_hostname(o)
+{	
+		dot=0;
+		s=o.value;
+
+		if(s == ""){
+				show_alert_block("<#QKSet_account_nameblank#>");
+				return false;
+		}		
+
+		var unvalid_start=new RegExp("^[0-9].*", "gi");
+		if(unvalid_start.test(s) ){
+				show_alert_block("<#LANHostConfig_x_DDNS_alarm_7#>");
+				return false;
+		}
+		if (!validate_string(o)){
+				return false;
+		}
+		
+		for(i=0;i<s.length;i++){
+				c = s.charCodeAt(i);
+				if (c==46){
+						dot++;
+						if(dot>0){
+									show_alert_block("<#LANHostConfig_x_DDNS_alarm_7#>");
+									return false;
+						}
+				}
+				if (!validate_hostnamechar(c)){
+						show_alert_block("<#LANHostConfig_x_DDNS_alarm_13#> '" + s.charAt(i) +"' !");
+						return false;
+				}
+		}
+		return true;
+}
+
+function validate_hostnamechar(ch){
+	if (ch>=48&&ch<=57) return true;	//0-9
+	if (ch>=97&&ch<=122) return true;	//little EN
+	if (ch>=65&&ch<=90) return true; 	//Large EN
+	if (ch==45) return true;	//-
+	if (ch==46) return true;	//.
+	
+	return false;
+}
+
+function show_alert_block(alert_str){
+	$("alert_block").style.display = "block";
+	
+	showtext($("alert_str"), alert_str);
+}
 </script>
 </head>
 
@@ -305,8 +376,7 @@ function checkDDNSReturnCode(){
                     			<option value="WWW.TZO.COM" <% nvram_match("ddns_server_x", "WWW.TZO.COM","selected"); %>>WWW.TZO.COM</option>
                     			<option value="WWW.ZONEEDIT.COM" <% nvram_match("ddns_server_x", "WWW.ZONEEDIT.COM","selected"); %>>WWW.ZONEEDIT.COM</option>
                     			<option value="WWW.DNSOMATIC.COM" <% nvram_match("ddns_server_x", "WWW.DNSOMATIC.COM","selected"); %>>WWW.DNSOMATIC.COM</option>
-					<option value="WWW.NO-IP.COM" <% nvram_match("ddns_server_x",
-"WWW.NO-IP.COM","selected"); %>>WWW.NO-IP.COM</option>
+					<option value="WWW.NO-IP.COM" <% nvram_match("ddns_server_x",< "WWW.NO-IP.COM","selected"); %>>WWW.NO-IP.COM</option>
                   		</select>
 				<a id="link" href="javascript:openLink('x_DDNSServer')" style=" margin-left:5px; text-decoration: underline;"><#LANHostConfig_x_DDNSServer_linkname#></a>
 				</td>
@@ -318,7 +388,10 @@ function checkDDNSReturnCode(){
 						<input type="text" maxlength="63" class="input_25_table" name="ddns_hostname_x" id="ddns_hostname_x" value="<% nvram_get("ddns_hostname_x"); %>" onKeyPress="return is_string(this, event)">
 					</div>
 					<div id="asusddnsname_input" style="display:none;">
-						<input type="text" maxlength="20" class="input_15_table" name="DDNSName" id="DDNSName" class="inputtext">.asuscomm.com
+						<input type="text" maxlength="20" class="input_20_table" name="DDNSName" id="DDNSName" class="inputtext" onKeyPress="return is_string(this, event)">.asuscomm.com
+						<div id="alert_block" style="color:#FFCC00; margin-left:5px; font-size:11px;display:none;">
+								<span id="alert_str"></span>
+						</div>						
 					</div>							
 							
 				</td>
@@ -338,7 +411,7 @@ function checkDDNSReturnCode(){
 					<input type="radio" value="0" name="ddns_wildcard_x" onClick="return change_common_radio(this, 'LANHostConfig', 'ddns_wildcard_x', '0')" <% nvram_match("ddns_wildcard_x", "0", "checked"); %>><#checkbox_No#>
 				</td>
 			</tr>
-			<tr>
+			<tr style="display:none;">
 				<th><#LANHostConfig_x_DDNSStatus_itemname#></th>
 				<td>
 					<input type="hidden" maxlength="15" class="button_gen" size="12" name="" value="<% nvram_get("DDNSStatus"); %>">

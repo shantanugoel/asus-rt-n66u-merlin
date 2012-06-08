@@ -4,20 +4,6 @@
 #include <bcmnvram.h>
 #include "rc.h"
 
-/* Copy each token in wordlist delimited by ascii_62 into word */
-#define foreach_62(word, wordlist, next) \
-	for (next = &wordlist[strspn(wordlist, ">")], \
-	     strncpy(word, next, sizeof(word)), \
-	     word[strcspn(word, ">")] = '\0', \
-	     word[sizeof(word) - 1] = '\0', \
-	     next = strchr(next, '>'); \
-	     strlen(word); \
-	     next = next ? &next[strspn(next, ">")] : "", \
-	     strncpy(word, next, sizeof(word)), \
-	     word[strcspn(word, ">")] = '\0', \
-	     word[sizeof(word) - 1] = '\0', \
-	     next = strchr(next, '>'))
-
 /* activity date_time for rule */
 int parental_macfilter_daytime(void)
 {

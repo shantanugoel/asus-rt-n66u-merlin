@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Tomato GUI
 	Copyright (C) 2006-2009 Jonathan Zarate
 	http://www.polarcloud.com/tomato/
@@ -76,35 +76,9 @@ function switchDraw(n)
 	cookie.set(cprefix + 'draw', drawMode);
 }
 
-/*			//Banned by Viz 2010.09           vvvvvvvvvv
-function showColor()
-{	
-	E('drawcolor').innerHTML = colors[drawColor][0] + ' &raquo;';	//>>
-	//E('rx-name').style.borderBottom = '2px dashed ' + colors[drawColor][1 + colorX];
-	//E('tx-name').style.borderBottom = '2px dashed ' + colors[drawColor][1 + (colorX ^ 1)];
-	
-}
-
-function switchColor(rev)
-{
-	if ((!svgReady) || (updating)) return;
-	
-	drawColor = rev;
-	showColor();
-	showCTab();
-	cookie.set(cprefix + 'color', drawColor + ',' + colorX);
-}
-*/				//Banned by Viz 2010.09   ^^^^^^^^
-
-
 // Viz add 2010.09  vvvvvvvvvv
 function showColor()
 {	
-	//E('drawcolor').innerHTML = colors[drawColor][0] + ' &raquo;';	//>>
-	//E('rx-name').style.borderBottom = '2px dashed ' + colorRX[drawColorRX];
-	//E('tx-name').style.borderBottom = '2px dashed ' + colorTX[drawColorTX];
-	//E('rx-sel').style.background =colorRX[drawColorRX];
-	//E('tx-sel').style.background =colorTX[drawColorTX];	
 }
 
 function switchColorRX(rev)
@@ -114,9 +88,6 @@ function switchColorRX(rev)
 	drawColorRX = rev;
 	showColor();
 	showCTab();
-	//cookie.set(cprefix + 'color', drawColorRX + ',' + colorX);
-	//E('rx-sel').style.background-color =colorRX[rev];
-	
 }
 
 function switchColorTX(rev)
@@ -126,7 +97,6 @@ function switchColorTX(rev)
 	drawColorTX = rev;
 	showColor();
 	showCTab();
-	//cookie.set(cprefix + 'color', drawColorTX + ',' + colorX);
 }
 // Viz add 2010.09 ^^^^^^^^^^
 
@@ -196,11 +166,7 @@ function showTab(name)
 		max = scaleMode ? MAX(h.rx_max, h.tx_max) : xx_max
 		if (max > 12500) max = Math.round((max + 12499) / 12500) * 12500;
 			else max += 100;
-	/*
-		updateSVG(h.rx, h.tx, max, drawMode,
-			colors[drawColor][1 + colorX], colors[drawColor][1 + (colorX ^ 1)],
-			updateInt, updateMaxL, updateDiv, avgMode, clock);
-	*/
+
 		updateSVG(h.rx, h.tx, max, drawMode,
 			colorRX[drawColorRX], colorTX[drawColorTX],
 			updateInt, updateMaxL, updateDiv, avgMode, clock);	
@@ -316,29 +282,8 @@ function initCommon(defAvg, defDrawMode, defDrawColorRX, defDrawColorTX) //Viz m
 	showDraw();
 
 	var c = nvram.rstats_colors.split(',');
-	/*
-	while (c.length >= 3) {
-		c[0] = escapeHTML(c[0]);
-		colors.push(c.splice(0, 3));
-	} */
 
 	c = (cookie.get(cprefix + 'color') || '').split(',');
-	/* alert(c);	//3,0 */
-
-/*			//Banned by Viz 2010.09	
-	if (c.length == 2) {
-		//drawColor = fixInt(c[0], 0, colors.length - 1, defDrawColor);
-		//colorX = fixInt(c[1], 0, 1, 0);    // Viz modify drawColorRX TX 2010.09		
-		drawColorRX = fixInt(c[0], 0, colorRX.length - 1, defDrawColorRX);
-		drawColorTX = fixInt(c[0], 0, colorTX.length - 1, defDrawColorTX);
-	
-	}
-	else {
-		drawColorRX = defDrawColorRX;
-		drawColorTX = defDrawColorTX;
-	}
-	
-	*/    // Banned by Viz 2010.09   ^^^^^^^^^^^
 	
 	drawColorRX = defDrawColorRX;
 	drawColorTX = defDrawColorTX;		

@@ -13,6 +13,7 @@
 .config.old
 config_
 mipsel-uclibc
+config.log
 
 #
 # asuswrt test

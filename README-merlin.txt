@@ -1,4 +1,4 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.130.8 (08-Jun-2012)
+Asus RT-N66U Modded Firmware - build 3.0.0.3.130.9 (xx-Jun-2012)
 ================================================================
 
 About
@@ -197,6 +197,10 @@ The "merlin" branch contains my modifications to the Asus firmware.
 
 History
 -------
+
+3.0.0.3.130.9:
+   - FIXED: no-ip DDNS entry would revert to Asus DDNS on webui
+
 
 3.0.0.3.130.8:
 *** Reverting to factory defaults BEFORE and AFTER flashing

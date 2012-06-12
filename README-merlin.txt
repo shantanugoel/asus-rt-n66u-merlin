@@ -80,7 +80,9 @@ certain events occur:
 - Just after a partition is mounted: /jffs/scripts/post-mount
 
 Those scripts must all be located under /jffs/scripts/ (so JFFS support 
-must be enabled first).
+must be enabled first).  Don't forget to set them as executable:
+
+   chmod a+rx /jffs/scripts/*
 
 The wan-start script for example is perfect for using an IPv6 tunnel 
 update script (such as the script I posted on my website to use with 

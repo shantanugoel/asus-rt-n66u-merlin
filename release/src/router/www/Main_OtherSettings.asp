@@ -189,7 +189,7 @@ function done_validating(action){
 						</td>
 					</tr>
 					<tr id="rstats_path_tr">
-					<th>Save history location:</th>
+					<th>Save history location:<br><i>Directory must end with a '/'.</i></th>
 	   	                <td><input type="text" id="rstats_path" size=32 maxlength=90 name="rstats_path" class="input_32_table" value="<% nvram_get("rstats_path"); %>"></td>
 					</tr>
 					<tr id="rstats_new_tr">

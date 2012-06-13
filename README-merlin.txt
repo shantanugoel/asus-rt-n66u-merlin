@@ -1,4 +1,4 @@
-Asus RT-N66U Modded Firmware - build 3.0.0.3.130.9 (10-Jun-2012)
+Asus RT-N66U Modded Firmware - build 3.0.0.3.130.10 (xx-Jun-2012)
 ================================================================
 
 About
